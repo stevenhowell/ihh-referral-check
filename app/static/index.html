@@ -45,7 +45,10 @@ main.wide { max-width: 1120px; margin: 0 auto; }
 .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .dash { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; text-align: left; color: var(--text); display: flex; flex-direction: column; gap: 2px; min-height: 92px; }
 button.dash { cursor: pointer; } button.dash:active { background: var(--bg); }
-.dash .n { font-size: 30px; font-weight: 800; line-height: 1.1; } .dash .l { font-size: 13.5px; color: var(--muted); font-weight: 600; }
+.dash .n { font-size: 30px; font-weight: 800; line-height: 1.1; }
+.dash .top { display: flex; align-items: center; gap: 10px; }
+.ico { width: 30px; height: 30px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); }
+.dash.approve .ico { color: var(--green); } .dash.deny .ico { color: var(--red); } .dash.beds .ico { color: var(--accent); } .dash .l { font-size: 13.5px; color: var(--muted); font-weight: 600; }
 .dash.approve .n { color: var(--green); } .dash.deny .n { color: var(--red); } .dash.look .n { color: var(--purple); } .dash.beds .n { color: var(--accent); }
 .bedsrow { display: flex; gap: 6px; margin-top: 6px; } .bedsrow input { width: 64px; min-height: 44px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; font: inherit; background: var(--panel); color: var(--text); }
 .btn.small { min-height: 44px; padding: 0 10px; font-size: 14px; }
@@ -332,14 +335,21 @@ async function refresh() {
 }
 
 // ---------- dashboard
+const ICON = {
+  all: '<path d="M4 13l2.5-7h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h5l1 2h4l1-2h5"/>',
+  approve: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/>',
+  deny: '<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
+  beds: '<path d="M3 18V7M3 14h18v4M21 14v-2.5a2.5 2.5 0 0 0-2.5-2.5H11v5"/><circle cx="7" cy="11" r="1.8"/>',
+};
+const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
 function dashboardHTML() {
   const c = state.desk.counts, beds = state.desk.beds;
-  const tile = (n, label, cls, go) => `<button class="dash ${cls}${state.filter === go || (go === "all" && !state.filter && state.view === "queue") ? " on" : ""}" ${go ? `data-go="${go}" aria-pressed="${state.filter === go}"` : "disabled"}><span class="n">${n}</span><span class="l">${label}</span></button>`;
+  const tile = (n, label, cls, go) => `<button class="dash ${cls}${state.filter === go || (go === "all" && !state.filter && state.view === "queue") ? " on" : ""}" ${go ? `data-go="${go}" aria-pressed="${state.filter === go}"` : "disabled"}><span class="top">${icon(go)}<span class="n">${n}</span></span><span class="l">${label}</span></button>`;
   return `<div class="dashboard">
     ${tile(c.to_review, "To review", "", "all")}
     ${tile(c.suggest_approve, "Fetch suggests approve", "approve", "approve")}
     ${tile(c.suggest_deny, "Fetch suggests deny", "deny", "deny")}
-    <div class="dash beds"><span class="n" id="beds-n">${beds ? beds.count : "–"}</span><span class="l">Beds available</span>
+    <div class="dash beds"><span class="top">${icon("beds")}<span class="n" id="beds-n">${beds ? beds.count : "–"}</span></span><span class="l">Beds available</span>
       <span class="bedsrow"><input id="beds-in" type="number" min="0" max="500" inputmode="numeric" aria-label="Beds available" value="${beds ? beds.count : ""}"><button class="btn small" id="beds-save">Update</button></span>
       <span class="meta tiny">${beds ? `Entered at ${clock(beds.at)}` : "Not entered yet"}</span></div>
   </div>
@@ -721,7 +731,7 @@ function profileHTML(pr) {
   if (!pr) return `<div class="card meta">The client profile isn't ready yet.</div>`;
   const P = pr.profile;
   const facts = P.sections.reduce((n, sec) => n + sec.facts.length, 0);
-  return `<details class="profile"><summary><span><b>Client profile</b><span class="meta"> · ${facts} facts, each with its page · names and dates are blacked out in the fax</span></span><span class="showwhy"></span></summary>
+  return `<details class="profile" open><summary><span><b>Client profile</b><span class="meta"> · ${facts} facts, each with its page · names and dates are blacked out in the fax</span></span><span class="showwhy"></span></summary>
     <div class="psections">${P.sections.map((sec) => `<div class="psec"><h4>${esc(sec.title)}</h4>${sec.facts.map(factHTML).join("")}</div>`).join("")}</div>
   </details>`;
 }
@@ -770,14 +780,14 @@ function reviewHTML(r, name, profile) {
     <div class="trust"><span class="badge flagbadge">${flaggedItems.length} flagged for you</span>${trustLine}<span class="badge ok" title="SHA-256 ${esc(r.sha256 || "")}">✓ Original file unchanged</span></div>
     <p class="meta" style="margin:10px 0 0">Read ${r.page_count} page${r.page_count === 1 ? "" : "s"} in ${mins} min ${secs} s. Fetch suggests; the coordinator decides.</p>
   </div></div>
+  ${profileHTML(profile)}
   <section class="flagged">
     <div class="flagged-head"><span class="flag-count">${flaggedItems.length}</span><div><h2>Flagged for the coordinator</h2>
       <div class="meta">${flaggedItems.length ? "What rules the patient out, what needs your judgment, what must be arranged first, where the pages disagree, and anything Fetch couldn't confirm." : "Nothing rules the patient out, needs your judgment or failed a check."}</div></div></div>
     ${flaggedItems.map((f) => findingHTML(f, taskFor(r.packet_id, f))).join("")}
   </section>
-  ${profileHTML(profile)}
-  ${todoHTML(r)}
   ${groupsHTML(rv.findings)}
+  ${todoHTML(r)}
 
   <p class="meta" style="margin-top:14px">${esc(rv.summary)}</p>
   <div class="row" style="margin-top:20px"><button class="btn" id="again">Fetch again</button><span class="meta">Checks the rules again on the pages already read.</span></div>`;
