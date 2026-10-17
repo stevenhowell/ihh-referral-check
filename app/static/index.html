@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referral Check</title>
+<style>
+:root {
+  --bg: #f5f5f7; --panel: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
+  --accent: #0a66d8; --accent-press: #0852ad; --accent-soft: #e8f1fc;
+  --red: #c4291c; --red-soft: #fdeceb; --amber: #a35a00; --amber-soft: #fdf3e3;
+  --green: #1f7a3a; --green-soft: #e9f6ed; --purple: #6b3fb5; --purple-soft: #f1ecfa;
+  --row: #fafafc; --mark: #ffe58a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161618; --panel: #1f1f22; --text: #f2f2f5; --muted: #a1a1a8; --line: #333338;
+    --accent: #4a9bff; --accent-press: #2f86f0; --accent-soft: #1c2b40;
+    --red: #ff6b5e; --red-soft: #3a1f1d; --amber: #f0a542; --amber-soft: #382a17;
+    --green: #5fd27f; --green-soft: #18301f; --purple: #b69cff; --purple-soft: #2a2238;
+    --row: #242428; --mark: #6b5a12;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
+button { font: inherit; }
+header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+header h1 { font-size: 17px; margin: 0; }
+header .sub { color: var(--muted); font-size: 13px; }
+.seg { margin-left: auto; display: flex; background: var(--bg); border-radius: 9px; padding: 2px; }
+.seg button { border: 0; background: transparent; color: var(--text); padding: 8px 16px; min-height: 36px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600; }
+.layout { display: grid; grid-template-columns: 250px 1fr; min-height: calc(100vh - 61px); }
+nav { border-right: 1px solid var(--line); background: var(--panel); padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+nav .item { display: block; width: 100%; text-align: left; border: 0; background: transparent; color: var(--text); padding: 9px 12px; border-radius: 8px; cursor: pointer; min-height: 44px; }
+nav .item:hover { background: var(--bg); }
+nav .item:active { background: var(--line); }
+nav .item[aria-current="true"] { background: var(--accent-soft); }
+nav .item b { font-weight: 600; }
+nav .item .st { display: block; font-size: 12.5px; color: var(--muted); }
+nav .open { margin-top: 10px; }
+main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 16px; min-height: 44px; border-radius: 10px; cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn:active { background: var(--bg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.primary:active { background: var(--accent-press); }
+.btn:disabled { opacity: .5; cursor: default; }
+.empty { text-align: center; padding: 70px 20px; color: var(--muted); }
+.empty h2 { color: var(--text); font-size: 22px; margin: 0 0 8px; }
+.empty p { max-width: 460px; margin: 0 auto 20px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; }
+.verdict { display: flex; gap: 18px; align-items: flex-start; }
+.verdict .label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.verdict .call { font-size: 26px; font-weight: 700; margin: 2px 0 6px; }
+.call.approve { color: var(--green); } .call.deny { color: var(--red); } .call.need_more_info { color: var(--amber); }
+.meta { color: var(--muted); font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.banner { border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; background: var(--red-soft); color: var(--red); font-weight: 600; }
+h3 { font-size: 15px; margin: 26px 0 10px; display: flex; align-items: center; gap: 8px; }
+h3 .count { color: var(--muted); font-weight: 400; }
+.finding { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+.finding.problem { border-left-color: var(--red); } .finding.cant_tell { border-left-color: var(--amber); }
+.finding.missing { border-left-color: var(--amber); } .finding.ok { border-left-color: var(--green); }
+.finding.conflict { border-left-color: var(--purple); }
+.finding .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.finding .head strong { font-weight: 600; }
+.finding .rule { font-size: 12.5px; color: var(--muted); }
+.finding .expl { margin: 4px 0 0; }
+.finding .ruletext { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.unsupported { font-size: 12.5px; color: var(--red); margin-top: 6px; font-weight: 600; }
+.quote { display: flex; gap: 10px; align-items: flex-start; margin-top: 8px; padding: 8px 10px; background: var(--row); border-radius: 8px; }
+.quote q { flex: 1; font-style: italic; }
+.pagebtn { border: 1px solid var(--line); background: var(--panel); color: var(--accent); border-radius: 8px; min-height: 32px; min-width: 52px; padding: 0 8px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+.pagebtn:active { background: var(--accent-soft); }
+.check { font-size: 12px; white-space: nowrap; padding-top: 6px; }
+.check.on_page, .check.close { color: var(--green); }
+.check.other_page { color: var(--amber); } .check.not_found { color: var(--red); font-weight: 600; }
+details > summary { cursor: pointer; color: var(--accent); min-height: 32px; padding-top: 4px; }
+ul.ask { margin: 0; padding-left: 20px; }
+textarea { width: 100%; min-height: 150px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; font: inherit; background: var(--panel); color: var(--text); resize: vertical; }
+.row { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.viewer { position: fixed; top: 61px; right: 0; bottom: 0; width: min(560px, 48vw); background: var(--panel); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0,0,0,.08); display: flex; flex-direction: column; z-index: 10; }
+.viewer[hidden] { display: none; }
+.viewer .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.viewer .bar .t { flex: 1; font-weight: 600; }
+.viewer .body { overflow: auto; padding: 14px; }
+.viewer img { width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.viewer pre { white-space: pre-wrap; font: 13px/1.5 ui-monospace, Menlo, monospace; background: var(--row); padding: 12px; border-radius: 8px; }
+mark { background: var(--mark); color: inherit; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 12px; overflow: hidden; }
+th, td { text-align: left; padding: 10px 12px; font-size: 14px; }
+th { font-size: 12.5px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(even) { background: var(--row); }
+.big { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+.spinner { width: 22px; height: 22px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+@media (max-width: 760px) {
+  .layout { grid-template-columns: 1fr; }
+  nav { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  nav .item { width: auto; min-width: 120px; }
+  main { padding: 16px; }
+  .viewer { width: 100vw; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Referral Check</h1>
+    <div class="sub">Illumination Health + Home · recuperative care referrals</div>
+  </div>
+  <div class="seg" role="group" aria-label="View">
+    <button id="tab-packets" aria-pressed="true">Packets</button>
+    <button id="tab-score" aria-pressed="false">Score</button>
+  </div>
+</header>
+<div class="layout">
+  <nav id="list" aria-label="Packets"></nav>
+  <main id="main"></main>
+</div>
+<aside class="viewer" id="viewer" hidden aria-label="Page viewer">
+  <div class="bar">
+    <button class="btn" id="v-prev" aria-label="Previous page">‹</button>
+    <span class="t" id="v-title"></span>
+    <button class="btn" id="v-next" aria-label="Next page">›</button>
+    <button class="btn" id="v-close">Close</button>
+  </div>
+  <div class="body">
+    <div id="v-note" class="meta"></div>
+    <img id="v-img" alt="">
+    <details id="v-tr-wrap"><summary>Show what Claude read on this page</summary><pre id="v-tr"></pre></details>
+  </div>
+</aside>
+<input type="file" id="file" accept="application/pdf" hidden>
+<script>
+const state = { view: "packets", selected: null, packets: [], review: null, viewer: null };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const CALL = { approve: "Approve", deny: "Deny", need_more_info: "Needs more information" };
+const CHECK = {
+  on_page: "✓ On the page",
+  close: "≈ On the page, small reading differences",
+  other_page: (e) => `! Found on page ${e.found_on}, not ${e.page}`,
+  not_found: "✗ Not found on the page. Check by hand",
+};
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || `Request failed (${r.status})`);
+  return body;
+}
+
+function statusLine(p) {
+  if (p.state === "running") return esc(p.step || "Reviewing");
+  if (p.state === "error") return "Stopped. Open for details";
+  if (p.state === "done") return `Suggests ${CALL[p.decision].toLowerCase()} · ${p.pages} pages`;
+  return "Not reviewed";
+}
+
+function renderList() {
+  const items = state.packets.map((p) => `
+    <button class="item" data-id="${p.id}" aria-current="${p.id === state.selected && state.view === "packets"}">
+      <b>${p.uploaded ? "Opened packet " + p.id.slice(1) : "Packet " + p.id}</b>
+      <span class="st">${statusLine(p)}</span>
+    </button>`).join("");
+  $("list").innerHTML = items + `<button class="btn open" id="open-btn">Open packet…</button>`;
+  $("list").querySelectorAll(".item").forEach((b) => b.onclick = () => select(b.dataset.id));
+  $("open-btn").onclick = () => $("file").click();
+}
+
+async function refresh() {
+  const { packets } = await api("/api/packets");
+  state.packets = packets;
+  renderList();
+  if (state.view === "packets" && state.selected) {
+    const p = packets.find((x) => x.id === state.selected);
+    if (p && (p.state !== "done" || !state.review || state.review.packet_id !== p.id)) await renderPacket();
+  }
+  if (state.view === "score") await renderScore(true);
+  const running = packets.some((p) => p.state === "running");
+  clearTimeout(state.timer);
+  if (running) state.timer = setTimeout(refresh, 2000);
+}
+
+async function select(id) {
+  state.view = "packets"; state.selected = id; state.review = null;
+  setTab();
+  closeViewer();
+  renderList();
+  await renderPacket();
+}
+
+async function startReview(id, fresh) {
+  await api(`/api/review/${id}${fresh ? "?fresh=1" : ""}`, { method: "POST" });
+  state.review = null;
+  await refresh();
+}
+
+async function renderPacket() {
+  const p = state.packets.find((x) => x.id === state.selected);
+  const main = $("main");
+  if (!p) return;
+  const name = p.uploaded ? `Opened packet ${p.id.slice(1)}` : `Packet ${p.id}`;
+  if (p.state === "new") {
+    main.innerHTML = `<div class="empty"><h2>${name} hasn't been reviewed</h2>
+      <p>Review reads every page of the fax and checks it against IHH's admission rules. Each finding shows the page and the words it came from. It takes about three minutes.</p>
+      <button class="btn primary" id="go">Review</button></div>`;
+    $("go").onclick = () => startReview(p.id);
+    return;
+  }
+  if (p.state === "running") {
+    main.innerHTML = `<div class="empty"><h2><span class="spinner"></span>&nbsp; Reviewing ${name}</h2><p>${esc(p.step)}</p></div>`;
+    return;
+  }
+  if (p.state === "error") {
+    main.innerHTML = `<div class="empty"><h2>The review of ${name} stopped</h2><p>${esc(p.error)}</p>
+      <button class="btn primary" id="go">Review again</button></div>`;
+    $("go").onclick = () => startReview(p.id, true);
+    return;
+  }
+  if (!state.review || state.review.packet_id !== p.id) state.review = await api(`/api/review/${p.id}`);
+  main.innerHTML = reviewHTML(state.review, name);
+  main.querySelectorAll(".pagebtn").forEach((b) => b.onclick = () => openViewer(+b.dataset.page, b.dataset.quote));
+  const copy = $("copy");
+  if (copy) copy.onclick = async () => {
+    try { await navigator.clipboard.writeText($("reply").value); copy.textContent = "Copied"; }
+    catch { copy.textContent = "Select the text and copy it"; }
+    setTimeout(() => copy.textContent = "Copy reply", 2000);
+  };
+  const again = $("again");
+  if (again) again.onclick = () => startReview(p.id, true);
+}
+
+function quoteHTML(e) {
+  const label = typeof CHECK[e.check] === "function" ? CHECK[e.check](e) : CHECK[e.check];
+  return `<div class="quote">
+    <button class="pagebtn" data-page="${e.page}" data-quote="${esc(e.quote)}" aria-label="Open page ${e.page}">p. ${e.page}</button>
+    <q>${esc(e.quote)}</q>
+    <span class="check ${e.check}">${label}</span></div>`;
+}
+
+function findingHTML(f) {
+  const rule = f.known_rule ? `${esc(f.rule_id)} · ${esc(f.rule_section)}` : `${esc(f.rule_id)} · not a rule ID in IHH's documents`;
+  return `<div class="finding ${f.status}">
+    <div class="head"><strong>${esc(f.headline)}</strong><span class="rule">${rule}</span></div>
+    <p class="expl">${esc(f.explanation)}</p>
+    ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
+    ${f.supported ? "" : `<div class="unsupported">No quote for this finding was found on its page. Treat it as unchecked.</div>`}
+    ${f.evidence.map(quoteHTML).join("")}
+  </div>`;
+}
+
+function section(title, items, render, open = true) {
+  if (!items.length) return "";
+  const body = items.map(render).join("");
+  if (open) return `<h3>${title} <span class="count">${items.length}</span></h3>${body}`;
+  return `<h3>${title} <span class="count">${items.length}</span></h3><details><summary>Show ${items.length}</summary>${body}</details>`;
+}
+
+function reviewHTML(r, name) {
+  const rv = r.review, s = rv.suggestion, qc = r.quote_check;
+  const by = (st) => rv.findings.filter((f) => f.status === st);
+  const flagged = r.pages.filter((p) => p.possible_unredacted_identifier).map((p) => p.page);
+  const checked = qc.on_page + qc.close;
+  const mins = Math.floor(r.seconds / 60), secs = r.seconds % 60;
+  const lean = s.decision === "need_more_info" ? `<div class="meta">If it had to be decided now with only this packet: ${CALL[s.lean_if_forced].toLowerCase()}.</div>` : "";
+  return `
+  ${flagged.length ? `<div class="banner">Page ${flagged.join(", ")} may show an identifier the redaction missed. Stop and tell an organizer before going further.</div>` : ""}
+  <div class="card verdict"><div style="flex:1">
+    <div class="label">${esc(name)} · suggested decision</div>
+    <div class="call ${s.decision}">${CALL[s.decision]}</div>
+    <div>${esc(s.why)}</div>${lean}
+    <div class="chips">${s.deciding_rule_ids.map((id) => `<span class="chip">${esc(id)}</span>`).join("")}</div>
+    <p class="meta" style="margin:12px 0 0">${esc(rv.summary)}</p>
+    <p class="meta" style="margin:8px 0 0">Read ${r.page_count} pages in ${mins} min ${secs} s. ${checked} of ${qc.quotes} quotes found on the page they cite${qc.quotes - checked ? `; ${qc.quotes - checked} need a look` : ""}. The coordinator makes the decision.</p>
+  </div></div>
+  ${section("Rules the patient out", by("problem"), findingHTML)}
+  ${section("The packet disagrees with itself", rv.conflicts, (c) => `<div class="finding conflict"><div class="head"><strong>${esc(c.topic)}</strong></div><p class="expl">${esc(c.explanation)}</p>${c.evidence.map(quoteHTML).join("")}</div>`)}
+  ${section("Can't tell from this packet", by("cant_tell"), findingHTML)}
+  ${section("Missing documents", by("missing"), findingHTML)}
+  ${rv.ask_hospital.length ? `<h3>Ask the hospital for</h3><div class="card"><ul class="ask">${rv.ask_hospital.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></div>` : ""}
+  <h3>Reply to the hospital</h3>
+  <div class="card"><textarea id="reply" aria-label="Reply draft">${esc(rv.reply_draft)}</textarea>
+    <div class="row"><button class="btn" id="copy">Copy reply</button><span class="meta">A draft for the coordinator to edit. Nothing is sent from here.</span></div></div>
+  ${section("Meets the rule", by("ok"), findingHTML, false)}
+  <div class="row" style="margin-top:28px"><button class="btn" id="again">Review again</button><span class="meta">Runs the rules check again on the pages already read.</span></div>`;
+}
+
+async function openViewer(page, quote) {
+  const r = state.review;
+  state.viewer = { page, quote };
+  const info = r.pages.find((p) => p.page === page) || {};
+  $("viewer").hidden = false;
+  $("v-title").textContent = `Page ${page} of ${r.page_count}`;
+  const notes = [info.kind ? info.kind.replace(/_/g, " ") : "", info.rotated ? "scanned sideways or upside down" : "", info.legibility && info.legibility !== "clear" ? info.legibility.replace(/_/g, " ") : ""].filter(Boolean);
+  $("v-note").textContent = notes.join(" · ");
+  $("v-img").src = `/page/${r.packet_id}/${page}.png`;
+  $("v-img").alt = `Page ${page} of packet ${r.packet_id}`;
+  $("v-prev").disabled = page <= 1;
+  $("v-next").disabled = page >= r.page_count;
+  try {
+    const t = await api(`/api/transcript/${r.packet_id}/${page}`);
+    let html = esc(t.transcript);
+    if (quote) {
+      const i = t.transcript.toLowerCase().indexOf(quote.toLowerCase());
+      if (i >= 0) {
+        html = esc(t.transcript.slice(0, i)) + "<mark>" + esc(t.transcript.slice(i, i + quote.length)) + "</mark>" + esc(t.transcript.slice(i + quote.length));
+        $("v-tr-wrap").open = true;
+      }
+    }
+    $("v-tr").innerHTML = html;
+  } catch { $("v-tr").textContent = "No transcript for this page."; }
+}
+function closeViewer() { $("viewer").hidden = true; state.viewer = null; }
+$("v-close").onclick = closeViewer;
+$("v-prev").onclick = () => openViewer(state.viewer.page - 1);
+$("v-next").onclick = () => openViewer(state.viewer.page + 1);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.viewer) closeViewer(); });
+
+async function renderScore(quiet) {
+  const { rows } = await api("/api/score");
+  const done = rows.filter((r) => r.state === "done");
+  const matched = done.filter((r) => r.match).length;
+  const waiting = rows.filter((r) => r.state !== "done" && r.state !== "running");
+  const running = rows.filter((r) => r.state === "running");
+  const quotes = done.reduce((a, r) => a + r.quote_check.quotes, 0);
+  const ok = done.reduce((a, r) => a + r.quote_check.on_page + r.quote_check.close, 0);
+  const head = done.length
+    ? `<p class="big">Matched IHH's decision on ${matched} of ${done.length} packets</p>
+       <p class="meta">${ok} of ${quotes} quotes were found on the page they cite. For packets where it asks for more information, the score uses the call it would make with only the packet.</p>`
+    : `<p class="big">No packets reviewed yet</p><p class="meta">Review the packets to compare the tool with what IHH actually decided.</p>`;
+  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>Suggests</th><th>If decided now</th><th>IHH decided</th><th>Match</th><th>Quotes on page</th><th>Time</th></tr></thead><tbody>
+    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td>${CALL[r.decision]}</td><td>${CALL[r.lean]}</td><td>${CALL[r.ihh]}</td>
+      <td>${r.match ? "Yes" : "<b>No</b>"}</td><td>${r.quote_check.on_page + r.quote_check.close} of ${r.quote_check.quotes}</td><td>${Math.round(r.seconds / 60 * 10) / 10} min</td></tr>`
+      : `<tr><td>${r.id}</td><td colspan="7" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
+  </tbody></table>`;
+  $("main").innerHTML = `<div class="card">${head}
+    ${waiting.length ? `<div class="row"><button class="btn primary" id="all">Review ${waiting.length} remaining</button><span class="meta">Reads each packet once; about three minutes each, several at a time.</span></div>` : ""}
+    ${running.length ? `<p class="meta"><span class="spinner"></span>&nbsp; Reviewing ${running.length}…</p>` : ""}
+    </div>${table}
+    <p class="meta">IHH's real decisions are used only on this screen, after a review is done. The review never sees them. IHH did not record reasons, so a match on the decision does not prove the reasons match.</p>`;
+  const all = $("all");
+  if (all) all.onclick = async () => {
+    all.disabled = true;
+    for (const r of waiting) await api(`/api/review/${r.id}`, { method: "POST" });
+    await refresh();
+  };
+}
+
+function setTab() {
+  $("tab-packets").setAttribute("aria-pressed", state.view === "packets");
+  $("tab-score").setAttribute("aria-pressed", state.view === "score");
+}
+$("tab-packets").onclick = () => { if (state.selected) select(state.selected); else { state.view = "packets"; setTab(); renderList(); showWelcome(); } };
+$("tab-score").onclick = async () => { state.view = "score"; setTab(); closeViewer(); renderList(); await renderScore(); };
+
+$("file").onchange = async () => {
+  const f = $("file").files[0];
+  if (!f) return;
+  try {
+    const p = await api("/api/upload", { method: "POST", body: await f.arrayBuffer(), headers: { "Content-Type": "application/pdf" } });
+    $("file").value = "";
+    await refresh();
+    await select(p.id);
+  } catch (e) { alert(e.message); }
+};
+
+function showWelcome() {
+  $("main").innerHTML = `<div class="empty"><h2>Choose a referral packet</h2>
+    <p>Pick one of IHH's eleven packets on the left, or open a new fax as a PDF. The review shows which of IHH's rules the packet meets, which it breaks, and what it doesn't say, each with the page it came from.</p></div>`;
+}
+
+showWelcome();
+refresh();
+</script>
+</body>
+</html>
