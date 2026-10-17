@@ -63,7 +63,16 @@ h3 .count { color: var(--muted); font-weight: 400; }
 .finding { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
 .finding.problem { border-left-color: var(--red); } .finding.cant_tell { border-left-color: var(--amber); }
 .finding.missing { border-left-color: var(--amber); } .finding.ok { border-left-color: var(--green); }
-.finding.conflict { border-left-color: var(--purple); }
+.finding.conflict, .finding.coordinator_call { border-left-color: var(--purple); }
+.imgcheck { font-size: 12px; margin-top: 2px; }
+.imgcheck.yes { color: var(--green); } .imgcheck.no { color: var(--red); font-weight: 600; } .imgcheck.unclear { color: var(--amber); }
+.formonly { font-size: 12.5px; color: var(--amber); margin-top: 6px; font-weight: 600; }
+.groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.group { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--row); }
+.group .g { font-size: 13px; color: var(--muted); }
+.group .r { font-weight: 700; }
+.r.pass { color: var(--green); } .r.fail { color: var(--red); } .r.cant { color: var(--amber); } .r.judge { color: var(--purple); }
+.quote .side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .finding .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .finding .head strong { font-weight: 600; }
 .finding .rule { font-size: 12.5px; color: var(--muted); }
@@ -134,7 +143,7 @@ tbody tr:nth-child(even) { background: var(--row); }
     <details id="v-tr-wrap"><summary>Show what Claude read on this page</summary><pre id="v-tr"></pre></details>
   </div>
 </aside>
-<input type="file" id="file" accept="application/pdf" hidden>
+<input type="file" id="file" accept="application/pdf,image/jpeg,image/png,image/heic,.heic" hidden>
 <script>
 const state = { view: "packets", selected: null, packets: [], review: null, viewer: null };
 const $ = (id) => document.getElementById(id);
@@ -235,12 +244,18 @@ async function renderPacket() {
   if (again) again.onclick = () => startReview(p.id, true);
 }
 
+const IMG = { yes: "✓ Seen on the page image", no: "✗ Not on the page image. Check by hand", unclear: "? Hard to read on the image. Check by hand" };
+function imageCheck(e) {
+  if (!e.image_check) return "";
+  const says = e.image_says ? `<div class="imgcheck ${e.image_check}">Page shows: ${esc(e.image_says)}</div>` : "";
+  return `<span class="imgcheck ${e.image_check}">${IMG[e.image_check]}</span>${says}`;
+}
 function quoteHTML(e) {
   const label = typeof CHECK[e.check] === "function" ? CHECK[e.check](e) : CHECK[e.check];
   return `<div class="quote">
     <button class="pagebtn" data-page="${e.page}" data-quote="${esc(e.quote)}" aria-label="Open page ${e.page}">p. ${e.page}</button>
     <q>${esc(e.quote)}</q>
-    <span class="check ${e.check}">${label}</span></div>`;
+    <span class="side"><span class="check ${e.check}">${label}</span>${imageCheck(e)}</span></div>`;
 }
 
 function findingHTML(f) {
@@ -249,6 +264,7 @@ function findingHTML(f) {
     <div class="head"><strong>${esc(f.headline)}</strong><span class="rule">${rule}</span></div>
     <p class="expl">${esc(f.explanation)}</p>
     ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
+    ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
     ${f.supported ? "" : `<div class="unsupported">No quote for this finding was found on its page. Treat it as unchecked.</div>`}
     ${f.evidence.map(quoteHTML).join("")}
   </div>`;
@@ -261,6 +277,22 @@ function section(title, items, render, open = true) {
   return `<h3>${title} <span class="count">${items.length}</span></h3><details><summary>Show ${items.length}</summary>${body}</details>`;
 }
 
+const GROUPS = [["GEN", "General"], ["ADL", "Daily living"], ["MOB", "Mobility"], ["MH", "Mental health"],
+  ["COG", "Cognition"], ["OTH", "Other factors"], ["INF", "Infection control"], ["EOL", "End of life"], ["DOC", "Documents"], ["FORM", "Referral form"]];
+function groupOf(id) { const pre = id.split("-")[0]; const g = GROUPS.find(([k]) => k === pre); return g ? g[1] : "Conditions"; }
+function groupsHTML(findings) {
+  const order = [...GROUPS.map(([, n]) => n), "Conditions"];
+  const groups = {};
+  for (const f of findings) (groups[groupOf(f.rule_id)] ||= []).push(f);
+  const cells = order.filter((n) => groups[n]).map((n) => {
+    const fs = groups[n], has = (st) => fs.some((f) => f.status === st);
+    const shaky = fs.some((f) => f.status === "ok" && (f.form_only || !f.supported));
+    const [cls, word] = has("problem") ? ["fail", "Fail"] : has("coordinator_call") ? ["judge", "Coordinator's call"]
+      : has("cant_tell") || has("missing") || shaky ? ["cant", "Can't tell"] : ["pass", "Pass"];
+    return `<div class="group"><div class="g">${n}</div><div class="r ${cls}">${word}</div><div class="meta">${fs.length} rule${fs.length > 1 ? "s" : ""}</div></div>`;
+  }).join("");
+  return `<h3>By rule group</h3><div class="groups">${cells}</div>`;
+}
 function reviewHTML(r, name) {
   const rv = r.review, s = rv.suggestion, qc = r.quote_check;
   const by = (st) => rv.findings.filter((f) => f.status === st);
@@ -276,9 +308,11 @@ function reviewHTML(r, name) {
     <div>${esc(s.why)}</div>${lean}
     <div class="chips">${s.deciding_rule_ids.map((id) => `<span class="chip">${esc(id)}</span>`).join("")}</div>
     <p class="meta" style="margin:12px 0 0">${esc(rv.summary)}</p>
-    <p class="meta" style="margin:8px 0 0">Read ${r.page_count} pages in ${mins} min ${secs} s. ${checked} of ${qc.quotes} quotes found on the page they cite${qc.quotes - checked ? `; ${qc.quotes - checked} need a look` : ""}. The coordinator makes the decision.</p>
+    <p class="meta" style="margin:8px 0 0">Read ${r.page_count} pages in ${mins} min ${secs} s. ${checked} of ${qc.quotes} quotes found on the page they cite${qc.quotes - checked ? `; ${qc.quotes - checked} need a look` : ""}. ${qc.image ? ` ${qc.image.seen} of ${qc.image.checked} key quotes seen on the page image${qc.image.checked - qc.image.seen ? `; ${qc.image.checked - qc.image.seen} to check by hand` : ""}.` : ""} The coordinator makes the decision.</p>
   </div></div>
+  ${groupsHTML(rv.findings)}
   ${section("Rules the patient out", by("problem"), findingHTML)}
+  ${section("Needs the coordinator's judgment", by("coordinator_call"), findingHTML)}
   ${section("The packet disagrees with itself", rv.conflicts, (c) => `<div class="finding conflict"><div class="head"><strong>${esc(c.topic)}</strong></div><p class="expl">${esc(c.explanation)}</p>${c.evidence.map(quoteHTML).join("")}</div>`)}
   ${section("Can't tell from this packet", by("cant_tell"), findingHTML)}
   ${section("Missing documents", by("missing"), findingHTML)}
@@ -298,6 +332,7 @@ async function openViewer(page, quote) {
   $("v-title").textContent = `Page ${page} of ${r.page_count}`;
   const notes = [info.kind ? info.kind.replace(/_/g, " ") : "", info.rotated ? "scanned sideways or upside down" : "", info.legibility && info.legibility !== "clear" ? info.legibility.replace(/_/g, " ") : ""].filter(Boolean);
   $("v-note").textContent = notes.join(" · ");
+  if (info.possible_unredacted_identifier) $("v-note").innerHTML += `<div class="banner" style="margin-top:8px">This page may show an identifier the redaction missed. Stop and tell an organizer.</div>`;
   $("v-img").src = `/page/${r.packet_id}/${page}.png`;
   $("v-img").alt = `Page ${page} of packet ${r.packet_id}`;
   $("v-prev").disabled = page <= 1;
@@ -356,7 +391,7 @@ async function renderScore(quiet) {
     ${waiting.length ? `<div class="row"><button class="btn primary" id="all">Review ${waiting.length} remaining</button><span class="meta">Reads each packet once; about three minutes each, several at a time.</span></div>` : ""}
     ${running.length ? `<p class="meta"><span class="spinner"></span>&nbsp; Reviewing ${running.length}…</p>` : ""}
     </div>${table}
-    <p class="meta">IHH's real decisions are used only on this screen, after a review is done. The review never sees them. IHH did not record reasons, so a match on the decision does not prove the reasons match.</p>
+    <p class="meta">IHH's real decisions are used only on this screen, after a review is done. The review never sees them. IHH did not record reasons, so a match on the decision does not prove the reasons match. Eleven packets is a small test: a good score here shows the tool isn't broken, not that it is reliable.</p>
     ${denialsHTML(denials)}`;
   const all = $("all");
   if (all) all.onclick = async () => {
@@ -377,7 +412,7 @@ $("file").onchange = async () => {
   const f = $("file").files[0];
   if (!f) return;
   try {
-    const p = await api("/api/upload", { method: "POST", body: await f.arrayBuffer(), headers: { "Content-Type": "application/pdf" } });
+    const p = await api("/api/upload", { method: "POST", body: await f.arrayBuffer(), headers: { "Content-Type": "application/octet-stream" } });
     $("file").value = "";
     await refresh();
     await select(p.id);
@@ -386,7 +421,7 @@ $("file").onchange = async () => {
 
 function showWelcome() {
   $("main").innerHTML = `<div class="empty"><h2>Choose a referral packet</h2>
-    <p>Pick one of IHH's eleven packets on the left, or open a new fax as a PDF. The review shows which of IHH's rules the packet meets, which it breaks, and what it doesn't say, each with the page it came from.</p></div>`;
+    <p>Pick one of IHH's eleven packets on the left, or open a new fax as a PDF or a photo. The review shows which of IHH's rules the packet meets, which it breaks, and what it doesn't say, each with the page it came from.</p></div>`;
 }
 
 showWelcome();

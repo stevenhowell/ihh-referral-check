@@ -16,7 +16,7 @@ from common import MODEL, packet_dir, packet_path
 
 DPI = 150          # about 1275 x 1650 px per page: legible, and well under the image size cap
 PAGES_PER_CALL = 3
-PARALLEL_CALLS = 6
+PARALLEL_CALLS = 3  # venue Wi-Fi drops connections when too many large uploads run at once
 
 PAGE_KINDS = [
     "fax_cover", "ihh_referral_form", "health_plan_authorization", "face_sheet",
@@ -78,15 +78,28 @@ def render_pages(packet_id):
     return sorted(out.glob("p-*.png"))
 
 
+def _upload_bytes(image):
+    """A JPEG copy of the page for sending: about half the size of the PNG, same legibility."""
+    jpg = image.with_suffix(".jpg")
+    if not jpg.exists():
+        subprocess.run(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "75", str(image), "--out", str(jpg)],
+                       check=True, capture_output=True)
+    return jpg.read_bytes()
+
+
 def _read_batch(client, images, first_page, total):
+    done = images[0].parent / f"batch-{first_page:03d}.json"
+    if done.exists():  # survives a dropped connection: finished batches are never sent twice
+        saved = json.loads(done.read_text())
+        return saved["pages"], None
     content = []
     for offset, image in enumerate(images):
         number = first_page + offset
         content.append({"type": "text", "text": f"Page {number} of {total}:"})
         content.append({
             "type": "image",
-            "source": {"type": "base64", "media_type": "image/png",
-                       "data": base64.standard_b64encode(image.read_bytes()).decode()},
+            "source": {"type": "base64", "media_type": "image/jpeg",
+                       "data": base64.standard_b64encode(_upload_bytes(image)).decode()},
         })
     numbers = ", ".join(str(first_page + i) for i in range(len(images)))
     content.append({"type": "text", "text": f"Transcribe pages {numbers}. Return one entry per page, using the page numbers given."})
@@ -114,6 +127,7 @@ def _read_batch(client, images, first_page, total):
         pages.append({"page": missing, "kind": "other", "rotated": False, "legibility": "mostly_illegible",
                       "transcript": "[This page was not transcribed. Open the image.]",
                       "possible_unredacted_identifier": False})
+    done.write_text(json.dumps({"pages": pages}))
     return pages, message.usage
 
 
@@ -128,7 +142,7 @@ def read_packet(packet_id, progress=lambda text: None):
     total = len(images)
     batches = [(images[i:i + PAGES_PER_CALL], i + 1) for i in range(0, total, PAGES_PER_CALL)]
 
-    client = anthropic.Anthropic(max_retries=6)
+    client = anthropic.Anthropic(max_retries=8, timeout=anthropic.Timeout(600, connect=30))
     done = 0
     pages = []
     usage = {"input_tokens": 0, "output_tokens": 0}
@@ -138,8 +152,9 @@ def read_packet(packet_id, progress=lambda text: None):
         for future in futures:
             batch_pages, batch_usage = future.result()
             pages += batch_pages
-            usage["input_tokens"] += batch_usage.input_tokens
-            usage["output_tokens"] += batch_usage.output_tokens
+            if batch_usage:
+                usage["input_tokens"] += batch_usage.input_tokens
+                usage["output_tokens"] += batch_usage.output_tokens
             done += len(batch_pages)
             progress(f"Read {done} of {total} pages")
 

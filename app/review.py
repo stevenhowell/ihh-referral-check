@@ -1,4 +1,4 @@
-"""Steps 2 and 3: check the packet against IHH's rules, then check every quote.
+"""Steps 2 to 4: check the packet against IHH's rules, then check every quote twice.
 
 Step 2 sends the page transcripts and IHH's rules to Claude and asks for a finding per
 rule, each backed by the page number and the exact words from that page.
@@ -6,19 +6,24 @@ rule, each backed by the page number and the exact words from that page.
 Step 3 is the quality check, and it does not use AI: every quote is looked up in the
 transcript of the page it cites. A quote that is not there is flagged for the
 coordinator, and a finding with no quote that checks out is marked unsupported.
+
+Step 4 covers what step 3 can't: a misread page. The quotes a decision rests on, and any
+quote with a number in it, are looked for again on the original page image.
 """
 
+import base64
 import json
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor
 from difflib import SequenceMatcher
 
 import anthropic
 
 from common import MODEL, criteria_prompt, packet_dir, rule_index
-from read_pages import read_packet
+from read_pages import _upload_bytes, read_packet
 
-STATUSES = ["ok", "problem", "cant_tell", "missing"]
+STATUSES = ["ok", "problem", "coordinator_call", "cant_tell", "missing"]
 
 EVIDENCE = {
     "type": "array",
@@ -87,11 +92,12 @@ REVIEW_INSTRUCTIONS = """You are helping an Illumination Health + Home (IHH) ref
 The packet is above as page transcripts, made from faxed page images. It is a real referral with identifiers blacked out.
 
 How to read it
-- Check the chart, not only the referral form. The form is one person's summary and can be wrong. The deciding fact is often deep in the chart. When the form and the chart (or two chart pages) disagree, report it under conflicts.
+- Check the chart, not only the referral form. The form is one person's summary and can be wrong; the deciding fact is often deep in the chart. When the form and the chart (or two chart pages) disagree, the chart wins: report the conflict, and judge the rule on the chart.
+- Never mark a rule ok on the referral form alone when the rule is about the patient's condition or abilities. If only the form supports it, use cant_tell and say the chart doesn't confirm it.
 - What the packet does not say is unknown, not normal. Use cant_tell.
 - [redacted] marks a privacy redaction, not a missing document. Dates are redacted, so any rule that turns on a date or a number of hours is cant_tell; say "dates removed for privacy".
 - When the outline and the referral form disagree, the outline wins (see "Which document wins"). Where the written rules are unclear (see the last section of the rules), say so in the explanation instead of guessing.
-- Registered sex offender status is never a problem on its own: it is case by case. Report it as cant_tell for the coordinator.
+- Registered sex offender status is never a problem on its own: it is case by case. Report it as coordinator_call.
 - Some packets have no IHH referral form. That is a missing document, not a reason to stop.
 
 Which rules to report
@@ -104,17 +110,19 @@ Statuses
 - ok: the packet shows the rule is met. For a document item: the document is in the packet.
 - problem: the packet shows something that breaks the rule or rules the patient out.
 - cant_tell: the packet does not settle it.
+- coordinator_call: the packet shows something that matters, but IHH's written rules don't settle it and a person has to judge. Use it for case-by-case rules, for the unclear places listed at the end of the rules, and for facts that come close to a rule without matching its wording. Explain what the coordinator has to weigh.
 - missing: a document item the hospital was asked to send is not in the packet.
 
 Evidence
-- Give at least one quote for every ok and problem finding, and for a conflict give one quote per side.
+- Give at least one quote for every ok, problem and coordinator_call finding, and for a conflict give one quote per side.
 - Each quote must be copied character for character from the transcript of the page you cite, 4 to 30 words, one passage per quote. It will be checked automatically against that page; a quote that is not on the page is flagged as unreliable. Never paraphrase inside a quote and never combine words from two places.
 - Use the page numbers from the "=== Page N" headers.
 
 Headline: a few plain words a coordinator can scan, e.g. "Walks 150 ft with a walker". Explanation: one or two sentences.
 
 Suggestion
-- approve: nothing in the packet rules the patient out and the must rules are supported.
+- approve: nothing in the packet rules the patient out, the must rules are supported by the chart, and no coordinator_call is serious.
+- A missing date alone never makes a packet need_more_info: dates are removed for privacy in every packet. Judge on what the packet can show.
 - deny: something in the packet rules the patient out under IHH's rules.
 - need_more_info: the answer turns on something the hospital could send or confirm.
 - lean_if_forced: the call you would make if the coordinator had to answer now with only this packet.
@@ -126,7 +134,7 @@ reply_draft: a short message from the coordinator to the hospital case manager, 
 
 
 def _client():
-    return anthropic.Anthropic(max_retries=6)
+    return anthropic.Anthropic(max_retries=8, timeout=anthropic.Timeout(600, connect=30))
 
 
 def _transcript_block(read):
@@ -233,10 +241,104 @@ def check_review(review, read):
                 continue
             ev.update(check_quote(ev, page_words))
             counts[ev["check"]] += 1
+    kinds = {p["page"]: p["kind"] for p in read["pages"]}
     for f in review["findings"]:
         good = [e for e in f["evidence"] if e["check"] in ("on_page", "close")]
         f["supported"] = bool(good) or f["status"] in ("cant_tell", "missing")
+        # The referral form is one person's summary. A pass resting on it alone is not a pass.
+        f["form_only"] = (f["status"] == "ok" and not f["rule_id"].startswith("DOC") and bool(good)
+                          and all(kinds.get(e["page"]) == "ihh_referral_form" for e in good))
     return counts
+
+
+# ------------------------------------------------------------ image check
+
+IMAGE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "items": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "n": {"type": "integer"},
+                    "seen": {"type": "string", "enum": ["yes", "no", "unclear"]},
+                    "page_says": {"type": "string"},
+                },
+                "required": ["n", "seen", "page_says"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["items"],
+    "additionalProperties": False,
+}
+
+
+def _needs_image_check(item, deciding):
+    """Quotes a decision rests on, and any quote with a number in it."""
+    if item.get("status") in ("problem", "coordinator_call") or item.get("rule_id") in deciding:
+        return True
+    return "status" not in item  # a conflict
+
+
+def _check_page_image(client, image, quotes):
+    listing = "\n".join(f"{i}. {q}" for i, q in enumerate(quotes, 1))
+    content = [
+        {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
+                                     "data": base64.standard_b64encode(_upload_bytes(image)).decode()}},
+        {"type": "text", "text": (
+            "This is one page of a faxed, de-identified hospital record. Black boxes are privacy redactions.\n"
+            "For each numbered passage below, look at the image and say whether the page really shows it, "
+            "with the same meaning and the same numbers, doses and yes/no marks. Small spelling or spacing "
+            "differences are fine. Answer yes, no, or unclear (unreadable). In page_says, give what the page "
+            "actually shows at that spot, in a few words, without copying any identifier.\n\n" + listing)},
+    ]
+    with client.messages.stream(
+        model=MODEL, max_tokens=8000, thinking={"type": "adaptive"},
+        output_config={"effort": "low", "format": {"type": "json_schema", "schema": IMAGE_SCHEMA}},
+        messages=[{"role": "user", "content": content}],
+    ) as stream:
+        message = stream.get_final_message()
+    if message.stop_reason in ("refusal", "max_tokens"):
+        return {}
+    text = next(b.text for b in message.content if b.type == "text")
+    return {it["n"]: it for it in json.loads(text)["items"]}
+
+
+def image_check(packet_id, review):
+    """Look at the page image itself for the quotes that matter most.
+
+    The text check only proves a quote matches what Claude read. This one asks Claude to
+    find each important quote again on the original page image, one page at a time.
+    """
+    from read_pages import render_pages
+    images = render_pages(packet_id)
+    deciding = set(review["suggestion"]["deciding_rule_ids"])
+    by_page = {}
+    for item in review["findings"] + review["conflicts"]:
+        important = _needs_image_check(item, deciding)
+        for ev in item["evidence"]:
+            has_number = any(ch.isdigit() for ch in ev["quote"])
+            if (important or has_number) and 1 <= ev["page"] <= len(images):
+                by_page.setdefault(ev["page"], []).append(ev)
+    client = _client()
+    with ThreadPoolExecutor(3) as pool:
+        futures = {pool.submit(_check_page_image, client, images[page - 1], [e["quote"] for e in evs]): evs
+                   for page, evs in by_page.items()}
+        for future, evs in futures.items():
+            try:
+                answers = future.result()
+            except anthropic.APIError:
+                answers = {}
+            for i, ev in enumerate(evs, 1):
+                a = answers.get(i)
+                ev["image_check"] = a["seen"] if a else "unclear"
+                if a and a["seen"] != "yes":
+                    ev["image_says"] = a["page_says"]
+    checked = [ev for evs in by_page.values() for ev in evs]
+    return {"checked": len(checked), "seen": sum(ev["image_check"] == "yes" for ev in checked),
+            "not_seen": sum(ev["image_check"] == "no" for ev in checked)}
 
 
 # ------------------------------------------------------------------- run
@@ -252,6 +354,8 @@ def review_packet(packet_id, progress=lambda text: None, fresh=False):
     review, usage, review_seconds = ask_claude(read)
     progress("Checking every quote against its page")
     counts = check_review(review, read)
+    progress("Looking for the key quotes on the page images")
+    counts["image"] = image_check(packet_id, review)
 
     rules = rule_index()
     for f in review["findings"]:

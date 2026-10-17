@@ -5,6 +5,7 @@ Nothing here sends anything anywhere except the packet pages to the Claude API.
 
 import json
 import re
+import subprocess
 import sys
 import threading
 import traceback
@@ -20,6 +21,8 @@ STATIC = Path(__file__).parent / "static"
 PORT = 8811
 JOBS = {}  # packet_id -> {"state": "running" | "error", "step": str}
 LOCK = threading.Lock()
+# A few reviews at once keeps each one fast and stays under the API's rate limits.
+SLOTS = threading.Semaphore(3)
 
 
 def packet_ids():
@@ -52,7 +55,7 @@ def start(packet_id, fresh=False):
     with LOCK:
         if JOBS.get(packet_id, {}).get("state") == "running":
             return
-        JOBS[packet_id] = {"state": "running", "step": "Starting"}
+        JOBS[packet_id] = {"state": "running", "step": "Waiting for another review to finish"}
 
     def step(text):
         with LOCK:
@@ -60,7 +63,9 @@ def start(packet_id, fresh=False):
 
     def run():
         try:
-            review_packet(packet_id, progress=step, fresh=fresh)
+            with SLOTS:
+                step("Starting")
+                review_packet(packet_id, progress=step, fresh=fresh)
             with LOCK:
                 JOBS.pop(packet_id, None)
         except Exception as exc:  # shown to the coordinator as the reason the review stopped
@@ -81,6 +86,24 @@ def friendly_error(exc):
     if "credit" in text.lower() or "billing" in text.lower():
         return "The Claude API account is out of credit."
     return f"The review stopped: {text[:300]}"
+
+
+def file_kind(data):
+    if data.startswith(b"%PDF"):
+        return "pdf"
+    if data[:3] == b"\xff\xd8\xff":
+        return "jpg"
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        return "png"
+    if data[4:12] in (b"ftypheic", b"ftypheix", b"ftypmif1", b"ftyphevc"):
+        return "heic"
+    return None
+
+
+def page_count(pdf):
+    out = subprocess.run(["pdfinfo", str(pdf)], capture_output=True, text=True).stdout
+    m = re.search(r"^Pages:\s+(\d+)", out, re.M)
+    return int(m.group(1)) if m else 0
 
 
 def score():
@@ -178,12 +201,27 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/upload":
             length = int(self.headers.get("Content-Length", 0))
             data = self.rfile.read(length)
-            if not data.startswith(b"%PDF"):
-                return self.send(400, {"error": "That file is not a PDF."})
+            kind = file_kind(data)
+            if not kind:
+                return self.send(400, {"error": "Open a PDF or a photo (JPEG, PNG or HEIC) of the fax."})
             UPLOADS.mkdir(parents=True, exist_ok=True)
             n = len(list(UPLOADS.glob("U[0-9][0-9].pdf"))) + 1
             pid = f"U{n:02d}"
-            (UPLOADS / f"{pid}.pdf").write_bytes(data)
+            target = UPLOADS / f"{pid}.pdf"
+            if kind == "pdf":
+                target.write_bytes(data)
+            else:
+                # A phone photo becomes a one-page PDF, so it goes through the same steps as a fax.
+                photo = UPLOADS / f"{pid}.{kind}"
+                photo.write_bytes(data)
+                done = subprocess.run(["sips", "-s", "format", "pdf", str(photo), "--out", str(target)],
+                                      capture_output=True)
+                if done.returncode or not target.exists():
+                    return self.send(400, {"error": "That photo couldn't be opened. Try a PDF or a JPEG."})
+            pages = page_count(target)
+            if pages > 150:
+                target.unlink()
+                return self.send(400, {"error": f"That file has {pages} pages. The review handles up to 150."})
             start(pid)
             return self.send(202, summary(pid))
         self.send(404, {"error": "Not found"})
