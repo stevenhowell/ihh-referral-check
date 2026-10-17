@@ -172,7 +172,7 @@ footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 20
       </div>
       <div class="rp-right">
         <div class="rp-kicker">Time to read a 34-page fax</div>
-        <div class="rp-time"><span id="rp-min">0</span><small>min</small><span id="rp-sec">00</span><small>s</small><span class="done" id="rp-done">✓ Done</span></div>
+        <div class="rp-time"><span id="rp-min">0</span><small>min</small><span id="rp-sec">00</span><small>s</small><span class="done" id="rp-done">✓ Read</span></div>
         <div class="rp-steps">
           <div class="rp-step"><span class="dot"></span>Read every page</div>
           <div class="rp-step"><span class="dot"></span>Check 155 IHH rules</div>
@@ -180,7 +180,7 @@ footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 20
           <div class="rp-step"><span class="dot"></span>Build the client profile</div>
         </div>
         <div class="rp-bar"><i id="rp-bar"></i></div>
-        <div class="rp-sub" id="rp-sub">Measured on a fresh read of IHH's longest referral. The full review, with every rule and quote checked, averages 6 min 42 s.</div>
+        <div class="rp-sub" id="rp-sub">Measured on a fresh read of IHH's longest referral.</div>
       </div>
     </div>
     <div class="sa-facts">
@@ -231,7 +231,7 @@ function scanFrame(k) {
   lastPage = pg;
   R.scan.style.top = (k < PHASES[0] ? -50 + ((readK * PAGES) % 1) * 360 : -50) + "px";
   R.hit.classList.toggle("on", k >= PHASES[0] && k < 1 ? true : k >= 1);
-  R.done.classList.toggle("on", k >= 1);
+  R.done.classList.toggle("on", k >= PHASES[0]);
 }
 function factsFrame(p) {
   R.facts.forEach((f) => {
