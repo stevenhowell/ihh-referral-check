@@ -41,6 +41,44 @@ nav .item .st { display: block; font-size: 12.5px; color: var(--muted); }
 .navflag { display: inline-block; margin-left: 6px; font-weight: 700; color: #fff; background: var(--purple); border-radius: 999px; padding: 0 7px; font-size: 11.5px; }
 nav .open { margin-top: 10px; }
 main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
+main.wide { max-width: 1120px; margin: 0 auto; }
+.dashboard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.dash { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; text-align: left; color: var(--text); display: flex; flex-direction: column; gap: 2px; min-height: 92px; }
+button.dash { cursor: pointer; } button.dash:active { background: var(--bg); }
+.dash .n { font-size: 30px; font-weight: 800; line-height: 1.1; } .dash .l { font-size: 13.5px; color: var(--muted); font-weight: 600; }
+.dash.approve .n { color: var(--green); } .dash.deny .n { color: var(--red); } .dash.look .n { color: var(--purple); } .dash.beds .n { color: var(--accent); }
+.bedsrow { display: flex; gap: 6px; margin-top: 6px; } .bedsrow input { width: 64px; min-height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; font: inherit; background: var(--panel); color: var(--text); }
+.btn.small { min-height: 36px; padding: 0 10px; font-size: 14px; }
+.tiny { font-size: 12px; } .dash-note { margin: 8px 0 18px; }
+.qhead { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; } .qhead h2 { margin: 0; font-size: 20px; }
+.dropline { border: 2px dashed var(--line); border-radius: 12px; padding: 10px; text-align: center; color: var(--muted); font-size: 14px; margin: 10px 0; }
+.dropline.over { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+table.queue td { vertical-align: top; } .qrow { cursor: pointer; } .qrow:hover { background: var(--accent-soft) !important; } .qrow:focus { outline: 2px solid var(--accent); }
+.qline { max-width: 380px; } .late { color: var(--red); font-weight: 600; }
+.chip2 { font-size: 13px; font-weight: 700; border-radius: 999px; padding: 3px 10px; display: inline-block; white-space: nowrap; }
+.chip2.approve { color: var(--green); background: var(--green-soft); } .chip2.deny { color: var(--red); background: var(--red-soft); } .chip2.wait { color: var(--muted); background: var(--bg); }
+.riskn { background: var(--purple); color: #fff; font-weight: 700; border-radius: 999px; padding: 2px 10px; }
+.backlink { border: 0; background: none; color: var(--accent); font-size: 16px; min-height: 44px; padding: 0; cursor: pointer; }
+.decbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; }
+.decbar.decided.approve { background: var(--green-soft); color: var(--green); } .decbar.decided.deny { background: var(--red-soft); color: var(--red); }
+.decbtns { display: flex; gap: 8px; } .btn.approve { color: var(--green); border-color: var(--green); font-weight: 700; } .btn.deny { color: var(--red); border-color: var(--red); font-weight: 700; }
+.profile { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 18px; }
+.ph { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+.avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center; flex: none; }
+.profile .label { font-size: 12.5px; color: var(--muted); } .oneline { font-size: 18px; font-weight: 600; }
+.psections { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.psec h4 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.fact { display: grid; grid-template-columns: 110px 1fr auto; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); align-items: start; font-size: 14.5px; }
+.fl { color: var(--muted); } .fv.missing { color: var(--muted); font-style: italic; } .fp .pagebtn { min-height: 30px; }
+.taskbar { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.taskbar select { min-height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: inherit; padding: 0 8px; margin-left: 6px; }
+.tick2 { min-height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 12px; font-weight: 600; cursor: pointer; }
+.tick2.on { background: var(--green); border-color: var(--green); color: #fff; }
+.task { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--purple); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+.task.problem { border-left-color: var(--red); } .task .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.linkbtn { margin-left: auto; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; min-height: 32px; }
+.tag.unchecked { color: var(--red); background: var(--red-soft); }
+@media (max-width: 900px) { .dashboard { grid-template-columns: repeat(2, 1fr); } .fact { grid-template-columns: 90px 1fr auto; } table.queue th:nth-child(3), table.queue td:nth-child(3) { display: none; } }
 .btn { border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 16px; min-height: 44px; border-radius: 10px; cursor: pointer; }
 .btn:hover { border-color: var(--muted); }
 .btn:active { background: var(--bg); }
@@ -182,14 +220,12 @@ tbody tr:nth-child(even) { background: var(--row); }
     <div class="sub">Referral review for Illumination Health + Home</div>
   </div>
   <div class="seg" role="group" aria-label="View">
-    <button id="tab-packets" aria-pressed="true">Packets</button>
+    <button id="tab-queue" aria-pressed="true">Queue</button>
+    <button id="tab-tasks" aria-pressed="false">Tasks</button>
     <button id="tab-score" aria-pressed="false">Score</button>
   </div>
 </header>
-<div class="layout">
-  <nav id="list" aria-label="Packets"></nav>
-  <main id="main"></main>
-</div>
+<main id="main" class="wide"></main>
 <aside class="viewer" id="viewer" hidden aria-label="Page viewer">
   <div class="bar">
     <button class="btn" id="v-prev" aria-label="Previous page">‹</button>
@@ -205,7 +241,7 @@ tbody tr:nth-child(even) { background: var(--row); }
 </aside>
 <input type="file" id="file" accept="application/pdf,image/jpeg,image/png,image/heic,.heic" hidden>
 <script>
-const state = { view: "packets", selected: null, packets: [], review: null, viewer: null };
+const state = { view: "queue", selected: null, packets: [], desk: null, review: null, profile: null, viewer: null };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const CALL = { approve: "Approve", approve_once_arranged: "Approve once arranged", deny: "Deny", need_more_info: "Needs more information" };
@@ -231,38 +267,143 @@ function statusLine(p) {
   return "Not reviewed";
 }
 
-function renderList() {
-  const items = state.packets.map((p) => `
-    <button class="item" data-id="${p.id}" aria-current="${p.id === state.selected && state.view === "packets"}">
-      <b>${p.uploaded ? "Opened packet " + p.id.slice(1) : "Packet " + p.id}</b>
-      <span class="st">${statusLine(p)}</span>
-    </button>`).join("");
-  $("list").innerHTML = items + `<button class="btn open" id="open-btn">Open packet…</button>`;
-  $("list").querySelectorAll(".item").forEach((b) => b.onclick = () => select(b.dataset.id));
-  $("open-btn").onclick = () => $("file").click();
+function packetName(p) { return p.uploaded ? `Opened packet ${p.id.slice(1)}` : `Packet ${p.id}`; }
+function ago(seconds) {
+  const m = Math.max(0, Math.round(seconds / 60));
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`;
 }
+function clock(t) { return new Date(t * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+function leanOf(p) { return ["approve", "approve_once_arranged"].includes(p.decision) ? "approve" : p.decision === "deny" ? "deny" : p.lean; }
 
 async function refresh() {
-  const { packets } = await api("/api/packets");
-  state.packets = packets;
-  renderList();
-  if (state.view === "packets" && state.selected) {
-    const p = packets.find((x) => x.id === state.selected);
+  state.desk = await api("/api/queue");
+  state.packets = state.desk.rows;
+  if (state.view === "queue") renderQueue();
+  if (state.view === "tasks") renderTasks();
+  if (state.view === "packet" && state.selected) {
+    const p = state.packets.find((x) => x.id === state.selected);
     if (p && (p.state !== "done" || !state.review || state.review.packet_id !== p.id)) await renderPacket();
   }
   if (state.view === "score") await renderScore(true);
-  const running = packets.some((p) => p.state === "running");
+  const running = state.packets.some((p) => p.state === "running");
   clearTimeout(state.timer);
   if (running) state.timer = setTimeout(refresh, 2000);
 }
 
+// ---------- dashboard
+function dashboardHTML() {
+  const c = state.desk.counts, beds = state.desk.beds;
+  const tile = (n, label, cls, go) => `<button class="dash ${cls}" ${go ? `data-go="${go}"` : "disabled"}><span class="n">${n}</span><span class="l">${label}</span></button>`;
+  return `<div class="dashboard">
+    ${tile(c.to_review, "To review", "", "queue")}
+    ${tile(c.suggest_approve, "Fetch suggests approve", "approve", "queue")}
+    ${tile(c.suggest_deny, "Fetch suggests deny", "deny", "queue")}
+    ${tile(c.to_look_at, "To look at", "look", "tasks")}
+    <div class="dash beds"><span class="n" id="beds-n">${beds ? beds.count : "–"}</span><span class="l">Beds available</span>
+      <span class="bedsrow"><input id="beds-in" type="number" min="0" max="500" inputmode="numeric" aria-label="Beds available" value="${beds ? beds.count : ""}"><button class="btn small" id="beds-save">Update</button></span>
+      <span class="meta tiny">${beds ? `Entered at ${clock(beds.at)}` : "Not entered yet"}</span></div>
+  </div>
+  <p class="meta dash-note">${c.approved} approved and ${c.denied} denied by the coordinator. "Fetch suggests" is not a decision until a person records one.</p>`;
+}
+function wireDashboard() {
+  document.querySelectorAll(".dash[data-go]").forEach((b) => b.onclick = () => b.dataset.go === "tasks" ? showTasks() : showQueue());
+  $("beds-save").onclick = async () => {
+    const v = $("beds-in").value.trim();
+    try { await api("/api/beds", { method: "POST", body: JSON.stringify({ count: v === "" ? null : Number(v) }) }); await refresh(); }
+    catch (e) { alert(e.message); }
+  };
+}
+
+// ---------- queue
+function suggestionChip(p) {
+  if (p.state === "running") return `<span class="chip2 wait">Reading…</span>`;
+  if (p.state === "new") return `<span class="chip2 wait">Not fetched</span>`;
+  if (p.state === "error") return `<span class="chip2 deny">Stopped</span>`;
+  if (p.state === "changed") return `<span class="chip2 deny">File changed</span>`;
+  const l = leanOf(p);
+  const text = p.decision === "need_more_info" ? `Needs info, leaning ${p.lean}` : CALL[p.decision];
+  return `<span class="chip2 ${l}">${esc(text)}</span>`;
+}
+function renderQueue() {
+  const now = state.desk.now;
+  const open = state.packets.filter((p) => !p.coordinator).sort((a, b) => a.added_at - b.added_at);
+  const done = state.packets.filter((p) => p.coordinator).sort((a, b) => b.coordinator.at - a.coordinator.at);
+  const row = (p) => {
+    const waited = now - p.added_at, late = !p.coordinator && waited > 7200;
+    const dec = p.coordinator ? `<span class="chip2 ${p.coordinator.decision}">${p.coordinator.decision === "approve" ? "Approved" : "Denied"}</span><div class="meta tiny">at ${clock(p.coordinator.at)}</div>` : `<span class="meta">To review</span>`;
+    return `<tr class="qrow" data-id="${p.id}" tabindex="0">
+      <td><b>${esc(packetName(p))}</b><div class="meta qline">${esc(p.profile_line || (p.state === "running" ? p.step : "") || "")}</div></td>
+      <td class="${late ? "late" : ""}">${p.coordinator ? "–" : ago(waited)}${late ? `<div class="tiny">past 2-hour target</div>` : ""}<div class="meta tiny">added ${clock(p.added_at)}</div></td>
+      <td>${p.seconds ? ago(p.seconds).replace(" min", " min").replace(/^0 min$/, "<1 min") : "–"}${p.pages ? `<div class="meta tiny">${p.pages} pages</div>` : ""}</td>
+      <td>${suggestionChip(p)}</td>
+      <td>${p.open_tasks ? `<span class="riskn">${p.open_tasks}</span>` : p.state === "done" ? `<span class="meta">None open</span>` : ""}</td>
+      <td>${dec}</td></tr>`;
+  };
+  const table = (rows) => `<table class="queue"><thead><tr><th>Referral</th><th>Waiting</th><th title="How long Fetch's last run on this referral took. A rerun reuses pages it already read, so it is shorter.">Last Fetch run</th><th>Fetch suggests</th><th>Open risks</th><th>Decision</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
+  $("main").innerHTML = `${dashboardHTML()}
+    <div class="qhead"><h2>Queue <span class="count">${open.length}</span></h2><button class="btn" id="add">Add a referral…</button></div>
+    <div class="dropline" id="drop">Drop a fax PDF or photo anywhere here to add it to the queue.</div>
+    ${open.length ? table(open) : `<div class="card meta">Nothing waiting. New referrals appear here when you add them.</div>`}
+    ${done.length ? `<h3>Decided <span class="count">${done.length}</span></h3>${table(done)}` : ""}
+    <p class="meta">"Waiting" counts from when the referral was added to Fetch; the fax's own date and time are blacked out. "Last Fetch run" is how long Fetch's most recent check took; reruns reuse pages already read, so they're shorter than a first read.</p>`;
+  wireDashboard();
+  $("add").onclick = () => $("file").click();
+  document.querySelectorAll(".qrow").forEach((r) => { r.onclick = () => select(r.dataset.id); r.onkeydown = (e) => { if (e.key === "Enter") select(r.dataset.id); }; });
+  const drop = $("main");
+  drop.ondragover = (e) => { e.preventDefault(); $("drop").classList.add("over"); };
+  drop.ondragleave = () => $("drop").classList.remove("over");
+  drop.ondrop = (e) => { e.preventDefault(); $("drop").classList.remove("over"); if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]); };
+}
+
+// ---------- tasks
+function taskControls(t) {
+  if (!t) return "";
+  const owners = state.desk.owners.map((o) => `<option ${o === t.owner ? "selected" : ""}>${esc(o)}</option>`).join("");
+  return `<div class="taskbar">
+    <label class="meta">Who reviews <select class="owner" data-task="${esc(t.id)}">${owners}</select></label>
+    <button class="tick2 ${t.done ? "on" : ""}" data-task="${esc(t.id)}" aria-pressed="${t.done}">${t.done ? "✓ Done" : "Mark done"}</button>
+  </div>`;
+}
+function wireTasks(root) {
+  root.querySelectorAll("select.owner").forEach((s) => s.onchange = async (e) => {
+    e.stopPropagation();
+    await api("/api/task", { method: "POST", body: JSON.stringify({ id: s.dataset.task, owner: s.value }) });
+    await refresh();
+  });
+  root.querySelectorAll(".tick2").forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    await api("/api/task", { method: "POST", body: JSON.stringify({ id: b.dataset.task, done: !b.classList.contains("on") }) });
+    state.review = null; await refresh();
+    if (state.view === "packet") await renderPacket();
+  });
+}
+function renderTasks() {
+  const all = state.desk.tasks.filter((t) => !(state.packets.find((p) => p.id === t.packet_id) || {}).coordinator);
+  const sev = { problem: 0, coordinator_call: 1, arrange: 2, unchecked: 3, conflict: 4 };
+  const open = all.filter((t) => !t.done).sort((a, b) => sev[a.kind] - sev[b.kind] || a.packet_id.localeCompare(b.packet_id));
+  const groups = state.desk.owners.map((o) => [o, open.filter((t) => t.owner === o)]).filter(([, ts]) => ts.length);
+  const item = (t) => `<div class="task ${t.kind}">
+      <div class="head"><span class="tag ${t.kind}">${esc(t.kind_label)}</span><strong>${esc(t.title)}</strong>
+        <button class="linkbtn" data-open="${t.packet_id}">${esc(packetName({ id: t.packet_id, uploaded: t.packet_id.startsWith("U") }))} ›</button></div>
+      <p class="expl">${esc(t.detail)}</p>${taskControls(t)}</div>`;
+  $("main").innerHTML = `${dashboardHTML()}
+    <h2>Open tasks <span class="count">${open.length}</span></h2>
+    <p class="meta">Every risk Fetch flagged, with who should review it. Owners start from a suggested default by kind of rule; change them here. ${all.length - open.length} done.</p>
+    ${groups.length ? groups.map(([o, ts]) => `<h3>${esc(o)} <span class="count">${ts.length}</span></h3>${ts.map(item).join("")}`).join("") : `<div class="card meta">No open tasks.</div>`}`;
+  wireDashboard();
+  wireTasks($("main"));
+  document.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => select(b.dataset.open));
+}
+
 async function select(id) {
-  state.view = "packets"; state.selected = id; state.review = null;
+  state.view = "packet"; state.selected = id; state.review = null; state.profile = null;
   setTab();
   closeViewer();
-  renderList();
+  window.scrollTo(0, 0);
   await renderPacket();
 }
+function showQueue() { state.view = "queue"; state.selected = null; setTab(); closeViewer(); renderQueue(); window.scrollTo(0, 0); }
+function showTasks() { state.view = "tasks"; setTab(); closeViewer(); renderTasks(); window.scrollTo(0, 0); }
 
 async function startReview(id, fresh) {
   await api(`/api/review/${id}${fresh ? "?fresh=1" : ""}`, { method: "POST" });
@@ -274,7 +415,7 @@ async function renderPacket() {
   const p = state.packets.find((x) => x.id === state.selected);
   const main = $("main");
   if (!p) return;
-  const name = p.uploaded ? `Opened packet ${p.id.slice(1)}` : `Packet ${p.id}`;
+  const name = packetName(p);
   if (p.state === "new") {
     main.innerHTML = `<div class="empty"><h2>${name} hasn't been fetched</h2>
       <p>Fetch reads every page of the fax and checks it against IHH's admission rules. Each finding shows the page and the words it came from. It takes about three minutes.</p>
@@ -283,7 +424,7 @@ async function renderPacket() {
     return;
   }
   if (p.state === "running") {
-    main.innerHTML = progressHTML(name, p.step || "");
+    main.innerHTML = `<button class="backlink" onclick="showQueue()">‹ Queue</button>` + progressHTML(name, p.step || "");
     return;
   }
   if (p.state === "changed") {
@@ -300,7 +441,15 @@ async function renderPacket() {
     return;
   }
   if (!state.review || state.review.packet_id !== p.id) state.review = await api(`/api/review/${p.id}`);
-  main.innerHTML = reviewHTML(state.review, name);
+  if (!state.profile || state.profile.packet_id !== p.id) state.profile = await api(`/api/profile/${p.id}`).catch(() => null);
+  main.innerHTML = `<button class="backlink" id="back">‹ Queue</button>` + decisionBar(p) + profileHTML(state.profile) + reviewHTML(state.review, name);
+  $("back").onclick = showQueue;
+  wireTasks(main);
+  main.querySelectorAll("[data-decide]").forEach((b) => b.onclick = async () => {
+    const d = b.dataset.decide;
+    await api(`/api/decision/${p.id}`, { method: "POST", body: JSON.stringify({ decision: d === "clear" ? null : d }) });
+    await refresh(); await renderPacket();
+  });
   main.querySelectorAll(".pagebtn").forEach((b) => b.onclick = () => openViewer(+b.dataset.page, b.dataset.quote, b.dataset.box ? JSON.parse(b.dataset.box) : null));
   main.querySelectorAll(".tick").forEach((b) => b.onclick = () => {
     const r = state.review, ticks = loadTicks(r);
@@ -339,7 +488,16 @@ function quoteHTML(e) {
 }
 
 const TAG = { problem: "Rules them out", arrange: "Arrange first", coordinator_call: "Your call", conflict: "Pages disagree" };
-function findingHTML(f) {
+function taskFor(pid, f) {
+  if (!state.desk) return null;
+  const rv = state.review.review;
+  let key;
+  if (!f.status) key = `conflict:${rv.conflicts.indexOf(f)}`;
+  else if (["problem", "coordinator_call", "arrange"].includes(f.status)) key = `${f.status}:${f.rule_id}`;
+  else key = `unchecked:${f.rule_id}`;
+  return state.desk.tasks.find((t) => t.id === `${pid}:${key}`) || null;
+}
+function findingHTML(f, task) {
   const kind = f.status || "conflict";
   const tag = TAG[kind] ? `<span class="tag ${kind}">${TAG[kind]}</span>` : "";
   const rule = f.rule_id ? `<span class="rule">${esc(f.rule_id)}${f.known_rule ? "" : " (not an IHH rule ID)"}</span>` : "";
@@ -350,6 +508,7 @@ function findingHTML(f) {
     ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
     ${f.supported === false ? `<div class="unsupported">None of its quotes checked out. Treat this finding as unchecked.</div>` : ""}
     ${f.evidence.map(quoteHTML).join("")}
+    ${task ? taskControls(task) : ""}
   </div>`;
 }
 
@@ -401,6 +560,30 @@ function suggestionText(decision, lean) {
   return decision === "need_more_info" ? `${CALL[decision]}, leaning ${lean}` : CALL[decision];
 }
 
+function decisionBar(p) {
+  const c = p.coordinator;
+  if (c) return `<div class="decbar decided ${c.decision}"><b>${c.decision === "approve" ? "Approved" : "Denied"} by the coordinator</b> at ${clock(c.at)}
+    <button class="btn small" data-decide="clear">Undo</button></div>`;
+  return `<div class="decbar"><span><b>Your decision</b><span class="meta"> · Fetch suggests; you decide.</span></span>
+    <span class="decbtns"><button class="btn approve" data-decide="approve">Approve</button><button class="btn deny" data-decide="deny">Deny</button></span></div>`;
+}
+function factHTML(f) {
+  const ev = f.evidence[0];
+  const bad = f.checked === false;
+  return `<div class="fact"><div class="fl">${esc(f.label)}</div><div class="fv ${f.value === "Not in the fax" ? "missing" : ""}">${esc(f.value)}
+    ${bad ? `<span class="badge bad">Check by hand</span>` : ""}</div>
+    <div class="fp">${ev ? `<button class="pagebtn" data-page="${ev.page}" data-quote="${esc(ev.quote)}" data-box="${ev.box ? esc(JSON.stringify(ev.box)) : ""}">p. ${ev.page}</button>` : ""}</div></div>`;
+}
+function profileHTML(pr) {
+  if (!pr) return `<div class="card meta">The client profile isn't ready yet.</div>`;
+  const P = pr.profile;
+  return `<section class="profile">
+    <div class="ph"><div class="avatar" aria-hidden="true">${esc((P.one_line.match(/(\d+)/) || ["?"])[0])}</div>
+      <div><div class="label">Client profile · names and dates are blacked out in the fax</div><div class="oneline">${esc(P.one_line)}</div></div></div>
+    <div class="psections">${P.sections.map((sec) => `<div class="psec"><h4>${esc(sec.title)}</h4>${sec.facts.map(factHTML).join("")}</div>`).join("")}</div>
+  </section>`;
+}
+
 // "Before you say yes": what must be arranged (with its page) and what to ask the hospital for.
 // Ticks are kept in this browser only, per packet.
 function todoKey(r) { return `fetch-todo-${r.packet_id}-${(r.sha256 || "").slice(0, 12)}`; }
@@ -445,7 +628,7 @@ function reviewHTML(r, name) {
   <section class="flagged">
     <div class="flagged-head"><span class="flag-count">${flaggedItems.length}</span><div><h2>Flagged for the coordinator</h2>
       <div class="meta">${flaggedItems.length ? "What rules the patient out, what needs your judgment, what must be arranged first, where the pages disagree, and anything Fetch couldn't confirm." : "Nothing rules the patient out, needs your judgment or failed a check."}</div></div></div>
-    ${flaggedItems.map(findingHTML).join("")}
+    ${flaggedItems.map((f) => findingHTML(f, taskFor(r.packet_id, f))).join("")}
   </section>
   ${todoHTML(r)}
   ${groupsHTML(rv.findings)}
@@ -545,11 +728,13 @@ async function renderScore(quiet) {
 }
 
 function setTab() {
-  $("tab-packets").setAttribute("aria-pressed", state.view === "packets");
+  $("tab-queue").setAttribute("aria-pressed", state.view === "queue" || state.view === "packet");
+  $("tab-tasks").setAttribute("aria-pressed", state.view === "tasks");
   $("tab-score").setAttribute("aria-pressed", state.view === "score");
 }
-$("tab-packets").onclick = () => { if (state.selected) select(state.selected); else { state.view = "packets"; setTab(); renderList(); showWelcome(); } };
-$("tab-score").onclick = async () => { state.view = "score"; setTab(); closeViewer(); renderList(); await renderScore(); };
+$("tab-queue").onclick = showQueue;
+$("tab-tasks").onclick = showTasks;
+$("tab-score").onclick = async () => { state.view = "score"; setTab(); closeViewer(); await renderScore(); };
 
 $("file").onchange = () => { if ($("file").files[0]) uploadFile($("file").files[0]); };
 async function uploadFile(f) {
@@ -558,6 +743,7 @@ async function uploadFile(f) {
     $("file").value = "";
     await refresh();
     await select(p.id);
+    await refresh();
   } catch (e) { alert(e.message); }
 }
 
@@ -599,7 +785,6 @@ function showWelcome() {
   drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]); };
 }
 
-showWelcome();
 refresh();
 </script>
 </body>

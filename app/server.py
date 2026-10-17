@@ -17,6 +17,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from common import DECISIONS, PACKETS, UPLOADS, WORK, fingerprint, load_env, packet_path, protect  # noqa: E402
 from review import review_packet  # noqa: E402
+import desk  # noqa: E402
+from profile import build_profile  # noqa: E402
 
 STATIC = Path(__file__).parent / "static"
 PORT = 8811
@@ -93,6 +95,7 @@ def start(packet_id, fresh=False):
             with SLOTS:
                 step("Starting")
                 review_packet(packet_id, progress=step, fresh=fresh)
+                build_profile(packet_id, progress=step)
             with LOCK:
                 JOBS.pop(packet_id, None)
         except Exception as exc:  # shown to the coordinator as the reason the review stopped
@@ -131,6 +134,39 @@ def page_count(pdf):
     out = subprocess.run(["pdfinfo", str(pdf)], capture_output=True, text=True).stdout
     m = re.search(r"^Pages:\s+(\d+)", out, re.M)
     return int(m.group(1)) if m else 0
+
+
+def queue():
+    """Every packet as a row of the coordinator's worklist, plus the dashboard counts."""
+    d = desk.snapshot()
+    rows, tasks = [], []
+    for pid in packet_ids():
+        item = summary(pid)
+        item["added_at"] = desk.added_at(pid)
+        item["coordinator"] = d["decisions"].get(pid)
+        if item["state"] == "done":
+            r = json.loads((WORK / pid / "review.json").read_text())
+            t = desk.tasks_for(pid, r)
+            tasks += t
+            item["open_tasks"] = sum(not x["done"] for x in t)
+            item["profile_line"] = None
+            pf = WORK / pid / "profile.json"
+            if pf.exists():
+                prof = json.loads(pf.read_text())
+                if prof.get("sha256") == r.get("sha256"):
+                    item["profile_line"] = prof["profile"]["one_line"]
+        rows.append(item)
+    undecided = [x for x in rows if not x["coordinator"]]
+    lean = lambda x: call_of(x["decision"], x["lean"])
+    counts = {
+        "to_review": len(undecided),
+        "suggest_approve": sum(x["state"] == "done" and lean(x) == "approve" for x in undecided),
+        "suggest_deny": sum(x["state"] == "done" and lean(x) == "deny" for x in undecided),
+        "to_look_at": sum(x.get("open_tasks", 0) > 0 for x in undecided),
+        "approved": sum((x["coordinator"] or {}).get("decision") == "approve" for x in rows),
+        "denied": sum((x["coordinator"] or {}).get("decision") == "deny" for x in rows),
+    }
+    return {"rows": rows, "tasks": tasks, "counts": counts, "beds": d["beds"], "owners": desk.OWNERS, "now": time.time()}
 
 
 def score():
@@ -207,6 +243,17 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, (STATIC / "index.html").read_bytes(), "text/html; charset=utf-8")
         if path == "/api/packets":
             return self.send(200, {"packets": [summary(p) for p in packet_ids()]})
+        if path == "/api/queue":
+            return self.send(200, queue())
+        m = re.match(r"^/api/profile/([RU]\d{2})$", path)
+        if m:
+            f = WORK / m.group(1) / "profile.json"
+            if not f.exists():
+                return self.send(404, {"error": "No profile yet"})
+            prof = json.loads(f.read_text())
+            if prof.get("sha256") != fingerprint(m.group(1)):
+                return self.send(409, {"error": "The file changed after the profile was built."})
+            return self.send(200, prof)
         if path == "/api/score":
             return self.send(200, score())
         m = re.match(r"^/api/review/([RU]\d{2})$", path)
@@ -234,8 +281,26 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(404, {"error": "No such page"})
         self.send(404, {"error": "Not found"})
 
+    def body(self):
+        length = int(self.headers.get("Content-Length", 0))
+        return json.loads(self.rfile.read(length) or b"{}")
+
     def do_POST(self):
         path = self.path.split("?")[0]
+        try:
+            m = re.match(r"^/api/decision/([RU]\d{2})$", path)
+            if m:
+                desk.set_decision(m.group(1), self.body().get("decision"))
+                return self.send(200, {"ok": True})
+            if path == "/api/task":
+                b = self.body()
+                desk.set_task(b["id"], owner=b.get("owner"), done=b.get("done"))
+                return self.send(200, {"ok": True})
+            if path == "/api/beds":
+                desk.set_beds(self.body().get("count"))
+                return self.send(200, {"ok": True})
+        except (ValueError, KeyError) as exc:
+            return self.send(400, {"error": str(exc)})
         m = re.match(r"^/api/review/([RU]\d{2})$", path)
         if m:
             pid = m.group(1)
