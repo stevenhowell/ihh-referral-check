@@ -74,6 +74,12 @@ Rules:
 - If the packet doesn't say, the value is "Not in the fax" with no evidence. Never guess.
 - If two pages disagree, say so in the value ("Form says no wounds; nurse's note describes a leg wound") and quote both.
 - Each quote is copied character for character from the cited page's transcript, 4 to 25 words. It will be checked automatically.
+- Use the chart's own words; never turn a suspected or past condition into a confirmed current one.
+- A blacked-out field is unknown, never "none".
+- Orientation: give the exact count (x2, x3, x4). "Alert and oriented" with no count is "Not stated".
+- Describe how they are now, not their function before this stay.
+- If only the IHH referral form says something, start the value with "Referral form says:".
+- List every pain medicine and IV medicine you find, not only the first.
 - Never write a name, a date, a phone number, an address or a record number, even if one appears. Ages are fine; write 90 or older as "90 or older".
 - one_line: one sentence a coordinator could say out loud, e.g. "62-year-old man, unhoused, recovering from a leg infection on IV antibiotics."
 """
@@ -106,9 +112,12 @@ def build_profile(packet_id, progress=lambda text: None):
         for ev in f["evidence"]:
             ev.update(check_quote(ev, page_words) if ev["page"] in page_words else {"check": "not_found"})
     image_check(packet_id, {"findings": facts, "conflicts": []})
+    kinds = {p["page"]: p["kind"] for p in read["pages"]}
     for f in facts:
         good = [e for e in f["evidence"] if e["check"] in ("on_page", "close") and e.get("image_check", "yes") == "yes"]
         f["checked"] = bool(good) if f["evidence"] else None
+        # The referral form is one person's summary; say so when it is the only source.
+        f["form_only"] = bool(good) and all(kinds.get(e["page"]) == "ihh_referral_form" for e in good)
 
     result = {"packet_id": packet_id, "sha256": read["sha256"], "profile": profile,
               "seconds": round(time.time() - started), "built_at": time.strftime("%Y-%m-%d %H:%M")}

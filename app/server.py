@@ -188,7 +188,30 @@ def score():
             row["before"] = {"decision": b["decision"], "lean": b["lean_if_forced"],
                              "match": call_of(b["decision"], b["lean_if_forced"]) == truth[pid]}
         rows.append(row)
-    return {"rows": rows, "denials": denial_reasons(truth)}
+    return {"rows": rows, "denials": denial_reasons(truth), "audit": audit_summary()}
+
+
+def audit_summary():
+    """Totals from the independent audits in work/audit: each one re-read the fax and graded Fetch's claims."""
+    files = sorted((WORK / "audit").glob("R*.json"))
+    if not files:
+        return None
+    rows, tot, types = [], {"correct": 0, "partly": 0, "wrong": 0, "unverifiable": 0}, {}
+    for f in files:
+        a = json.loads(f.read_text())
+        v = {k: sum(c["verdict"] == k for c in a["claims"]) for k in tot}
+        for k in tot:
+            tot[k] += v[k]
+        terr = 0
+        for page in a["transcript_spotcheck"]:
+            for e in page.get("errors", []):
+                types[e["type"]] = types.get(e["type"], 0) + 1
+                terr += 1
+        rows.append({"id": a["packet"], "claims": len(a["claims"]), **v, "transcript_errors": terr,
+                     "missed_high": sum(m["severity"] == "high" for m in a["missed"]),
+                     "summary": a.get("summary", "")})
+    return {"rows": rows, "totals": tot, "transcript_types": types,
+            "graded": "the version before the accuracy fixes (v2)"}
 
 
 def call_of(decision, lean):
@@ -263,7 +286,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(404, {"error": "Not reviewed yet"})
             if not matches_file(m.group(1)):
                 return self.send(409, {"error": "This file changed after it was reviewed, so the review isn't shown."})
-            return self.send(200, json.loads(f.read_text()))
+            result = json.loads(f.read_text())
+            clear = WORK / "redaction-clearances.json"
+            if clear.exists():
+                result["cleared"] = json.loads(clear.read_text()).get(m.group(1), {})
+            return self.send(200, result)
         m = re.match(r"^/api/transcript/([RU]\d{2})/(\d+)$", path)
         if m:
             f = WORK / m.group(1) / "pages.json"

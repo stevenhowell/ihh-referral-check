@@ -171,3 +171,83 @@ def read_packet(packet_id, progress=lambda text: None):
     result = {"packet_id": packet_id, "sha256": sha, "page_count": total, "pages": pages, "usage": usage}
     cache.write_text(json.dumps(result, indent=1))
     return result
+
+
+# ------------------------------------------------------------ sideways pages
+
+TURN_SCHEMA = {
+    "type": "object",
+    "properties": {"clockwise": {"type": "integer", "enum": [0, 90, 180, 270]}},
+    "required": ["clockwise"],
+    "additionalProperties": False,
+}
+
+
+def _turn_needed(client, image):
+    """How far this page must turn clockwise to read upright."""
+    with client.messages.stream(
+        model=MODEL, max_tokens=4000, thinking={"type": "adaptive"},
+        output_config={"effort": "low", "format": {"type": "json_schema", "schema": TURN_SCHEMA}},
+        messages=[{"role": "user", "content": [
+            {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
+                                         "data": base64.standard_b64encode(_upload_bytes(image)).decode()}},
+            {"type": "text", "text": "How many degrees must this scanned page be rotated clockwise so its main text reads normally, left to right and top to bottom? Answer 0, 90, 180 or 270."},
+        ]}],
+    ) as stream:
+        message = stream.get_final_message()
+    return json.loads(next(b.text for b in message.content if b.type == "text"))["clockwise"]
+
+
+def reread_sideways(packet_id, progress=lambda text: None):
+    """Turn sideways or upside-down pages upright at a higher resolution and read them again.
+
+    Sideways tables are where reading mistakes concentrate. The upright image replaces the
+    page image too, so the viewer and the highlight boxes match what was read.
+    """
+    cache = packet_dir(packet_id) / "pages.json"
+    read = read_packet(packet_id)
+    todo = [p for p in read["pages"] if p["rotated"] and "upright" not in p]
+    if not todo:
+        return read
+    client = anthropic.Anthropic(max_retries=8, timeout=anthropic.Timeout(600, connect=30))
+    pages_dir = packet_dir(packet_id) / "pages"
+    for i, p in enumerate(todo, 1):
+        progress(f"Turning sideways pages upright: {i} of {len(todo)}")
+        n = p["page"]
+        png = pages_dir / f"p-{n:02d}.png"
+        turn = _turn_needed(client, png)
+        if turn:
+            hi = pages_dir / f"hi-{n:02d}"
+            subprocess.run(["pdftoppm", "-r", "200", "-f", str(n), "-l", str(n), "-png", "-singlefile",
+                            str(packet_path(packet_id)), str(hi)], check=True)
+            hi_png = hi.with_suffix(".png")
+            subprocess.run(["sips", "-r", str(turn), str(hi_png)], check=True, capture_output=True)
+            hi_png.replace(png)
+            png.with_suffix(".jpg").unlink(missing_ok=True)
+        pages, _ = _read_batch_upright(client, png, n, read["page_count"])
+        new = pages[0]
+        new["rotated"] = True
+        new["upright"] = turn
+        read["pages"][n - 1] = new
+        cache.write_text(json.dumps(read, indent=1))
+    return read
+
+
+def _read_batch_upright(client, image, number, total):
+    """Read one page without touching the saved batch files from the first reading."""
+    content = [{"type": "text", "text": f"Page {number} of {total}:"},
+               {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
+                                            "data": base64.standard_b64encode(_upload_bytes(image)).decode()}},
+               {"type": "text", "text": f"Transcribe page {number}. It has been turned upright. Copy every number exactly; mark anything you can't read [illegible]."}]
+    with client.messages.stream(
+        model=MODEL, max_tokens=32000, system=READ_SYSTEM, thinking={"type": "adaptive"},
+        output_config={"effort": "medium", "format": {"type": "json_schema", "schema": READ_SCHEMA}},
+        messages=[{"role": "user", "content": content}],
+    ) as stream:
+        message = stream.get_final_message()
+    pages = json.loads(next(b.text for b in message.content if b.type == "text"))["pages"]
+    page = next((x for x in pages if x["page"] == number), pages[0] if pages else None)
+    if not page:
+        raise RuntimeError(f"Page {number} could not be read upright.")
+    page["page"] = number
+    return [page], message.usage

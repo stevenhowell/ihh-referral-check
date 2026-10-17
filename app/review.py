@@ -21,7 +21,7 @@ from difflib import SequenceMatcher
 import anthropic
 
 from common import MODEL, criteria_prompt, fingerprint, packet_dir, rule_index
-from read_pages import _upload_bytes, read_packet
+from read_pages import _upload_bytes, read_packet, reread_sideways
 
 STATUSES = ["ok", "problem", "arrange", "coordinator_call", "cant_tell", "missing"]
 
@@ -81,10 +81,9 @@ REVIEW_SCHEMA = {
         },
         "arrange_first": {"type": "array", "items": {"type": "string"}},
         "ask_hospital": {"type": "array", "items": {"type": "string"}},
-        "reply_draft": {"type": "string"},
     },
     "required": ["summary", "reason_for_hospital_stay", "findings", "conflicts", "suggestion",
-                 "arrange_first", "ask_hospital", "reply_draft"],
+                 "arrange_first", "ask_hospital"],
     "additionalProperties": False,
 }
 
@@ -106,6 +105,14 @@ Which rules to report
 - Every rule of kind must or exclude in the main rule list (ADL, MOB, MH, COG, OTH, INF and the rest), and every DOC item in the referral checklist.
 - Every rule for a specific condition, treatment or device this patient has (for example the diabetes rules for a diabetic, IV rules for a patient with a PICC line, wound rules for a wound, cardiac rules after a heart procedure).
 - Skip rules that plainly do not apply to this patient. Do not report FORM rules that a main-list rule already covers.
+
+Accuracy rules (these come from checking earlier reviews against the fax)
+- Use the chart's own diagnosis words. Never turn a suspected, possible, rule-out or historical condition into a confirmed current one.
+- A blacked-out field is unknown. Never conclude something is absent, or that a list is complete, because a value is blacked out.
+- Orientation: give the exact count the chart states (x1, x2, x3, x4). Only x4 meets the orientation rule. "Alert and oriented" with no count is cant_tell.
+- How the patient managed before this stay ("prior level of function") is not how they are now. Judge ADL and mobility rules on current notes.
+- Copy numbers exactly. If a number on a sideways or faint page is unclear, say so instead of picking one.
+- If a rule doesn't apply to this patient, leave it out rather than marking it ok.
 
 Statuses
 - ok: the packet shows the rule is met. For a document item: the document is in the packet.
@@ -135,7 +142,7 @@ arrange_first: what the hospital must set up before admission (from the arrange 
 
 ask_hospital: short items the coordinator would request from the hospital case manager. Empty if nothing is needed.
 
-reply_draft: a short message from the coordinator to the hospital case manager, 120 words at most. Refer to "the patient", never a name. Match the suggestion: for approve, say what is still needed before transport; for approve_once_arranged, say the patient can be accepted once the listed items are arranged; for deny, a brief reason as IHH's form promises; for need_more_info, the list of what to send. It is a draft the coordinator will edit and send themselves."""
+"""
 
 
 def _client():
@@ -264,6 +271,7 @@ def check_review(review, read):
             ev.update(check_quote(ev, page_words))
             counts[ev["check"]] += 1
     kinds = {p["page"]: p["kind"] for p in read["pages"]}
+    timing_guard(review)
     for f in review["findings"]:
         good = [e for e in f["evidence"] if e["check"] in ("on_page", "close")]
         f["supported"] = bool(good) or f["status"] in ("cant_tell", "missing")
@@ -271,6 +279,29 @@ def check_review(review, read):
         f["form_only"] = (f["status"] == "ok" and not f["rule_id"].startswith("DOC") and bool(good)
                           and all(kinds.get(e["page"]) == "ihh_referral_form" for e in good))
     return counts
+
+
+# Explanations that admit the fax can't settle it. A pass or fail that says this about itself
+# is not a pass or a fail.
+UNSETTLED = re.compile(r"(cannot|can't|could not|couldn't|unable to|not possible to)\s+(be\s+)?(confirm|check|verif|tell|determin)"
+                       r"|dates?\s+(were\s+|are\s+)?(removed|redacted|blacked)|timing\s+\w*\s*(is\s+)?(unknown|unclear)", re.I)
+# Document rules defined by a time window can only pass if the page itself shows the window.
+WINDOW_DOCS = {"DOC-6": re.compile(r"\b24\b")}
+
+
+def timing_guard(review):
+    """The fax's dates are blacked out, so rules that turn on timing must stay can't-tell."""
+    for f in review["findings"]:
+        if f["status"] not in ("ok", "problem"):
+            continue
+        reason = None
+        if UNSETTLED.search(f["explanation"]):
+            reason = "Fetch's own explanation says the fax can't settle this, so it can't pass or fail."
+        elif f["rule_id"] in WINDOW_DOCS and not any(WINDOW_DOCS[f["rule_id"]].search(e["quote"]) for e in f["evidence"]):
+            reason = "This rule turns on a time window, and nothing quoted shows it. The fax's dates are blacked out."
+        if reason:
+            f["guard"] = {"was": f["status"], "reason": reason}
+            f["status"] = "cant_tell"
 
 
 # ------------------------------------------------------------ image check
@@ -394,6 +425,7 @@ def review_packet(packet_id, progress=lambda text: None, fresh=False):
         shown(text)
 
     read = read_packet(packet_id, progress)
+    read = reread_sideways(packet_id, progress)
     progress(f"Checking {read['page_count']} page{'' if read['page_count'] == 1 else 's'} against IHH's rules")
     review, usage, review_seconds = ask_claude(read)
     progress("Checking every quote against its page")

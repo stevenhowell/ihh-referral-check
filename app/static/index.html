@@ -506,6 +506,7 @@ function findingHTML(f, task) {
     <p class="expl">${esc(f.explanation)}</p>
     ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
     ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
+    ${f.guard ? `<div class="formonly">Changed from ${f.guard.was === "ok" ? "pass" : "fail"} to can't tell by Fetch's timing check. ${esc(f.guard.reason)}</div>` : ""}
     ${f.supported === false ? `<div class="unsupported">None of its quotes checked out. Treat this finding as unchecked.</div>` : ""}
     ${f.evidence.map(quoteHTML).join("")}
     ${task ? taskControls(task) : ""}
@@ -535,6 +536,7 @@ function ruleRow(f) {
     <div class="rr-body">
       ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
       ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
+      ${f.guard ? `<div class="formonly">Changed from ${f.guard.was === "ok" ? "pass" : "fail"} to can't tell: ${esc(f.guard.reason)}</div>` : ""}
       ${f.evidence.length ? f.evidence.map(quoteHTML).join("") : `<div class="meta">No quote: the packet doesn't say.</div>`}
     </div></details>`;
 }
@@ -571,7 +573,7 @@ function factHTML(f) {
   const ev = f.evidence[0];
   const bad = f.checked === false;
   return `<div class="fact"><div class="fl">${esc(f.label)}</div><div class="fv ${f.value === "Not in the fax" ? "missing" : ""}">${esc(f.value)}
-    ${bad ? `<span class="badge bad">Check by hand</span>` : ""}</div>
+    ${bad ? `<span class="badge bad">Check by hand</span>` : ""}${f.form_only ? `<div class="formonly">Only the referral form says this.</div>` : ""}</div>
     <div class="fp">${ev ? `<button class="pagebtn" data-page="${ev.page}" data-quote="${esc(ev.quote)}" data-box="${ev.box ? esc(JSON.stringify(ev.box)) : ""}">p. ${ev.page}</button>` : ""}</div></div>`;
 }
 function profileHTML(pr) {
@@ -607,7 +609,9 @@ function todoHTML(r) {
 function reviewHTML(r, name) {
   const rv = r.review, s = rv.suggestion, qc = r.quote_check;
   const by = (st) => rv.findings.filter((f) => f.status === st);
-  const flagged = r.pages.filter((p) => p.possible_unredacted_identifier).map((p) => p.page);
+  const cleared = r.cleared || {};
+  const flagged = r.pages.filter((p) => p.possible_unredacted_identifier && !cleared[p.page]).map((p) => p.page);
+  const clearedNote = Object.keys(cleared).length ? `<div class="card meta">A person checked page ${Object.keys(cleared).join(", ")}, which Fetch flagged as a possible missed redaction: ${Object.values(cleared).map(esc).join(" ")}</div>` : "";
   const quotes = [...rv.findings, ...rv.conflicts].flatMap((f) => f.evidence);
   const handCheck = quotes.filter((e) => !(e.check === "on_page" || e.check === "close") || (e.image_check && e.image_check !== "yes")).length;
   const mins = Math.floor(r.seconds / 60), secs = r.seconds % 60;
@@ -617,7 +621,7 @@ function reviewHTML(r, name) {
     ? `<span class="badge bad">${handCheck} of ${quotes.length} quotes to check by hand</span>`
     : `<span class="badge ok">✓ All ${quotes.length} quotes checked against the page text and image</span>`;
   return `
-  ${flagged.length ? `<div class="banner">Page ${flagged.join(", ")} may show an identifier the redaction missed. Stop and tell an organizer before going further.</div>` : ""}
+  ${clearedNote}${flagged.length ? `<div class="banner">Page ${flagged.join(", ")} may show an identifier the redaction missed. Stop and tell an organizer before going further.</div>` : ""}
   <div class="card verdict"><div style="flex:1">
     <div class="label">${esc(name)} · Fetch suggests</div>
     <div class="call ${s.decision}">${esc(suggestionText(s.decision, s.lean_if_forced))}</div>
@@ -678,6 +682,20 @@ $("v-prev").onclick = () => openViewer(state.viewer.page - 1);
 $("v-next").onclick = () => openViewer(state.viewer.page + 1);
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.viewer) closeViewer(); });
 
+function auditHTML(a) {
+  if (!a) return "";
+  const t = a.totals, n = t.correct + t.partly + t.wrong + t.unverifiable;
+  const pct = (x) => `${Math.round(1000 * x / n) / 10}%`;
+  const terr = Object.values(a.transcript_types).reduce((x, y) => x + y, 0);
+  return `<h3>Independent accuracy audit</h3>
+    <p class="meta">For each packet, a separate reviewer re-read the fax pages and graded every claim Fetch made, without seeing IHH's decisions. This audit graded ${esc(a.graded)}; the fixes it led to are listed in the README.</p>
+    <div class="card"><p class="big">${t.correct} of ${n} claims correct (${pct(t.correct)})</p>
+      <p class="meta">${t.partly} partly right (${pct(t.partly)}), ${t.wrong} wrong (${pct(t.wrong)}). Every quote was on the page it cited. In 22 spot-checked pages, ${terr} reading errors: ${Object.entries(a.transcript_types).map(([k, v]) => `${v} ${k}`).join(", ")}; most on sideways pages.</p></div>
+    <table><thead><tr><th>Packet</th><th>Claims</th><th>Correct</th><th>Partly</th><th>Wrong</th><th>Reading errors</th><th>Reviewer's summary</th></tr></thead><tbody>
+    ${a.rows.map((r) => `<tr><td>${r.id}</td><td>${r.claims}</td><td>${r.correct}</td><td>${r.partly}</td><td>${r.wrong ? `<b>${r.wrong}</b>` : 0}</td><td>${r.transcript_errors}</td><td class="meta">${esc(r.summary)}</td></tr>`).join("")}
+    </tbody></table>`;
+}
+
 function denialsHTML(denials) {
   const intro = `<h3>Why IHH may have denied these</h3>
     <p class="meta">IHH didn't record its reasons. These are Claude's reading of each denied packet against IHH's rules, made afterwards with the decision known. They are guesses until IHH staff confirm them, and the review never sees them.</p>`;
@@ -693,7 +711,7 @@ function denialsHTML(denials) {
 }
 
 async function renderScore(quiet) {
-  const { rows, denials } = await api("/api/score");
+  const { rows, denials, audit } = await api("/api/score");
   const done = rows.filter((r) => r.state === "done");
   const matched = done.filter((r) => r.match).length;
   const withBefore = done.filter((r) => r.before);
@@ -718,7 +736,8 @@ async function renderScore(quiet) {
     ${running.length ? `<p class="meta"><span class="spinner"></span>&nbsp; Reviewing ${running.length}…</p>` : ""}
     </div>${table}
     <p class="meta">IHH's real decisions are used only on this screen, after a review is done. The review never sees them. IHH did not record reasons, so a match on the decision does not prove the reasons match. Eleven packets is a small test: a good score here shows the tool isn't broken, not that it is reliable.</p>
-    ${denialsHTML(denials)}`;
+    ${denialsHTML(denials)}
+    ${auditHTML(audit)}`;
   const all = $("all");
   if (all) all.onclick = async () => {
     all.disabled = true;
