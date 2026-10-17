@@ -289,10 +289,26 @@ UNSETTLED = re.compile(r"(cannot|can't|could not|couldn't|unable to|not possible
 WINDOW_DOCS = {"DOC-6": re.compile(r"\b24\b")}
 
 
+def _timed_rules():
+    """Rules whose own text turns on a time window (hours, 'within', 'last 24 hours')."""
+    window = re.compile(r"\b\d+\s*hours?\b|\bwithin\s+\d+|\blast\s+\d+|less than \d+", re.I)
+    return {rid for rid, r in rule_index().items() if window.search(r["text"])}
+
+
+TIMED = _timed_rules()
+
+
 def timing_guard(review):
-    """The fax's dates are blacked out, so rules that turn on timing must stay can't-tell."""
+    """The fax's dates are blacked out, so rules that turn on timing must stay can't-tell.
+
+    Only rules defined by a time window are affected. A value that doesn't depend on when
+    it was taken (an ejection fraction, a diagnosis) is judged on the value.
+    """
     for f in review["findings"]:
-        if f["status"] not in ("ok", "problem"):
+        if f.get("guard"):  # re-applying: start from what the review said
+            f["status"] = f["guard"]["was"]
+            del f["guard"]
+        if f["status"] not in ("ok", "problem") or f["rule_id"] not in TIMED:
             continue
         reason = None
         if UNSETTLED.search(f["explanation"]):
