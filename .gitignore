@@ -1,0 +1,29 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# never commit identifiable records
+real-data/
+private/
+
+# tooling
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+.next/
+.DS_Store
+
+# IHH unredacted original packets never commit
+packets-real/
+originals/
+
+# de-identified packets are hosted on Google Drive, not in git
+challenges/1-referral-intake/packets/*
+!challenges/1-referral-intake/packets/README.md
+*.zip
+**/R[0-9][0-9].pdf

@@ -1,0 +1,1642 @@
+{
+  "generated": "2026-10-13",
+  "disclaimer": "Seed data for a hackathon, not a directory to rely on. Every entry was read from a public web page on 2026-10-13 and may already be wrong: hours, phone numbers, operators and eligibility change often, and conflicts between sources are recorded in the notes. Re-verify each entry with the organization before giving it to anyone. Many shelters are referral-only, so do not send people to a shelter address without a referral. Street addresses of survivor-serving and confidential-location programs are intentionally omitted. Listing here is not an endorsement. This file contains no non-public information about Illumination Health + Home or its clients.",
+  "resources": [
+    {
+      "id": "211-orange-county",
+      "name": "211 Orange County (211OC) helpline",
+      "organization": "Orange County United Way",
+      "category": "other",
+      "tags": [
+        "information-referral",
+        "helpline",
+        "24-7",
+        "multilingual",
+        "coordinated-entry",
+        "text-line"
+      ],
+      "description": "Free, confidential 24/7 helpline and online directory that connects people in Orange County to local health and human services. Calling 2-1-1 is also the County's stated way to reach a Coordinated Entry access point.",
+      "services": [
+        "Information and referral by phone",
+        "Text line (text your ZIP code to 898-211)",
+        "Online resource directory",
+        "Connection to Coordinated Entry System access points"
+      ],
+      "eligibility": "Free and available to every resident and visitor in Orange County.",
+      "population": [
+        "anyone"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "2-1-1 or 888-600-4357 (toll-free)",
+      "address": null,
+      "city": null,
+      "hours": "Phone 24/7. Text line Monday through Friday, 9am – 5pm.",
+      "languages": [
+        "English",
+        "Spanish",
+        "Korean",
+        "Vietnamese",
+        "200+ more through translation services"
+      ],
+      "cost": "Free",
+      "website": "https://211oc.org/",
+      "source_url": "https://211oc.org/frequently-asked-questions/",
+      "source_quote": "Callers seeking assistance can dial 2-1-1 or 888-600-4357 (toll-free) 24/7 and be connected to trained Information and Referral (I&R) specialists.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Text-line hours are from the 211OC home page. The OC HMIS site (https://ochmis.org/) shows a different number for the same referral service, 949-646-4357. Some phones cannot dial 2-1-1; the FAQ says to use the toll-free number instead."
+    },
+    {
+      "id": "oc-coordinated-entry-system",
+      "name": "Orange County Coordinated Entry System (CES)",
+      "organization": "County of Orange, Office of Care Coordination",
+      "category": "housing-navigation",
+      "tags": [
+        "coordinated-entry",
+        "access-point",
+        "rapid-rehousing",
+        "housing-choice-voucher",
+        "permanent-supportive-housing",
+        "not-a-waitlist"
+      ],
+      "description": "Countywide process that assesses people who are homeless or at risk and prioritizes the most vulnerable for limited housing such as Rapid Rehousing, Housing Choice Vouchers and Permanent Supportive Housing. People enter through a CES Access Point; it is not a waitlist.",
+      "services": [
+        "Housing needs assessment at an Access Point",
+        "Placement on a Community Queue (separate queues for individuals, families and survivors)",
+        "Referrals to Rapid Rehousing, Housing Choice Vouchers and Permanent Supportive Housing",
+        "Shelter Bed Reservation System referrals"
+      ],
+      "eligibility": "People at risk of or experiencing homelessness in Orange County. Time waiting does not affect priority. Some Access Points serve only specific subpopulations.",
+      "population": [
+        "adults",
+        "families",
+        "veterans",
+        "youth 18-24",
+        "survivors of domestic violence"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "2-1-1",
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://ceo.oc.gov/care-coordination/homeless-services/coordinated-entry-system-ces",
+      "source_url": "https://ceo.oc.gov/care-coordination/homeless-services/coordinated-entry-system-ces",
+      "source_quote": "To access CES, you can connect with a CES Access Point.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Ways in, per the County: ask your current homeless service provider whether it is an Access Point, or call 2-1-1. The County's Get Help page (https://ceo.oc.gov/office-care-coordination/get-help) also lists the Office of Care Coordination at (714) 834-5000. The County's own Access Point list is behind a login (egovoc.com CES Academy); 211OC's public directory (https://211oc.org/providers/?category=Housing&term=Housing+Related+Coordinated+Entry) returned 32 Access Point records, several limited to people with ties to one city. PATH states it became CES Administrator for the County on July 1, 2026. Veterans can also call the VA CRRC (separate entry)."
+    },
+    {
+      "id": "family-coordinated-entry",
+      "name": "Family Coordinated Entry (families with minor children) via 2-1-1",
+      "organization": "Family Solutions Collaborative (part of United to End Homelessness, Orange County United Way)",
+      "category": "housing-navigation",
+      "tags": [
+        "families",
+        "coordinated-entry",
+        "family-shelter",
+        "prevention",
+        "diversion"
+      ],
+      "description": "Entry point for families with children who are homeless or at risk: call 2-1-1 to be connected to a Family Access Point offering prevention, diversion and housing navigation, and to the family shelter bed reservation system.",
+      "services": [
+        "Connection to Family Access Points",
+        "Prevention and diversion",
+        "Housing navigation",
+        "Family emergency shelter and transitional housing referrals"
+      ],
+      "eligibility": "Households with a child under 18, a pregnant person, and/or working on being reunited with minor children (County CES wording).",
+      "population": [
+        "families",
+        "pregnant people"
+      ],
+      "how_to_access": "phone",
+      "referral_required": false,
+      "phone": "2-1-1",
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://familysolutionscollaborative.org/",
+      "source_url": "https://familysolutionscollaborative.org/help/",
+      "source_quote": "simply dial 2-1-1 or search for local health and human services resources through 211 Orange County",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "The online Family Service Request Form is closed ('we are no longer accepting requests through this form'), although the FSC home page and the County pocket guide still point to it. Family Access Points by region are listed at https://familysolutionscollaborative.org/access-points/. The County says the family bed reservation system refers to 65 emergency shelter and 13 transitional housing family units as openings occur."
+    },
+    {
+      "id": "yale-navigation-center",
+      "name": "Yale Navigation Center",
+      "organization": "PATH (People Assisting the Homeless), under contract with the County of Orange",
+      "category": "shelter",
+      "tags": [
+        "emergency-shelter",
+        "navigation-center",
+        "central-spa",
+        "couples",
+        "referral-only",
+        "bed-reservation"
+      ],
+      "description": "County emergency shelter in Santa Ana for up to 425 adult individuals and couples experiencing homelessness in the Central Service Planning Area, with supportive services focused on stabilization and permanent housing.",
+      "services": [
+        "Emergency shelter",
+        "Supportive services",
+        "Permanent housing placement support"
+      ],
+      "eligibility": "Adult individuals and couples experiencing homelessness in the Central Service Planning Area. Entry by referral only: approved Central SPA referring partners, or a Central SPA Access Point reached by calling 2-1-1.",
+      "population": [
+        "adults",
+        "couples"
+      ],
+      "how_to_access": "referral-only",
+      "referral_required": true,
+      "phone": "(800) 364-2221",
+      "address": "2229 S. Yale St., Santa Ana, CA 92704",
+      "city": "Santa Ana",
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://epath.org/regions/orange-county/",
+      "source_url": "https://ceo.oc.gov/care-coordination/homeless-services/shelter-programs",
+      "source_quote": "PATH provides shelter and supportive services for up to 425 adult individuals and couples experiencing homelessness in the Central Service Planning Area (SPA).",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "The phone is the OC Outreach & Engagement referral hotline given on the County page, not a front desk. Do not send anyone to the address without a referral. The County's Central SPA pocket guide (https://ceo.oc.gov/sites/ceo/files/2025-10/Pocket%20Guide%20Resource%20Directory%20-%20Central%20Updated%207.28.2025.pdf, dated 2025) lists a different referral number, 714-785-9889. Central SPA: Costa Mesa, Fountain Valley, Garden Grove, Huntington Beach, Midway City, Newport Beach, Santa Ana, Seal Beach, Tustin, Westminster."
+    },
+    {
+      "id": "bridges-at-kraemer-place",
+      "name": "Bridges at Kraemer Place",
+      "organization": "PATH (People Assisting the Homeless), under contract with the County of Orange",
+      "category": "shelter",
+      "tags": [
+        "emergency-shelter",
+        "north-spa",
+        "referral-only",
+        "bed-reservation"
+      ],
+      "description": "County emergency shelter in Anaheim for up to 200 adult individuals experiencing homelessness in the North Service Planning Area, with supportive services focused on stabilization and permanent housing.",
+      "services": [
+        "Emergency shelter",
+        "Supportive services",
+        "Permanent housing placement support"
+      ],
+      "eligibility": "Adult individuals experiencing homelessness in the North Service Planning Area. Entry by referral only: approved North SPA referring partners, or a North SPA Access Point reached by calling 2-1-1.",
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "referral-only",
+      "referral_required": true,
+      "phone": "(800) 364-2221",
+      "address": "1000 N. Kraemer Place, Anaheim, CA 92806",
+      "city": "Anaheim",
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://epath.org/regions/orange-county/",
+      "source_url": "https://ceo.oc.gov/care-coordination/homeless-services/shelter-programs",
+      "source_quote": "Bridges provides shelter and supportive services for up to 200 adult individuals experiencing homelessness in the North Service Planning Area (SPA).",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Operator changed in 2026: PATH states it became operator on July 1, 2026, but 211OC's record (last verified 2026-02-17) still lists Mercy House Living Centers with an unrelated agency address. The phone is the OC Outreach & Engagement referral hotline, not a front desk. Do not send anyone to the address without a referral. North SPA: Anaheim, Brea, Buena Park, Cypress, Fullerton, La Habra, La Palma, Los Alamitos, Orange, Placentia, Rossmoor, Stanton, Villa Park, Yorba Linda."
+    },
+    {
+      "id": "costa-mesa-bridge-shelter",
+      "name": "Costa Mesa Bridge Shelter",
+      "organization": "City of Costa Mesa Network for Homeless Solutions (operated by Mercy House)",
+      "category": "shelter",
+      "tags": [
+        "emergency-shelter",
+        "bridge-shelter",
+        "city-ties",
+        "referral-only",
+        "costa-mesa",
+        "newport-beach"
+      ],
+      "description": "70-bed city shelter providing interim housing with wrap-around services toward permanent housing. Guests are admitted by referral only, through the City's 24-hour Network for Homeless Solutions hotline.",
+      "services": [
+        "Interim housing",
+        "Help locating and securing permanent housing",
+        "Help with barriers to housing and employment",
+        "Meals prepared on site",
+        "Transportation to and from the shelter"
+      ],
+      "eligibility": "Admission by referral only. The City gives direct assistance to people with Costa Mesa ties: a household member who has lived or worked in Costa Mesa for the preceding 36 months, or who attends school in the city.",
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "referral-only",
+      "referral_required": true,
+      "phone": "(714) 754-5346",
+      "address": null,
+      "city": "Costa Mesa",
+      "hours": "24-hour NHS Hotline",
+      "languages": null,
+      "cost": null,
+      "website": "https://www.costamesaca.gov/government/departments-and-divisions/city-manager-s-office/network-for-homeless-solutions",
+      "source_url": "https://www.costamesaca.gov/government/departments-and-divisions/city-manager-s-office/network-for-homeless-solutions/costa-mesa-bridge-shelter/contact-shelter",
+      "source_quote": "Guests are admitted into the Bridge Shelter by referral only.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Bed count conflict: the City page says 70 beds, 211OC's record says 100. Newport Beach says it partners with Costa Mesa for shelter beds here. The shelter's street address was not on the pages fetched. costamesaca.gov returns HTTP 403 to plain scripted requests; it loaded only with browser-like headers."
+    },
+    {
+      "id": "huntington-beach-navigation-center",
+      "name": "Huntington Beach Navigation Center",
+      "organization": "City of Huntington Beach (operated by Mercy House)",
+      "category": "shelter",
+      "tags": [
+        "emergency-shelter",
+        "navigation-center",
+        "city-ties",
+        "referral-only",
+        "couples",
+        "huntington-beach"
+      ],
+      "description": "City navigation center that can shelter up to 164 adults and couples with ties to Huntington Beach. No walk-ups: people must be prescreened and referred by the City's social workers or Homeless Task Force officers.",
+      "services": [
+        "Emergency shelter",
+        "Case management",
+        "Access to services on the path to housing"
+      ],
+      "eligibility": "Experiencing homelessness in Huntington Beach, not sheltered elsewhere, with significant and verifiable ties to the city (for example a permanent address there within the last five years, current or recent employment there, full-time enrollment at Golden West College, or a close family member living there). No open felony warrant; registered sex or arson offenders are not admitted; must be able to meet all Activities of Daily Living.",
+      "population": [
+        "adults",
+        "couples"
+      ],
+      "how_to_access": "referral-only",
+      "referral_required": true,
+      "phone": "(714) 536-5576",
+      "address": "17642 Beach Boulevard",
+      "city": "Huntington Beach",
+      "hours": "City social worker walk-in office hours: Huntington Beach Police Department front lobby, 2000 Main Street, Tuesday 9:00 a.m. – 11:00 a.m. and Wednesday 10:00 a.m. – 12:00 p.m.",
+      "languages": null,
+      "cost": null,
+      "website": "https://huntingtonbeachca.gov/departments/city_manager/homeless_solutions/index.php",
+      "source_url": "https://huntingtonbeachca.gov/departments/city_manager/homeless_solutions/hb_navigation_center.php",
+      "source_quote": "The Center can shelter up to 164 adults and couples with ties to Huntington Beach.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Phone and office hours are from the City's Homeless Assistance page (https://huntingtonbeachca.gov/departments/city_manager/homeless_solutions/homeless_assistance.php), which also lists office hours at Community United Methodist Church, 6652 Heil Avenue (Wednesday 1:30 p.m. - 3:00 p.m.) and Refuge Calvary Chapel, 7800 Edinger Avenue (Thursday 11:00 a.m. to 12:30 p.m.). The page says people who do not meet the requirements can still be connected to other services. Do not send anyone to the shelter address without a referral."
+    },
+    {
+      "id": "buena-park-navigation-center",
+      "name": "Buena Park Navigation Center",
+      "organization": "City of Buena Park (operated by Mercy House)",
+      "category": "shelter",
+      "tags": [
+        "emergency-shelter",
+        "navigation-center",
+        "north-spa",
+        "referral-only",
+        "buena-park"
+      ],
+      "description": "150-bed temporary shelter for North Orange County (North SPA) cities, with host cities such as Buena Park given priority. Clients are received on a referral basis only; walk-ins are not permitted.",
+      "services": [
+        "Temporary shelter",
+        "Healthcare and other on-site services"
+      ],
+      "eligibility": "Beds are designated for North SPA cities only, with host cities (including Buena Park) having priority. Referrals are typically made by police homeless liaison officers, the Homeless Outreach Team and the County of Orange.",
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "referral-only",
+      "referral_required": true,
+      "phone": "(714) 235-3296",
+      "address": "6494 Caballero Blvd., Buena Park, CA 90620",
+      "city": "Buena Park",
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://www.buenapark.com/residents/navigation_center.php",
+      "source_url": "https://www.buenapark.com/residents/navigation_center.php",
+      "source_quote": "The center will only receive clients on a referral-basis; walk-ins are not permitted.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "The same page lists the Buena Park Homeless Outreach Team at (714) 236-3877. The City page does not state an age rule; 'adults' follows 211OC's record ('18 years and older', last verified 2026-02-17), which also lists a different contact number, (714) 410-4060 ext. 281. Do not send anyone to the address without a referral."
+    },
+    {
+      "id": "central-cities-navigation-center",
+      "name": "Central Cities Navigation Center (CCNC)",
+      "organization": "City of Garden Grove with Fountain Valley and Westminster (operated by Volunteers of America of Los Angeles)",
+      "category": "shelter",
+      "tags": [
+        "emergency-shelter",
+        "navigation-center",
+        "central-spa",
+        "referral-only",
+        "garden-grove",
+        "fountain-valley",
+        "westminster",
+        "pets"
+      ],
+      "description": "Year-round, low-barrier navigation center in Garden Grove with 85 beds, offering transitional emergency housing and wrap-around services to homeless adults referred from Garden Grove, Fountain Valley and Westminster. No walk-ins.",
+      "services": [
+        "Emergency housing (length of stay up to 120 days)",
+        "1-on-1 case management",
+        "Mental health and substance use counseling resources",
+        "Outpatient health services",
+        "Employment assistance and job training",
+        "Shuttle transportation",
+        "Service animal and pet accommodation"
+      ],
+      "eligibility": "18+, no children. No walk-in. Referral guidelines on the City page: by designated PD division (GGPD SRT, FVPD HLO, W HLO), the cities' contracted street outreach service providers, or through the bed reservation systems. Beds are split among Garden Grove (50), Fountain Valley (13) and Westminster (22).",
+      "population": [
+        "adults",
+        "couples"
+      ],
+      "how_to_access": "referral-only",
+      "referral_required": true,
+      "phone": null,
+      "address": "13871 West Street, Garden Grove, CA 92843",
+      "city": "Garden Grove",
+      "hours": "24/7 including city holidays",
+      "languages": null,
+      "cost": null,
+      "website": "https://ggcity.org/navigation-center",
+      "source_url": "https://ggcity.org/navigation-center",
+      "source_quote": "offering low-barrier transitional emergency housing and wrap-around services to homeless individuals in Orange County's Central Service Planning Area",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "No public phone number: the City page lists none and 211OC's record says 'See chart for referral information'. The City page still says Garden Grove 'is developing' the center even though it reports an opening date of June 5, 2024. Do not send anyone to the address without a referral."
+    },
+    {
+      "id": "wiseplace",
+      "name": "WISEPlace: shelter and housing help for unaccompanied women",
+      "organization": "WISEPlace",
+      "category": "shelter",
+      "tags": [
+        "women",
+        "emergency-shelter",
+        "case-management",
+        "financial-assistance",
+        "survivors"
+      ],
+      "description": "Temporary shelter for unaccompanied individuals experiencing homelessness, with 1:1 case management, counseling, employment support and housing search help. Also offers financial assistance, such as a deposit or temporary rental assistance, to eligible people who are homeless but not seeking shelter.",
+      "services": [
+        "Temporary shelter",
+        "1:1 case management and counseling",
+        "Employment support",
+        "Housing search assistance",
+        "Help with job, housing and public benefits applications",
+        "Financial assistance (deposit, temporary rental assistance, utility deposit)"
+      ],
+      "eligibility": "Unaccompanied women / individuals experiencing homelessness. Request help by phone or the online inquiry form. Financial assistance has separate eligibility; the form asks about ties to the City of Santa Ana.",
+      "population": [
+        "women",
+        "adults without children"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "(714)542-3577",
+      "address": null,
+      "city": "Santa Ana",
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://wiseplace.org/",
+      "source_url": "https://wiseplace.org/get-help/",
+      "source_quote": "WISEPlace offers unaccompanied individuals experiencing homelessness a safe place by providing temporary shelter.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Street address deliberately omitted: 211OC lists WISEPlace as a Coordinated Entry access point for survivors, and this seed gives a phone line only for survivor-serving programs. The site footer says its focus is 'unaccompanied women' while the help page says 'unaccompanied individuals', so confirm who is eligible when calling."
+    },
+    {
+      "id": "oc-outreach-and-engagement",
+      "name": "OC Outreach & Engagement (OC O&E)",
+      "organization": "County of Orange (OC Health Care Agency / Office of Care Coordination)",
+      "category": "housing-navigation",
+      "tags": [
+        "street-outreach",
+        "unsheltered",
+        "shelter-referral",
+        "linkage",
+        "behavioral-health"
+      ],
+      "description": "County outreach teams serving people experiencing unsheltered homelessness, linking them to housing, physical health, behavioral health and other supportive services. The same hotline is the referral line the County lists for its two shelters.",
+      "services": [
+        "Street outreach",
+        "Linkage to housing and shelter",
+        "Linkage to physical and behavioral health care",
+        "Referral line for Yale Navigation Center and Bridges at Kraemer Place"
+      ],
+      "eligibility": "Individuals experiencing unsheltered homelessness in Orange County.",
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "phone",
+      "referral_required": false,
+      "phone": "800-364-2221",
+      "address": null,
+      "city": null,
+      "hours": "MON – FRI 8 AM – 5 PM",
+      "languages": null,
+      "cost": null,
+      "website": "https://ceo.oc.gov/office-care-coordination/get-help",
+      "source_url": "https://ochealthinfo.com/services-programs/mental-health-crisis-recovery/adult-18-services/outreach-and-engagement",
+      "source_quote": "The Orange County Outreach & Engagement (OC O&E) program serves individuals experiencing unsheltered homelessness in Orange County.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Hours are from the County's Central SPA pocket guide (https://ceo.oc.gov/sites/ceo/files/2025-10/Pocket%20Guide%20Resource%20Directory%20-%20Central%20Updated%207.28.2025.pdf, dated 2025); the program page itself states no hours, so confirm. The County Get Help page says to call 9-1-1 for a medical emergency and the Crisis Assessment Team at (855) 625-4657 for a non-emergency mental health crisis."
+    },
+    {
+      "id": "hub-resource-center-orange",
+      "name": "The HUB Resource Center (HRC)",
+      "organization": "The HUB OC, in partnership with the City of Orange",
+      "category": "hygiene-mail-storage",
+      "tags": [
+        "showers",
+        "laundry",
+        "mail",
+        "meals",
+        "clothing",
+        "charging",
+        "case-management",
+        "coordinated-entry-access-point",
+        "orange"
+      ],
+      "description": "Drop-in resource center in the City of Orange for unhoused people: meals, showers, laundry, clothing, mail service and phone charging, plus a Housing 101 class and one-on-one casework. Services are first-come, first-served with same-day appointments.",
+      "services": [
+        "Meals & food access",
+        "Showers",
+        "Laundry services",
+        "Clothing distribution",
+        "Mail services",
+        "Charging stations",
+        "Transportation support",
+        "Medical & health services",
+        "Pet supplies",
+        "Hygiene kits",
+        "Case management and housing pathways (Housing 101 class, Open Casework)"
+      ],
+      "eligibility": "Serves the unhoused population in partnership with the City of Orange. The site offers a separate resource list 'for those not living in Orange, CA'.",
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "walk-in",
+      "referral_required": false,
+      "phone": "(657) 767-5751",
+      "address": "517 W. Struck Ave, Orange, CA 92867",
+      "city": "Orange",
+      "hours": "Monday, Tuesday, Thursday, Friday: Basic Needs 7am to 11am, Programming 11am to 3pm. Saturday: Basic Needs only, 9am to 1pm.",
+      "languages": null,
+      "cost": null,
+      "website": "https://thehubresourcecenter.org/",
+      "source_url": "https://thehubresourcecenter.org/services",
+      "source_quote": "At the HRC our services operate on a fair and straightforward first-come, first-served basis, with same-day appointments ensuring timely assistance to those in need.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Address and phone are from the site's home page. 211OC lists this site as a Coordinated Entry Access Point for individuals and veterans in the North SPA with in-person intake, but with different hours (9:00 am-3:00 pm Monday-Friday, 9:00 am-1:00 pm Saturday; 211OC last verified 2026-01-12) and English/Spanish service; the center's own page lists no Wednesday hours. 211OC also still lists Mary's Kitchen at this same address, while Mary's Kitchen's own site now describes a food rescue based in Anaheim."
+    },
+    {
+      "id": "ocie-sbdc",
+      "name": "Orange County Inland Empire Small Business Development Center (OCIE SBDC)",
+      "organization": "Orange County Inland Empire SBDC Network",
+      "category": "microenterprise",
+      "tags": [
+        "small-business",
+        "business-plan",
+        "consulting",
+        "access-to-capital",
+        "no-cost",
+        "startup",
+        "training"
+      ],
+      "description": "No-cost one-on-one consulting and training for people starting or growing a small business in Orange, Riverside and San Bernardino counties, including help writing a business plan and preparing a loan package for lenders.",
+      "services": [
+        "One-on-one business consulting",
+        "SBDC Start: four-week no-cost startup series",
+        "Business plan help",
+        "Loan package preparation and introductions to lenders",
+        "Cohort training programs (for example EATS for food businesses)"
+      ],
+      "eligibility": null,
+      "population": [
+        "adults",
+        "entrepreneurs"
+      ],
+      "how_to_access": "appointment",
+      "referral_required": false,
+      "phone": "(800) 616-7232",
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": null,
+      "cost": "No cost",
+      "website": "https://ociesmallbusiness.org/",
+      "source_url": "https://ociesmallbusiness.org/",
+      "source_quote": "We provide no-cost consulting to small businesses across Orange, Riverside, and San Bernardino counties.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Advising, not money: it is not a lender, but its finance center helps prepare a loan package and connects clients with banks, CDFIs and nonprofit lenders. Starts with a 15-minute intake phone call. Not designed for people experiencing homelessness; ask what address, ID or business registration is needed."
+    },
+    {
+      "id": "accessity-small-business-loans",
+      "name": "Accessity small business loans ($300 to $25,000 start-up and expansion loans)",
+      "organization": "Accessity",
+      "category": "microenterprise",
+      "tags": [
+        "microloan",
+        "startup",
+        "nonprofit-lender",
+        "southern-california",
+        "business-coaching"
+      ],
+      "description": "Nonprofit lender serving Southern California entrepreneurs with limited access to traditional financing. Offers term loans from $300 to $25,000 for start-up or growing businesses (and larger loans up to $250,000), plus business support.",
+      "services": [
+        "Term loans $300 to $25,000 for start-up or growing businesses",
+        "Loans $25,001 to $250,000",
+        "Business coaching and peer support network"
+      ],
+      "eligibility": "Must be current on all personal financial obligations; live/work in Southern California; use the proceeds of the loan for your business; be at least 18 years of age and demonstrate good character; business must be a legal entity.",
+      "population": [
+        "adults",
+        "entrepreneurs"
+      ],
+      "how_to_access": "online",
+      "referral_required": false,
+      "phone": "619.884.8467",
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": null,
+      "cost": "8.99% – 14.99% fixed, simple interest; no application fees; closing costs financed into the loan",
+      "website": "https://accessity.org/",
+      "source_url": "https://accessity.org/loans/",
+      "source_quote": "From $300 to $25,000 term loans for startup or growing businesses",
+      "verified_date": "2026-10-13",
+      "confidence": "medium",
+      "notes": "Medium confidence: the page footer shows 'Copyright 2024' and product text refers to 2023 financial statements, so terms may have changed. 619.884.8467 is the staff line the site lists for Orange County; the main office line is 619.795.7250 (San Diego). These are loans with a credit review, and the business must be a legal entity. Both are real barriers for many clients."
+    },
+    {
+      "id": "jfla-zero-interest-loans",
+      "name": "Jewish Free Loan Association (JFLA) zero-interest loans",
+      "organization": "Jewish Free Loan Association",
+      "category": "microenterprise",
+      "tags": [
+        "interest-free-loan",
+        "small-business-loan",
+        "startup-loan",
+        "personal-loan",
+        "guarantor-required"
+      ],
+      "description": "Nonprofit offering zero-interest, zero-fee loans to individuals, families, students and small businesses in Los Angeles, Ventura, Orange and Santa Barbara counties. Business loans are considered case by case up to $50,000; personal or emergency loans go up to $15,000 with two guarantors.",
+      "services": [
+        "Startup and small business loans (case by case, up to $50,000)",
+        "Personal/emergency loans (up to $15,000)",
+        "Education loans"
+      ],
+      "eligibility": "All applicants must be over 18, have a permanent residence in Los Angeles, Ventura, Orange, or Santa Barbara County, have proof of income and a valid CA state ID. Personal loans require two qualified guarantors/co-signers.",
+      "population": [
+        "adults",
+        "entrepreneurs",
+        "students"
+      ],
+      "how_to_access": "online",
+      "referral_required": false,
+      "phone": "310-735-4911",
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": null,
+      "cost": "Zero interest, zero fees",
+      "website": "https://www.jfla.org/",
+      "source_url": "https://www.jfla.org/",
+      "source_quote": "JFLA is a non-profit offering zero-interest, zero-fee loans to individuals, families, students and small businesses in Los Angeles, Ventura, Orange, and Santa Barbara counties.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Eligibility is a real barrier for someone without housing: permanent residence, proof of income, a valid CA ID and guarantors are required. Phone is from https://www.jfla.org/about-jfla/contact-us and business loan terms from https://www.jfla.org/business-loans. JFLA describes itself as a remote agency with a Los Angeles mailing address."
+    },
+    {
+      "id": "cdc-small-business-finance-sba-microloans",
+      "name": "CDC Small Business Finance: SBA Microloans ($10,000-$50,000)",
+      "organization": "CDC Small Business Finance",
+      "category": "microenterprise",
+      "tags": [
+        "sba-microloan",
+        "nonprofit-lender",
+        "small-business-loan",
+        "irvine"
+      ],
+      "description": "Small business lender and SBA microloan intermediary that advertises SBA Microloans of $10,000-$50,000 with 7-year terms for California small businesses, and lists an Orange County office in Irvine.",
+      "services": [
+        "SBA Microloans $10,000-$50,000",
+        "SBA 7(a) Community Advantage loans",
+        "Small business advising"
+      ],
+      "eligibility": null,
+      "population": [
+        "adults",
+        "entrepreneurs"
+      ],
+      "how_to_access": "online",
+      "referral_required": false,
+      "phone": "800-611-5170",
+      "address": "2 Executive Circle Suite 110, Irvine, CA 92614",
+      "city": "Irvine",
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://cdcloans.com/",
+      "source_url": "https://cdcloans.com/small-business-loans/",
+      "source_quote": "Looking for $10,000-$50,000 loans with 7-year terms? We offer SBA Microloans in California!",
+      "verified_date": "2026-10-13",
+      "confidence": "medium",
+      "notes": "Medium confidence: microloan eligibility is in a downloadable factsheet that was not opened, so eligibility is left null. 800-611-5170 is the general line in the site footer; the Irvine office address (from https://cdcloans.com/contact/) has no phone listed. SBA's list of California microlenders shows this lender with a San Diego headquarters. For its general business loans the site says start-ups need a 10 percent down payment and management or industry experience. A $10,000 minimum is large for a first micro-business."
+    },
+    {
+      "id": "oc-workforce-solutions-business-accelerator",
+      "name": "Business Accelerator Program (six-week no-cost course)",
+      "organization": "OC Workforce Solutions",
+      "category": "microenterprise",
+      "tags": [
+        "training",
+        "startup",
+        "no-cost",
+        "virtual",
+        "in-person",
+        "cohort",
+        "spanish"
+      ],
+      "description": "Six-week no-cost course series on the fundamentals of starting, structuring and growing a business, offered in person at OC Workforce Solutions North in Brea or virtually.",
+      "services": [
+        "Six weekly classes on starting, structuring and growing a business",
+        "In-person or virtual attendance"
+      ],
+      "eligibility": null,
+      "population": [
+        "adults",
+        "entrepreneurs"
+      ],
+      "how_to_access": "online",
+      "referral_required": false,
+      "phone": "866.500.6587",
+      "address": "675 Placentia Ave., Third Floor, Brea, CA 92821",
+      "city": "Brea",
+      "hours": "Tuesdays, October 6- November 10, 2026 | 10:00 A.M. - 11:30 A.M.",
+      "languages": null,
+      "cost": "No cost",
+      "website": "https://www.ocworkforcesolutions.com/events",
+      "source_url": "https://www.ocworkforcesolutions.com/event-details/business-accelerator-program-3",
+      "source_quote": "Business Accelerator Program is a six-week no-cost course series to learn the fundamentals of starting, structuring, and growing your business.",
+      "verified_date": "2026-10-13",
+      "confidence": "medium",
+      "notes": "Medium confidence because it is time-limited: this English cohort began October 6, 2026 and is under way on the hackathon date; check the events page for the next cohort. A Spanish-language cohort (Wednesdays, September 30 - November 4, 2026) was also listed. Street address is from the event listing on the OC Workforce Solutions home page."
+    },
+    {
+      "id": "costa-mesa-reconnection-program",
+      "name": "Reconnection Program (help returning to your home community)",
+      "organization": "City of Costa Mesa Network for Homeless Solutions, with local churches/non-profits",
+      "category": "family-reunification-travel",
+      "tags": [
+        "reunification",
+        "return-home",
+        "family",
+        "costa-mesa"
+      ],
+      "description": "City partnership with local churches and non-profits that helps homeless individuals and families return to their original community when friends or family there are willing to offer permanent housing.",
+      "services": [
+        "Help returning to the person's original community where friends or family will provide housing"
+      ],
+      "eligibility": "Homeless individuals/families who have friends or family in their original community willing to offer permanent housing options.",
+      "population": [
+        "adults",
+        "families"
+      ],
+      "how_to_access": "phone",
+      "referral_required": null,
+      "phone": "(714) 754-4977",
+      "address": null,
+      "city": "Costa Mesa",
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://www.costamesaca.gov/government/departments-and-divisions/city-manager-s-office/network-for-homeless-solutions",
+      "source_url": "https://www.costamesaca.gov/government/departments-and-divisions/city-manager-s-office/network-for-homeless-solutions/resources-getting-help/not-a-costa-mesa-resident",
+      "source_quote": "assists homeless individuals/families in returning to their original community when there are friends or family willing to offer permanent housing options",
+      "verified_date": "2026-10-13",
+      "confidence": "low",
+      "notes": "Low confidence. The page does not say whether travel costs are paid, how much, or how to qualify. It contains a leftover editing note ('[add hyperlink back to Resources & Getting Help page]'), which suggests it is not maintained, and its phone number differs from the Network for Homeless Solutions hotline on the City's other pages, (714) 754-5346. Call to confirm the program still operates before telling anyone it can pay for travel."
+    },
+    {
+      "id": "newport-beach-family-reunification-travel",
+      "name": "City of Newport Beach homeless services: family reunification travel (case by case)",
+      "organization": "City of Newport Beach",
+      "category": "family-reunification-travel",
+      "tags": [
+        "reunification",
+        "travel-expenses",
+        "newport-beach",
+        "outreach"
+      ],
+      "description": "Newport Beach's homeless data dashboard lists family reunification travel expenses among the costs its Homeless Services Manager and Police Department cover for homeless people. There is no public application; the only route is the City's homeless outreach contact.",
+      "services": [
+        "Family reunification travel expenses (as reported by the City)",
+        "Outreach and case management"
+      ],
+      "eligibility": null,
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "phone",
+      "referral_required": null,
+      "phone": "949-718-1991",
+      "address": null,
+      "city": "Newport Beach",
+      "hours": null,
+      "languages": null,
+      "cost": null,
+      "website": "https://newportbeachca.gov/trending/community-issues/homelessness",
+      "source_url": "https://nbgis.newportbeachca.gov/gispub/Dashboards/HomelessDash.htm",
+      "source_quote": "Expenses related to supporting homeless people in bridge living arrangements, move-in items for permanent housing and family reunification travel expenses.",
+      "verified_date": "2026-10-13",
+      "confidence": "low",
+      "notes": "Low confidence. This is an expense category on a city dashboard, not a described program: no eligibility rules, amounts or request process are published, and it is presumably limited to people the City's outreach team is already working with in Newport Beach. The phone is the homeless outreach contact on the City's Homeless Resources page (https://newportbeachca.gov/trending/community-issues/homelessness/documents-and-resources)."
+    },
+    {
+      "id": "home-free-national-runaway-safeline",
+      "name": "Home Free (free bus ticket home for youth ages 12 to 21)",
+      "organization": "National Runaway Safeline",
+      "category": "family-reunification-travel",
+      "tags": [
+        "reunification",
+        "bus-ticket",
+        "greyhound",
+        "youth",
+        "national",
+        "24-7"
+      ],
+      "description": "National program that reunites youth with family or a legal guardian, or gets them to an alternative living arrangement, through a free Greyhound bus ticket. It starts with a call to 1-800-RUNAWAY.",
+      "services": [
+        "Free Greyhound bus ticket home or to a safe living arrangement",
+        "Planning call about where the youth will go and who they will stay with"
+      ],
+      "eligibility": "Youth ages 12 to 21 who are away from home, don't have a safe way to return, and are ready to reunite with family or a safe adult who agrees to help.",
+      "population": [
+        "youth 12-21"
+      ],
+      "how_to_access": "phone",
+      "referral_required": false,
+      "phone": "1-800-RUNAWAY (1-800-786-2929)",
+      "address": null,
+      "city": null,
+      "hours": "Available 24/7",
+      "languages": null,
+      "cost": "No cost to youth",
+      "website": "https://www.1800runaway.org/",
+      "source_url": "https://www.1800runaway.org/youth-teens/home-free",
+      "source_quote": "The Home Free program helps young people ages 12–21 return safely to their families or a safe place — at no cost to youth.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "National, not an Orange County program, and limited to ages 12 to 21, so it fits only the youngest adult clients. The page shows the number as 1-800-RUNAWAY and links it to 1-800-786-2929. No equivalent adult program with a public intake was found for Orange County."
+    },
+    {
+      "id": "oc-workforce-solutions",
+      "name": "OC Workforce Solutions career centers",
+      "organization": "OC Workforce Solutions (Orange County Workforce Development Board)",
+      "category": "employment",
+      "tags": [
+        "resume",
+        "job-search",
+        "career-counseling",
+        "workshops",
+        "job-fairs",
+        "training",
+        "no-cost",
+        "one-stop"
+      ],
+      "description": "No-cost employment and training services for job seekers: free career workshops on resumes, interviewing and LinkedIn, one-on-one career counseling with an Individualized Employment Plan, job fairs and skills training.",
+      "services": [
+        "Free career workshops (resume, interview skills, soft skills, LinkedIn)",
+        "Career counseling and Individualized Employment Plan",
+        "Job fairs and hiring events",
+        "Skills building (reading, writing, math, computers, GED preparation, English)",
+        "Veteran career services"
+      ],
+      "eligibility": "To start: complete the interest and eligibility assessment, register with CalJOBS, then call. Program-specific eligibility is not stated on the page.",
+      "population": [
+        "adults",
+        "youth",
+        "veterans"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "(866) 500-6587",
+      "address": "675 Placentia Avenue, Suite 330, Brea, CA 92821",
+      "city": "Brea",
+      "hours": "Mon-Fri: 9 AM - 6 PM; Sat: 9 AM - 1 PM",
+      "languages": null,
+      "cost": "No cost",
+      "website": "https://www.ocworkforcesolutions.com/",
+      "source_url": "https://www.ocworkforcesolutions.com/career-services",
+      "source_quote": "Learn how to create an impressive resume, practice your interview skills, strengthen your soft skills, build your LinkedIn profile",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Address, phone and hours are from https://www.ocworkforcesolutions.com/contact, which also lists: South County, 28202 Cabot Road, Suite 140, Laguna Niguel, CA 92677 (same phone and hours); Anaheim Workforce Connection, 201 South Anaheim Boulevard, 2nd Floor, Anaheim, CA 92805, (714) 765-4350, Mon-Fri 8 AM - 5 PM; and the Santa Ana Work Center (separate entry). TTY (800) 735-2922 or 711. anaheim.net blocked automated fetching, so the Anaheim details are not confirmed on the City's own site."
+    },
+    {
+      "id": "santa-ana-work-center-resume-help",
+      "name": "Santa Ana WORK Center: free one-on-one resume help",
+      "organization": "City of Santa Ana",
+      "category": "employment",
+      "tags": [
+        "resume",
+        "walk-in",
+        "job-search",
+        "mock-interviews",
+        "vocational-training",
+        "santa-ana"
+      ],
+      "description": "City job center offering free one-on-one resume reviewing, editing and formatting on a walk-in basis, plus job seeker services such as mock interviews, vocational training and on-the-job training.",
+      "services": [
+        "One-on-one resume assistance (walk-in)",
+        "Mock interviews",
+        "Resource center",
+        "Vocational training",
+        "On-the-job training",
+        "Youth employment services",
+        "Veterans Resource Center"
+      ],
+      "eligibility": null,
+      "population": [
+        "adults",
+        "youth",
+        "veterans"
+      ],
+      "how_to_access": "walk-in",
+      "referral_required": false,
+      "phone": "(714) 565-2600",
+      "address": "801 W. Civic Center Dr., Suite 200, Santa Ana, CA 92701",
+      "city": "Santa Ana",
+      "hours": "Resume help: Monday – Friday from 1:00 p.m. – 4:00 p.m., no appointment needed. Center: Monday-Thursday 8 a.m. to 5 p.m.; alternating Fridays 8 a.m. to 5 p.m.; Saturday-Sunday closed.",
+      "languages": null,
+      "cost": "Free",
+      "website": "https://santa-ana.gov/departments/santa-ana-work-center/",
+      "source_url": "https://santa-ana.gov/resume-assistance/",
+      "source_quote": "please stop by the Santa Ana WORK Center, Monday – Friday from 1:00 p.m. – 4:00 p.m. No appointment is needed.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Phone, address and center hours are from the WORK Center's main page. The resume page says Monday to Friday, but the main page says the center is open only on alternating Fridays, so call before going on a Friday. Parking is validated for 3 hours. TTY Relay Service (800) 735-2929."
+    },
+    {
+      "id": "chrysalis-orange-county",
+      "name": "Chrysalis Orange County: job-readiness program",
+      "organization": "Chrysalis",
+      "category": "employment",
+      "tags": [
+        "job-readiness",
+        "resume",
+        "practice-interviews",
+        "employment-specialist",
+        "barriers-to-work",
+        "spanish"
+      ],
+      "description": "Free job-readiness program for people facing barriers to work, with an Employment Specialist, resume and practice-interview help and supportive services. The first step is attending an orientation at the Anaheim center.",
+      "services": [
+        "Individualized case management with an Employment Specialist",
+        "Job-readiness program",
+        "One-on-one resume writing and practice interviews",
+        "Online job application assistance",
+        "Supportive services"
+      ],
+      "eligibility": "Free and available to all; the only program requirement is being willing and able to work. An active phone number or email address is needed to keep in contact with the Employment Specialist.",
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "walk-in",
+      "referral_required": false,
+      "phone": "(714) 204-3000",
+      "address": "290 S. Anaheim Blvd., Anaheim, CA 92805",
+      "city": "Anaheim",
+      "hours": "Monday – Thursday from 8 a.m. to 12 p.m., 1 to 4 p.m.; Friday from 8 a.m. to 12 p.m. Orientation: Monday – Thursday at 8 a.m.",
+      "languages": [
+        "English",
+        "Spanish"
+      ],
+      "cost": "Free",
+      "website": "https://www.changelives.org/",
+      "source_url": "https://www.changelives.org/our-services/",
+      "source_quote": "Chrysalis’ services are free and available to all. Our only program requirement is that an individual is willing and able to work.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Chrysalis reports that 74% of its clients are unstably housed. The need for an active phone number or email is a practical barrier; pair it with the phone entry. General information line (213) 394-2390. Address, phone and hours also match the County's Central SPA pocket guide (dated 2025)."
+    },
+    {
+      "id": "working-wardrobes-rebuilding-careers",
+      "name": "Working Wardrobes: Rebuilding Careers Program",
+      "organization": "Working Wardrobes",
+      "category": "employment",
+      "tags": [
+        "career-coaching",
+        "resume",
+        "interview-clothing",
+        "workshops",
+        "veterans",
+        "justice-impacted",
+        "no-cost"
+      ],
+      "description": "No-cost career readiness services for anyone facing self-described barriers to employment: career navigation, coaching on resumes and interviews, trainings and workshops, and an interview outfit for enrolled clients.",
+      "services": [
+        "Career navigation and an individualized plan",
+        "Career coaching (resume, interview)",
+        "Soft and hard skills training, workshops and certification programs",
+        "Interview outfit ('Success Suit') for enrolled clients with an upcoming interview"
+      ],
+      "eligibility": "Anyone facing self-described barriers to gainful employment (unemployed, underemployed, Veterans, justice-impacted, seniors, survivors of domestic violence, etc.). Interview clothing is for clients who are enrolled, actively engaged and have an upcoming job interview.",
+      "population": [
+        "adults",
+        "veterans",
+        "seniors"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "714-210-2460",
+      "address": "2000 E McFadden Ave, Santa Ana, CA 92705",
+      "city": "Santa Ana",
+      "hours": "Mon-Fri: 8AM – 5PM",
+      "languages": null,
+      "cost": "No cost",
+      "website": "https://www.workingwardrobes.org/",
+      "source_url": "https://www.workingwardrobes.org/our-services/",
+      "source_quote": "We offer no-cost services to anyone facing self-described barriers to gainful employment.",
+      "verified_date": "2026-10-13",
+      "confidence": "medium",
+      "notes": "Medium confidence on location only: the home page announces 'WE'RE MOVING!' and says the Career Success Center and Donation Center are coming together under one roof, so the McFadden Ave address (from the Contact page) may change. Confirm by phone. Sign-up is an online 'referral form' a person can fill in themselves; staff say they respond within 3 business days."
+    },
+    {
+      "id": "dmv-no-fee-and-reduced-fee-id",
+      "name": "California DMV no-fee and reduced-fee ID cards",
+      "organization": "California Department of Motor Vehicles",
+      "category": "id-documents",
+      "tags": [
+        "california-id",
+        "fee-waiver",
+        "homeless",
+        "reduced-fee",
+        "dl-937",
+        "senior"
+      ],
+      "description": "The DMV may issue an ID card at no fee to a person who is homeless as defined by the McKinney-Vento Act, and at a reduced fee to people who meet income requirements for certain assistance programs. Applications are finished in person at a DMV office.",
+      "services": [
+        "No-fee ID card for people who are homeless",
+        "Reduced-fee ID card (with a completed DL 937 from an assistance program)",
+        "No-fee senior ID card (62 or older)"
+      ],
+      "eligibility": "No fee: a \"homeless person\" as defined by the McKinney-Vento Act (includes a homeless child or youth, and an individual or family fleeing domestic violence or similar danger). Reduced fee: meet income requirements for selected governmental or non-profit assistance programs and bring a completed DL 937. Senior no-fee card: at least 62 years old.",
+      "population": [
+        "adults",
+        "youth",
+        "seniors"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": null,
+      "phone": null,
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": null,
+      "cost": "No fee or reduced fee if eligible",
+      "website": "https://www.dmv.ca.gov/",
+      "source_url": "https://www.dmv.ca.gov/portal/driver-licenses-identification-cards/identification-id-cards/",
+      "source_quote": "You may be eligible for a no-fee ID card if you are a “homeless person” as defined by the McKinney-Vento Act.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Statewide; use any DMV field office. The page names form DL 937 for the reduced fee but does not say, on this page, what proof of homelessness is needed for the no-fee card. Ask the DMV or a homeless services provider. Applicants still have to prove identity and, for a first California card, residency; that is often the real obstacle."
+    },
+    {
+      "id": "homeless-fee-exempt-birth-certificate",
+      "name": "Free certified birth certificate for people experiencing homelessness (AB 1733 / AB 2490)",
+      "organization": "California Department of Public Health: Vital Records, and county recorders (for Orange County births: Orange County Clerk-Recorder)",
+      "category": "id-documents",
+      "tags": [
+        "birth-certificate",
+        "fee-waiver",
+        "affidavit",
+        "vital-records",
+        "homeless"
+      ],
+      "description": "California law lets a person who is homeless get a certified copy of their birth record without a fee, from the county where they were born or from the State Registrar, using an Affidavit of Homeless Status signed by a homeless services provider.",
+      "services": [
+        "Fee-exempt certified copy of a birth record (one per application)"
+      ],
+      "eligibility": "Meets the federal McKinney-Vento definition of homeless person or homeless child or youth, and can verify homeless status. The affidavit must be signed by both a homeless services provider and the person requesting the record.",
+      "population": [
+        "adults",
+        "youth",
+        "families"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": true,
+      "phone": "(714) 834-2500",
+      "address": "601 N. Ross St., Santa Ana, CA 92701",
+      "city": "Santa Ana",
+      "hours": "8:00 a.m. - 4:30 p.m. Monday - Friday",
+      "languages": null,
+      "cost": "No fee with a completed affidavit; the Orange County Clerk-Recorder fee schedule otherwise lists a birth certificate at $34.00",
+      "website": "https://www.ocrecorder.com/clerk-services/vital-records",
+      "source_url": "https://www.cdph.ca.gov/Programs/CHSI/Pages/Assembly-Bill-(AB)-1733.aspx",
+      "source_quote": "allows a homeless person, or a homeless child or youth, to be eligible to receive a copy of a birth record without a fee",
+      "verified_date": "2026-10-13",
+      "confidence": "medium",
+      "notes": "Medium confidence: the State page and affidavit establish the right, but the Orange County Clerk-Recorder pages fetched (vital records page and fee schedule effective 2026-09-01) do not mention the fee exemption or how to present the affidavit, so call first. Phone, address and hours are the Clerk-Recorder's Central Office, for people born in Orange County; branches are at 222 S. Harbor Blvd, Ste. 110A, Anaheim and 24031 El Toro Rd., Ste. 150, Laguna Hills (9:00 a.m. - 4:30 p.m.). People born elsewhere apply to that county or the State. The affidavit lists who counts as a homeless services provider, including a nonprofit agency funded to serve homeless people. In-person applicants must fill in the application online first and bring valid government photo ID, which can be circular for someone with no ID."
+    },
+    {
+      "id": "oc-social-services-agency-benefits",
+      "name": "County of Orange Social Services Agency: CalFresh, Medi-Cal, CalWORKs and General Relief",
+      "organization": "County of Orange Social Services Agency (SSA)",
+      "category": "benefits",
+      "tags": [
+        "calfresh",
+        "medi-cal",
+        "calworks",
+        "general-relief",
+        "capi",
+        "benefitscal",
+        "ebt"
+      ],
+      "description": "County agency that takes applications for CalFresh food benefits, Medi-Cal, CalWORKs and General Relief. People can apply for CalFresh online at BenefitsCal.com, by phone, or in person at a regional center.",
+      "services": [
+        "CalFresh applications and EBT",
+        "Medi-Cal applications",
+        "CalWORKs",
+        "General Relief",
+        "Cash Assistance Program for Immigrants (CAPI)"
+      ],
+      "eligibility": "CalFresh: must be a resident of Orange County and report all household members' income and property; limits vary with household size and ages. Other programs have their own rules.",
+      "population": [
+        "adults",
+        "families",
+        "seniors"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "800-281-9799",
+      "address": "1928 S. Grand Ave., BLDG. B, Santa Ana, CA 92705",
+      "city": "Santa Ana",
+      "hours": "8:00am - 5:00pm, Monday - Friday",
+      "languages": null,
+      "cost": null,
+      "website": "https://ssa.ocgov.com/",
+      "source_url": "https://ssa.ocgov.com/cash-calfresh/calfresh",
+      "source_quote": "The CalFresh Program is a federal nutrition program that helps eligible, low-income, people purchase the food they need for good health.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Phone, address and hours are from the SSA office list (https://ssa.ocgov.com/about-us/office-locations/office-location-list); 800-281-9799 is the Service Center number, TTY 714-834-8500. Other CalFresh / General Relief / Medi-Cal offices: Anaheim Regional Center, 3320 E. La Palma Ave., Anaheim, CA 92806; Garden Grove Regional Center, 12912 Brookhurst St., Garden Grove, CA 92840; Laguna Hills Regional Center, 23330 Moulton Parkway, Laguna Hills, CA 92653; County Community Service Center Brea, 675 Placentia Ave. Suite 100, Brea, CA 92821 (714-834-7500). On 2026-10-13 the SSA site showed an alert that the Santa Ana Regional Center had a utility disruption and services may be delayed. The County pocket guide misspells the portal as 'www.benifitscal.com'."
+    },
+    {
+      "id": "oc-general-relief",
+      "name": "General Relief (GR): County of Orange",
+      "organization": "County of Orange Social Services Agency (SSA)",
+      "category": "benefits",
+      "tags": [
+        "general-relief",
+        "interview-required",
+        "repayment-agreement",
+        "bus-passes",
+        "disability-accommodation"
+      ],
+      "description": "County General Relief benefits: apply by phone, in person at select Social Services Agency offices, or by mail; an interview is required. Bus passes are available to applicants or recipients who need transportation to meet eligibility and verification requirements.",
+      "services": [
+        "General Relief application and interview",
+        "Bus passes to meet eligibility and verification requirements",
+        "Disability accommodations (home application, phone interview, mail-in application)"
+      ],
+      "eligibility": "Applicants must verify their circumstances, including identification for all adults who apply, a Social Security card or other acceptable documentation, income, property, registration with the CalFresh Employment & Training / General Relief Work Program, and documentation of legal immigration status. The application includes a Repayment Agreement.",
+      "population": [
+        "adults"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "800-281-9799",
+      "address": null,
+      "city": null,
+      "hours": "Call Center: Weekdays (Monday-Friday) from 7:30 a.m. to 5 p.m.",
+      "languages": null,
+      "cost": null,
+      "website": "https://ssa.ocgov.com/cash-calfresh/general-relief",
+      "source_url": "https://ssa.ocgov.com/cash-calfresh/how-apply/how-apply-general-relief",
+      "source_quote": "You can apply for General Relief Benefits by phone (800-281-9799 / TTY 714-834-8500), in person at select Social Services Agency office locations, or by mail.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Identification and a Social Security card are required verifications, so pair this with the ID-documents entries. People whose disability prevents an office visit can ask for a supervisor at the same number to arrange a home or phone application. In-person offices are listed in the Social Services Agency entry."
+    },
+    {
+      "id": "octa-reduced-fares",
+      "name": "OC Bus reduced fares (seniors 60+, people with disabilities, college students, youth)",
+      "organization": "Orange County Transportation Authority (OCTA)",
+      "category": "transportation",
+      "tags": [
+        "bus",
+        "reduced-fare",
+        "senior",
+        "disability",
+        "youth-ride-free",
+        "wave-card",
+        "fare-capping"
+      ],
+      "description": "Reduced OC Bus fares for riders 60 and older and people with disabilities ($0.75 single fare instead of the $2.00 regular fare), free rides for youth 18 and under, and college discounts. Riders apply through an account on the Wave website.",
+      "services": [
+        "Senior and Disabled reduced fare",
+        "Youth Ride Free pass (18 and under)",
+        "College student fares",
+        "OC ACCESS eligible fixed-route fare",
+        "Daily and monthly fare capping with Wave"
+      ],
+      "eligibility": "Seniors 60 years and older; persons with disabilities; college students enrolled in 9 or more units a semester; youth 18 and under. Proof examples listed: DMV license or ID, Medicare card, passport, service-connected veteran ID, receipt for a DMV Disabled Person Placard, Braille Institute ID.",
+      "population": [
+        "seniors",
+        "people with disabilities",
+        "youth",
+        "students"
+      ],
+      "how_to_access": "online",
+      "referral_required": false,
+      "phone": null,
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": [
+        "English",
+        "Spanish",
+        "Vietnamese"
+      ],
+      "cost": "Senior and Disabled single fare $0.75; regular single fare $2.00",
+      "website": "https://octa.net/",
+      "source_url": "https://octa.net/getting-around/bus/oc-bus/fares-and-passes/reduced-fares",
+      "source_quote": "If you are 60 years and older, disabled, college student, or youth, you can enjoy riding OCTA transit services using a reduced fare.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "No income-based (low-income) fare appeared on the OCTA fare pages fetched. Fare prices are from https://octa.net/getting-around/bus/oc-bus/fares-and-passes/overview. Proving age or disability needs ID documents, and applying needs a Wave online account. Languages reflect the page's English, Spanish and Vietnamese versions. Separately, the County says bus passes are available to General Relief applicants for eligibility appointments."
+    },
+    {
+      "id": "second-harvest-find-food",
+      "name": "Second Harvest Food Bank of Orange County: find a food pantry",
+      "organization": "Second Harvest Food Bank of Orange County",
+      "category": "food",
+      "tags": [
+        "food-pantry",
+        "pantry-map",
+        "groceries",
+        "tefap",
+        "calfresh-help"
+      ],
+      "description": "Food bank whose partner network provides food at more than 300 locations in Orange County. Its Need Food page has a searchable pantry map and a PDF list with distribution hours; generally no forms are needed to receive food.",
+      "services": [
+        "Searchable map of pantries by city, zip code or pantry name",
+        "PDF listing of pantries",
+        "Pointer to CalFresh application help through 211"
+      ],
+      "eligibility": "Generally no forms are needed. Sites distributing federal TEFAP food ask for name, county of residence and household count.",
+      "population": [
+        "anyone"
+      ],
+      "how_to_access": "online",
+      "referral_required": false,
+      "phone": "949.653.2900",
+      "address": null,
+      "city": null,
+      "hours": null,
+      "languages": null,
+      "cost": "Free",
+      "website": "https://feedoc.org/",
+      "source_url": "https://feedoc.org/need-food/",
+      "source_quote": "Use the map below. You may search by city, zip code or pantry name.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "The page said its pantry list was 'updated as of 09/14/26'. The phone is the food bank's main office line (8014 Marine Way, Irvine), which is not listed as a public pantry. No address is given here so that nobody is sent there for food. Always open a pantry's own listing for its hours. The page also tells people to call 2-1-1 or text 898-211."
+    },
+    {
+      "id": "southwest-community-center",
+      "name": "Southwest Community Center (SWCC): hot meals and support services",
+      "organization": "Community Action Partnership of Orange County (CAP OC)",
+      "category": "food",
+      "tags": [
+        "hot-meal",
+        "grab-and-go",
+        "tefap",
+        "diapers",
+        "calfresh-enrollment",
+        "medi-cal-enrollment",
+        "santa-ana"
+      ],
+      "description": "Community center in Santa Ana providing a free grab-and-go hot lunch on weekdays, TEFAP food and diaper distributions on Monday and Wednesday mornings, and Medi-Cal and CalFresh enrollment support by appointment.",
+      "services": [
+        "Free hot meal (lunch Mon-Fri 12-1 PM)",
+        "TEFAP food distribution (Mon & Wed 9-11 AM)",
+        "Free diaper distribution (Mon & Wed 9-11 AM)",
+        "Medi-Cal & CalFresh enrollment support (by appointment)",
+        "Information & referral services",
+        "Financial empowerment workshops",
+        "Free tax preparation for qualifying individuals (Feb-Apr)"
+      ],
+      "eligibility": "Hot meals are described as for people experiencing homelessness. The center's flyer says all services are free and available by appointment.",
+      "population": [
+        "adults",
+        "families",
+        "youth"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "(714) 547-4073",
+      "address": "1601 W. 2ND ST., SANTA ANA, CA 92703",
+      "city": "Santa Ana",
+      "hours": "General hours MON-FRI: 8 AM-4:30 PM. Hot lunch Mon-Fri 12-1 PM. Food and diaper distribution Mon & Wed 9-11 AM.",
+      "languages": null,
+      "cost": "Free",
+      "website": "https://www.capoc.org/addressing-immediate-needs/",
+      "source_url": "https://www.capoc.org/addressing-immediate-needs/",
+      "source_quote": "SWCC, located in Santa Ana, provides Grab and Go hot meals to people experiencing homelessness every week day.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Phone, address and hours are from CAP OC's bilingual English/Spanish SWCC flyer linked on the same page (https://www.capoc.org/wp-content/uploads/2026/04/SWCC-Flyer-2025-040126.pdf). WARNING for link checkers: 211OC lists this center's website as swcommunitycenter.org, which returned unrelated gambling content on 2026-10-13. Do not use that domain. The County pocket guide (dated 2025) and 211OC show slightly different meal times, including a weekend breakfast."
+    },
+    {
+      "id": "oc-links",
+      "name": "OC Links: behavioral health information, referral and crisis line",
+      "organization": "OC Health Care Agency",
+      "category": "behavioral-health",
+      "tags": [
+        "mental-health",
+        "substance-use",
+        "crisis",
+        "mobile-crisis",
+        "24-7",
+        "chat",
+        "navigation"
+      ],
+      "description": "Free, confidential 24/7 phone and online chat line that connects Orange County residents to mental health and substance use services, and can dispatch a mobile crisis response team when needed.",
+      "services": [
+        "Information and referral to County behavioral health programs",
+        "Mobile crisis response and crisis stabilization",
+        "Outpatient mental health treatment linkage",
+        "Substance use programs, outpatient and residential",
+        "Outreach and engagement for unhoused individuals and families",
+        "Suicide prevention support"
+      ],
+      "eligibility": "Orange County residents; call for yourself, a family member, or anyone else.",
+      "population": [
+        "anyone"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "(855) 625-4657",
+      "address": null,
+      "city": null,
+      "hours": "24 hours a day, 7 days a week",
+      "languages": null,
+      "cost": "Free",
+      "website": "https://www.ochealthinfo.com/oclinks",
+      "source_url": "https://www.ochealthinfo.com/services-programs/mental-health-crisis-recovery/navigation-help-resources/oc-links",
+      "source_quote": "OC Links is a free and confidential telephone and online chat service that connects Orange County residents to mental health and substance use services",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Also written 855-OC-LINKS. The County Get Help page gives the same number for its Crisis Assessment Team, and the City of Huntington Beach lists it for voluntary sobering or detox referrals. The page says to call 911 when a firefighter, paramedic or police officer is needed."
+    },
+    {
+      "id": "nami-oc-warmline",
+      "name": "NAMI OC WarmLine",
+      "organization": "NAMI Orange County",
+      "category": "behavioral-health",
+      "tags": [
+        "warmline",
+        "peer-support",
+        "non-crisis",
+        "call",
+        "text",
+        "chat"
+      ],
+      "description": "Warm line for emotional support by phone, text or online chat, answered by volunteer peer support specialists. Call backs are made during operating hours.",
+      "services": [
+        "Phone and text support",
+        "Online chat",
+        "Call backs during operating hours"
+      ],
+      "eligibility": null,
+      "population": [
+        "anyone"
+      ],
+      "how_to_access": "phone",
+      "referral_required": false,
+      "phone": "(714) 991-6412",
+      "address": null,
+      "city": null,
+      "hours": "12:00 PM to 12:00 AM, 7 days a week, 365 days a year",
+      "languages": null,
+      "cost": null,
+      "website": "https://www.namioc.org/oc-warmline",
+      "source_url": "https://www.namioc.org/oc-warmline",
+      "source_quote": "We provide call backs during our regular operating hours — 12:00 PM to 12:00 AM, 7 days a week, 365 days a year.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Hours appear to have changed: NAMI OC's page says 'Now Available 12pm – 12am', while the County's Central SPA pocket guide (dated 2025) still lists the WarmLine as 24/7 with a second toll-free number. Not a crisis line; for a crisis use OC Links or 988. The page describes a call back queue, so an immediate answer is not guaranteed."
+    },
+    {
+      "id": "988-suicide-and-crisis-lifeline",
+      "name": "988 Suicide & Crisis Lifeline",
+      "organization": "988 Suicide & Crisis Lifeline",
+      "category": "behavioral-health",
+      "tags": [
+        "crisis",
+        "suicide-prevention",
+        "24-7",
+        "call",
+        "text",
+        "chat",
+        "national"
+      ],
+      "description": "National crisis line with counselors available by call, text or chat for mental health struggles, emotional distress, or alcohol or drug use concerns. Free, confidential and available at all hours.",
+      "services": [
+        "Call 988",
+        "Text 988",
+        "Online chat",
+        "Deaf/HoH access"
+      ],
+      "eligibility": "The 988 Lifeline is for everyone.",
+      "population": [
+        "anyone"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "988",
+      "address": null,
+      "city": null,
+      "hours": "24/7/365",
+      "languages": [
+        "English",
+        "Spanish"
+      ],
+      "cost": "Free",
+      "website": "https://988lifeline.org/",
+      "source_url": "https://988lifeline.org/",
+      "source_quote": "The 988 Lifeline is available 24/7/365. Your conversations are free and confidential.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "National service, included because any tool used by people in crisis needs a crisis line. Spanish is listed because the site announces text and chat services in Spanish. For Orange County mobile crisis response use OC Links."
+    },
+    {
+      "id": "community-legal-aid-socal",
+      "name": "Community Legal Aid SoCal",
+      "organization": "Community Legal Aid SoCal",
+      "category": "legal",
+      "tags": [
+        "civil-legal-aid",
+        "low-income",
+        "hotline",
+        "online-intake",
+        "expungement",
+        "tenant-hotline",
+        "seniors"
+      ],
+      "description": "Legal advice, counseling and representation for low-income people on civil matters, reached through a telephone hotline or online intake form, plus free legal workshops and clinics.",
+      "services": [
+        "Legal advice, counseling and representation on civil matters",
+        "Telephone hotline intake",
+        "Online intake form",
+        "Free legal workshops and clinics",
+        "Tenant hotline",
+        "Expungement",
+        "Small Claims Advisory"
+      ],
+      "eligibility": "Low-income individuals.",
+      "population": [
+        "adults",
+        "seniors"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "714-571-5200",
+      "address": "2101 North Tustin Avenue, Santa Ana, CA 92705",
+      "city": "Santa Ana",
+      "hours": "Office M-F 9:00 a.m. to 5:00 p.m. Hotline hours: 9:30 a.m. – 2:30 p.m. Monday – Thursday; 9:00 a.m. – 12:00 p.m. Friday. Seniors: hotline Monday through Thursday to 6:00 p.m.",
+      "languages": null,
+      "cost": null,
+      "website": "https://www.communitylegalsocal.org/",
+      "source_url": "https://www.communitylegalsocal.org/contact-us/",
+      "source_quote": "We provide legal advice, counseling, and representation to low-income individuals on various civil matters.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Also lists an Anaheim office at 250 East Center Street, Anaheim, CA 92805 (same phone). Small Claims Advisory direct line 714-845-7560. The County pocket guide (dated 2025) describes the service as including lawyer referrals and expungement clinics."
+    },
+    {
+      "id": "public-law-center",
+      "name": "Public Law Center",
+      "organization": "Public Law Center",
+      "category": "legal",
+      "tags": [
+        "free-legal-services",
+        "low-income",
+        "housing",
+        "immigration",
+        "bankruptcy",
+        "veterans",
+        "micro-business",
+        "spanish",
+        "vietnamese"
+      ],
+      "description": "Pro bono law firm providing free legal services to low-income Orange County residents, including immigrants, veterans, seniors and micro- or small business owners, from legal advice to full representation.",
+      "services": [
+        "Individual legal advice",
+        "Full representation",
+        "Housing, immigration, domestic violence, bankruptcy, consumer, family and health law help",
+        "Legal help for micro- or small business owners",
+        "Online application for services"
+      ],
+      "eligibility": "Low-income residents of Orange County.",
+      "population": [
+        "adults",
+        "veterans",
+        "seniors",
+        "immigrants",
+        "entrepreneurs"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "(714) 541-1010",
+      "address": "601 Civic Center Drive West, Santa Ana, CA 92701-4002",
+      "city": "Santa Ana",
+      "hours": "Monday-Friday: 8:30 AM – 4:30 PM. Closed for lunch from 12:30 PM – 1:30 PM everyday.",
+      "languages": [
+        "English",
+        "Spanish",
+        "Vietnamese"
+      ],
+      "cost": "Free",
+      "website": "https://www.publiclawcenter.org/",
+      "source_url": "https://www.publiclawcenter.org/",
+      "source_quote": "The Public Law Center is a 501(c)(3) nonprofit providing free legal services to low income residents and other nonprofits in Orange County.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Also relevant to the microenterprise need: the site says it serves 'micro- or small business owners'. Hours and the online application (offered in English, Spanish and Vietnamese) are from https://www.publiclawcenter.org/about/contact/."
+    },
+    {
+      "id": "oc-veterans-service-office",
+      "name": "Orange County Veterans Service Office",
+      "organization": "County of Orange Veterans Service Office",
+      "category": "veterans",
+      "tags": [
+        "va-benefits",
+        "claims",
+        "walk-in",
+        "appointments",
+        "dependents",
+        "surviving-family"
+      ],
+      "description": "County office offering free benefits claims counseling and information and referral to veterans, their dependents and survivors, by walk-in or appointment.",
+      "services": [
+        "VA benefits claims counseling",
+        "Information and referral assistance"
+      ],
+      "eligibility": "Veterans, their dependents, and survivors.",
+      "population": [
+        "veterans",
+        "families"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "(714) 480-6555",
+      "address": "1300 S. Grand Ave., Bldg. B., Second Floor, Santa Ana, CA 92705",
+      "city": "Santa Ana",
+      "hours": "Monday-Friday, 8 a.m. - 4 p.m.",
+      "languages": null,
+      "cost": "Free",
+      "website": "https://veterans.oc.gov/",
+      "source_url": "https://veterans.oc.gov/about-us",
+      "source_quote": "scheduling appointments for free benefits claims counseling and information and referral assistance to Veterans, their dependents, and survivors",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "Address, phone and hours match the County's Central SPA pocket guide (dated 2025)."
+    },
+    {
+      "id": "va-crrc-santa-ana",
+      "name": "VA Community Resource & Referral Center (CRRC): West Santa Ana VA Clinic",
+      "organization": "U.S. Department of Veterans Affairs, VA Long Beach health care",
+      "category": "veterans",
+      "tags": [
+        "homeless-veterans",
+        "hud-vash",
+        "housing-placement",
+        "va-health-care",
+        "benefits",
+        "lockers",
+        "dd214",
+        "walk-in"
+      ],
+      "description": "VA walk-in center for veterans who are homeless or at risk: help with housing placement including HUD-VASH vouchers, VA health care eligibility, benefit applications, counseling, lockers, transportation to service providers, and getting a copy of a DD214.",
+      "services": [
+        "Housing placement assistance including HUD-VASH vouchers",
+        "VA healthcare eligibility",
+        "VA benefit application help",
+        "Counseling",
+        "Lockers",
+        "Transportation to service providers",
+        "Help obtaining a DD214 or Official Military Personnel File"
+      ],
+      "eligibility": "Veterans experiencing homelessness or at risk of becoming homeless. A referral is not required.",
+      "population": [
+        "veterans"
+      ],
+      "how_to_access": "walk-in",
+      "referral_required": false,
+      "phone": "844-838-8300",
+      "address": "888 West Santa Ana Boulevard, Community Resource & Referral Center (CRRC), Suite 150, Santa Ana, CA 92701-4561",
+      "city": "Santa Ana",
+      "hours": "Mon-Fri 8:00 a.m. to 4:00 p.m.; Sat-Sun closed",
+      "languages": null,
+      "cost": "Free",
+      "website": "https://www.va.gov/long-beach-health-care/locations/west-santa-ana-va-clinic/",
+      "source_url": "https://www.va.gov/long-beach-health-care/locations/west-santa-ana-va-clinic/",
+      "source_quote": "Provides assistance with housing placement, including offering United States Department of Housing and Urban Development-Veterans Affairs Supportive Housing (HUD-VASH) vouchers to Veterans experiencing homelessness.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "After hours, the same page lists the National Call Center for Homeless Veterans, 877-424-3838. The page stores the main phone as 8448388300; 844-838-8300 is the same number as printed in County materials. Conflicts found elsewhere: the City of Huntington Beach page lists (714) 568-9803 for this center, and 211OC's record shows a San Diego address. Lockers here are the only storage option found in this seed, and only for veterans."
+    },
+    {
+      "id": "california-lifeline",
+      "name": "California LifeLine (discounted home phone and cell phone service)",
+      "organization": "California Public Utilities Commission",
+      "category": "phone-internet",
+      "tags": [
+        "phone",
+        "cell-phone",
+        "discount",
+        "low-income",
+        "lifeline"
+      ],
+      "description": "State program that gives qualified households discounts on home phone or cell phone service. To apply, call a participating phone company and ask for the California LifeLine discounts.",
+      "services": [
+        "Discounted home phone or cell phone service",
+        "Provider search on californialifeline.com"
+      ],
+      "eligibility": "Qualified households. Only one discount per household is allowed, except for teletypewriter users and Deaf and Disabled Telecommunications Program participants.",
+      "population": [
+        "adults",
+        "families"
+      ],
+      "how_to_access": "phone",
+      "referral_required": false,
+      "phone": "1-866-272-0349",
+      "address": null,
+      "city": null,
+      "hours": "7 AM to 7 PM (Pacific Time) from Monday through Friday (except state holidays)",
+      "languages": null,
+      "cost": null,
+      "website": "https://www.cpuc.ca.gov/consumer-support/financial-assistance-savings-and-discounts/lifeline",
+      "source_url": "https://www.cpuc.ca.gov/consumer-support/financial-assistance-savings-and-discounts/lifeline",
+      "source_quote": "California LifeLine provides discounted home phone and cell phone services to qualified households.",
+      "verified_date": "2026-10-13",
+      "confidence": "high",
+      "notes": "1-866-272-0349 is the California LifeLine Call Center for general information; application and renewal questions go to the Administrator at 1-877-858-7463. The page fetched does not list the qualifying programs or income limits. It also describes a home broadband pilot approved in Decision 25-08-050."
+    },
+    {
+      "id": "caloptima-health-calaim",
+      "name": "CalOptima Health: Medi-Cal customer service and CalAIM Community Supports (housing navigation)",
+      "organization": "CalOptima Health",
+      "category": "health-coverage",
+      "tags": [
+        "medi-cal",
+        "calaim",
+        "community-supports",
+        "housing-navigation",
+        "housing-deposits",
+        "recuperative-care",
+        "enhanced-care-management"
+      ],
+      "description": "Medi-Cal health plan. Members can call customer service about benefits and can self-refer for CalAIM Community Supports such as Housing Transition Navigation Services, Housing Deposits and Recuperative Care, and for Enhanced Care Management.",
+      "services": [
+        "Medi-Cal customer service",
+        "Housing Transition Navigation Services",
+        "Housing Deposits",
+        "Housing Tenancy and Sustaining Services",
+        "Recuperative Care (Medical Respite)",
+        "Short-Term Post-Hospitalization Housing",
+        "Medically Tailored Meals",
+        "Enhanced Care Management (ECM)",
+        "Behavioral Health Line"
+      ],
+      "eligibility": "CalOptima Health Medi-Cal members who meet each service's eligibility criteria. Enhanced Care Management populations of focus include individuals and families experiencing homelessness.",
+      "population": [
+        "adults",
+        "families",
+        "Medi-Cal members"
+      ],
+      "how_to_access": "mixed",
+      "referral_required": false,
+      "phone": "1-888-587-8088",
+      "address": "500 City Parkway West, Orange, CA 92868",
+      "city": "Orange",
+      "hours": "In-person customer service: 8 a.m. to 5 p.m., Monday through Friday except for certain holidays",
+      "languages": null,
+      "cost": null,
+      "website": "https://www.caloptima.org/",
+      "source_url": "https://www.caloptima.org/en/health-insurance-plans/medi-cal/benefits-and-services/calaim",
+      "source_quote": "Helps members to find housing including but not limited to conducting a housing assessment, developing a housing support plan, searching for housing and securing housing.",
+      "verified_date": "2026-10-13",
+      "confidence": "medium",
+      "notes": "Medium confidence: caloptima.org blocked direct automated requests (HTTP 429, 'Vercel Security Checkpoint'), so the text was read through the Exa web crawler and may be a cached copy that could not be re-checked directly. Ways to ask for Community Supports per the page: talk to your primary care provider, call the number above (TTY 711), or self-refer with the online form. The CalAIM page gives phone hours as Monday through Friday, 8 a.m. to 5:30 p.m. Address, in-person hours and the Behavioral Health Line (1-855-877-3885) are from https://www.caloptima.org/en/contact-us. To apply for Medi-Cal itself, use the Social Services Agency entry."
+    }
+  ]
+}

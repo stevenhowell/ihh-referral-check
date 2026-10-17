@@ -1,0 +1,23 @@
+name: Post credits link at 9 AM (Oct 17)
+on:
+  schedule:
+    - cron: "50 15 17 10 *"   # 8:50 AM PDT, Sat Oct 17 (GitHub cron can run a few minutes late)
+  workflow_dispatch: {}        # or run it by hand: Actions tab > this workflow > Run workflow
+permissions:
+  contents: write
+jobs:
+  post-link:
+    if: github.repository == 'travcjohnson/claude-impact-lab-oc'   # skip in team copies made from the template
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore the claim link (reverts 523ed65)
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(TZ=America/Los_Angeles date +%F)" != "2026-10-17" ]; then echo "Not Oct 17, 2026; skipping"; exit 0; fi
+          if grep -q "platform.claude.com/offers" README.md; then echo "Link already posted"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git revert --no-edit 523ed65f52a7e680b2ed19afb55f369d238ba155
+          git push

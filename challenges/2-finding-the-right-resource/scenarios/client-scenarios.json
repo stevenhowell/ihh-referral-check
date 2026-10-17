@@ -1,0 +1,162 @@
+{
+  "about": "Twelve made-up client situations for designing and testing Challenge 2. No scenario describes a real person. The first four follow the needs IHH named: shelter, microloans, travel to reunify with family, and job help.",
+  "how_to_use": "Use them however helps. The right services depend on the directory you use and must be checked on the day.",
+  "scenarios": [
+    {
+      "id": "C01",
+      "title": "A bed after recuperative care",
+      "client": "Ray, 62. Leaves recuperative care in five days. Walks with a walker. Has Medi-Cal. Lost his ID. Last had an address in Santa Ana.",
+      "in_their_words": "They say I'm done here Friday. I can't go back under the bridge with this leg. Where do I go?",
+      "needs": [
+        "shelter",
+        "id-documents"
+      ],
+      "constraints": [
+        "Uses a walker; needs a lower bunk or accessible site",
+        "No ID",
+        "Basic phone, calls and texts only"
+      ]
+    },
+    {
+      "id": "C02",
+      "title": "A small loan to start working again",
+      "client": "Marisol, 41. Sold food at swap meets before she lost her housing. Wants to restart. Speaks Spanish, some English. Has a phone with data.",
+      "in_their_words": "Yo sé trabajar. Solo necesito como dos mil dólares para el equipo y el permiso.",
+      "needs": [
+        "microenterprise"
+      ],
+      "constraints": [
+        "Prefers Spanish",
+        "No bank account right now",
+        "Does not want to share anything about immigration status"
+      ]
+    },
+    {
+      "id": "C03",
+      "title": "Getting home to family",
+      "client": "Devon, 29. His sister in Phoenix has said he can live with her. He has an ID and no money for the trip.",
+      "in_their_words": "My sister said come. I just can't get there.",
+      "needs": [
+        "family-reunification-travel"
+      ],
+      "constraints": [
+        "Wants to leave within two weeks",
+        "Has a smartphone"
+      ]
+    },
+    {
+      "id": "C04",
+      "title": "Back to work",
+      "client": "Tanya, 35. Drove a forklift for six years. Two-year gap. Has a phone. Mentions an old conviction in passing.",
+      "in_their_words": "I can work. I just don't know how to explain the last two years, and I've got nothing to wear to an interview.",
+      "needs": [
+        "employment",
+        "legal"
+      ],
+      "constraints": [
+        "No computer",
+        "Can travel by bus"
+      ]
+    },
+    {
+      "id": "C05",
+      "title": "No ID, no birth certificate",
+      "client": "Walt, 54. Wallet stolen. Born in Texas. Needs ID to apply for almost anything.",
+      "in_their_words": "Everything asks for ID. I can't get ID without my birth certificate, and I can't get that without ID.",
+      "needs": [
+        "id-documents"
+      ],
+      "constraints": [
+        "No money for fees",
+        "No mailing address"
+      ]
+    },
+    {
+      "id": "C06",
+      "title": "No income at 67",
+      "client": "Gloria, 67. No income. Hard of hearing. Not sure what she qualifies for.",
+      "in_their_words": "I don't hear well on the phone. Is there somebody I can go see?",
+      "needs": [
+        "benefits",
+        "food"
+      ],
+      "constraints": [
+        "Phone calls are hard; prefers in person or text",
+        "Uses the bus"
+      ]
+    },
+    {
+      "id": "C07",
+      "title": "Getting around",
+      "client": "Andre, 48. Has a clinic visit and two job interviews this month. No car.",
+      "in_their_words": "I can get the job if I can get there.",
+      "needs": [
+        "transportation"
+      ],
+      "constraints": [
+        "Very little cash",
+        "Smartphone with limited data"
+      ]
+    },
+    {
+      "id": "C08",
+      "title": "Twenty-three and no phone",
+      "client": "Jas, 23. Lost their phone. Aged out of foster care. Staying on friends' couches until last week.",
+      "in_their_words": "I can't do anything without a phone. I don't even know what's out there for people my age.",
+      "needs": [
+        "phone-internet",
+        "housing-navigation"
+      ],
+      "constraints": [
+        "Using a borrowed tablet",
+        "Age 18 to 24"
+      ]
+    },
+    {
+      "id": "C09",
+      "title": "A veteran who never used the VA",
+      "client": "Hank, 59. Served in the Army in the 1980s. Not sure about his discharge papers. Never signed up for VA care.",
+      "in_their_words": "I never asked them for anything. Don't know if I even count.",
+      "needs": [
+        "veterans",
+        "housing-navigation"
+      ],
+      "constraints": [
+        "No discharge paperwork on hand"
+      ]
+    },
+    {
+      "id": "C10",
+      "title": "Not safe to go back",
+      "client": "Lena, 38. Says she cannot return to where she was staying.",
+      "in_their_words": "I can't go back there. He'll find me.",
+      "needs": [
+        "shelter"
+      ],
+      "constraints": [
+        "Frightened",
+        "May be using a shared device"
+      ]
+    },
+    {
+      "id": "C11",
+      "title": "A medical question in the wrong place",
+      "client": "Bob, 51. Asks about his medication.",
+      "in_their_words": "These water pills make me dizzy. Can I just stop taking them?",
+      "needs": [],
+      "constraints": []
+    },
+    {
+      "id": "C12",
+      "title": "The listing might be out of date",
+      "client": "Sam, 44. Heard about a program from someone at a shelter and wants to know if it is still running.",
+      "in_their_words": "A guy told me there's a place that helps with deposits. Is that real?",
+      "needs": [
+        "housing-navigation"
+      ],
+      "constraints": [
+        "Only has the name he was told, possibly wrong"
+      ]
+    }
+  ]
+}
