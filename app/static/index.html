@@ -42,7 +42,7 @@ nav .item .st { display: block; font-size: 12.5px; color: var(--muted); }
 nav .open { margin-top: 10px; }
 main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
 main.wide { max-width: 1120px; margin: 0 auto; }
-.dashboard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .dash { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; text-align: left; color: var(--text); display: flex; flex-direction: column; gap: 2px; min-height: 92px; }
 button.dash { cursor: pointer; } button.dash:active { background: var(--bg); }
 .dash .n { font-size: 30px; font-weight: 800; line-height: 1.1; } .dash .l { font-size: 13.5px; color: var(--muted); font-weight: 600; }
@@ -74,6 +74,22 @@ table.queue td { vertical-align: top; } .qrow { cursor: pointer; } .qrow:hover {
 .taskbar select { min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: inherit; padding: 0 8px; margin-left: 6px; }
 .tick2 { min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 12px; font-weight: 600; cursor: pointer; }
 .tick2.on { background: var(--green); border-color: var(--green); color: #fff; }
+.taskbar { flex-wrap: wrap; } .tb-left { flex: 1; } .tb-right { display: flex; gap: 8px; align-items: center; }
+.taskbar.resolved { justify-content: space-between; } .taskbar .res { flex: 1; color: var(--green); }
+.resolve-form { flex-basis: 100%; margin-top: 8px; }
+.outcomes { display: flex; gap: 8px; flex-wrap: wrap; }
+.outc { min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); padding: 0 14px; font: inherit; font-weight: 600; cursor: pointer; }
+.outc[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.rf-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 8px; flex-wrap: wrap; }
+.rf-row label { display: flex; flex-direction: column; font-size: 12.5px; color: var(--muted); gap: 2px; } .rf-row label.grow { flex: 1; min-width: 220px; }
+.rf-row input { min-height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; font: inherit; background: var(--panel); color: var(--text); }
+.rf-by { width: 100px; } .rf-msg { color: var(--red); margin-top: 4px; }
+.roles { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.rolebtn { min-height: 44px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--text); padding: 0 16px; font: inherit; font-weight: 600; cursor: pointer; }
+.rolebtn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; } .rolebtn[aria-pressed="true"] .count { color: #fff; }
+.tgroup { margin-top: 18px; } .tg-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 6px; } .tg-head .linkbtn { margin-left: 0; font-size: 16px; }
+.task .head .pagebtn { margin-left: auto; }
+.task.done .head strong { text-decoration: line-through; color: var(--muted); }
 .task { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--purple); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
 .task.problem { border-left-color: var(--red); } .task .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .linkbtn { margin-left: auto; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; min-height: 44px; }
@@ -323,7 +339,6 @@ function dashboardHTML() {
     ${tile(c.to_review, "To review", "", "all")}
     ${tile(c.suggest_approve, "Fetch suggests approve", "approve", "approve")}
     ${tile(c.suggest_deny, "Fetch suggests deny", "deny", "deny")}
-    ${tile(c.to_look_at, "To look at", "look", "look")}
     <div class="dash beds"><span class="n" id="beds-n">${beds ? beds.count : "–"}</span><span class="l">Beds available</span>
       <span class="bedsrow"><input id="beds-in" type="number" min="0" max="500" inputmode="numeric" aria-label="Beds available" value="${beds ? beds.count : ""}"><button class="btn small" id="beds-save">Update</button></span>
       <span class="meta tiny">${beds ? `Entered at ${clock(beds.at)}` : "Not entered yet"}</span></div>
@@ -402,40 +417,96 @@ function overdueNote(open, now) {
 function taskControls(t) {
   if (!t) return "";
   const owners = state.desk.owners.map((o) => `<option ${o === t.owner ? "selected" : ""}>${esc(o)}</option>`).join("");
-  return `<div class="taskbar">
-    <label class="meta">Who reviews <select class="owner" data-task="${esc(t.id)}">${owners}</select></label>
-    <button class="tick2 ${t.done ? "on" : ""}" data-task="${esc(t.id)}" aria-pressed="${t.done}">${t.done ? "✓ Done" : "Mark done"}</button>
+  const who = `<label class="meta">Who reviews <select class="owner" data-task="${esc(t.id)}">${owners}</select></label>`;
+  if (t.done) {
+    return `<div class="taskbar resolved"><span class="res"><b>✓ ${esc(t.outcome_label || "Done")}</b> · ${esc(t.note || "")} <span class="meta">· ${esc(t.by || "")} at ${t.done_at ? clock(t.done_at) : ""}</span></span>
+      <span class="tb-right">${who}<button class="btn small reopen" data-task="${esc(t.id)}">Reopen</button></span></div>`;
+  }
+  return `<div class="taskbar" data-form="${esc(t.id)}">
+    <span class="tb-left">${who}</span>
+    <span class="tb-right"><button class="btn small resolve-open" data-task="${esc(t.id)}">Resolve…</button></span>
+    <div class="resolve-form" hidden>
+      <div class="outcomes" role="radiogroup" aria-label="Outcome">${t.outcomes.map(([k, label]) => `<button class="outc" role="radio" aria-checked="false" data-outcome="${k}">${esc(label)}</button>`).join("")}</div>
+      <div class="rf-row"><label class="grow">Why <input class="rf-note" maxlength="500" placeholder="What you found or did, for the record"></label>
+        <label>Initials <input class="rf-by" maxlength="40" value="${esc(savedInitials())}"></label>
+        <button class="btn primary small rf-save">Save</button><button class="btn small rf-cancel">Cancel</button></div>
+      <div class="meta rf-msg" role="status"></div>
+    </div>
   </div>`;
 }
 function wireTasks(root) {
+  const after = async () => { state.review = null; await refresh(); if (state.view === "packet") { const y = window.scrollY; await renderPacket(); window.scrollTo(0, y); } };
   root.querySelectorAll("select.owner").forEach((s) => s.onchange = async (e) => {
     e.stopPropagation();
     await api("/api/task", { method: "POST", body: JSON.stringify({ id: s.dataset.task, owner: s.value }) });
-    await refresh();
+    await after();
   });
-  root.querySelectorAll(".tick2").forEach((b) => b.onclick = async (e) => {
-    e.stopPropagation();
-    await api("/api/task", { method: "POST", body: JSON.stringify({ id: b.dataset.task, done: !b.classList.contains("on") }) });
-    state.review = null; await refresh();
-    if (state.view === "packet") await renderPacket();
+  root.querySelectorAll(".reopen").forEach((b) => b.onclick = async () => {
+    await api("/api/task", { method: "POST", body: JSON.stringify({ id: b.dataset.task, reopen: true }) });
+    await after();
+  });
+  root.querySelectorAll(".resolve-open").forEach((b) => b.onclick = () => {
+    const bar = b.closest(".taskbar"); bar.querySelector(".resolve-form").hidden = false; b.hidden = true;
+  });
+  root.querySelectorAll(".taskbar[data-form]").forEach((bar) => {
+    let pick = null;
+    bar.querySelectorAll(".outc").forEach((o) => o.onclick = () => {
+      pick = o.dataset.outcome;
+      bar.querySelectorAll(".outc").forEach((x) => x.setAttribute("aria-checked", x === o));
+    });
+    const cancel = bar.querySelector(".rf-cancel");
+    if (cancel) cancel.onclick = () => { bar.querySelector(".resolve-form").hidden = true; bar.querySelector(".resolve-open").hidden = false; };
+    const save = bar.querySelector(".rf-save");
+    if (save) save.onclick = async () => {
+      const msg = bar.querySelector(".rf-msg"), note = bar.querySelector(".rf-note").value.trim(), by = bar.querySelector(".rf-by").value.trim();
+      if (!pick) { msg.textContent = "Pick an outcome."; return; }
+      if (!note) { msg.textContent = "Write why, so the record explains the outcome."; bar.querySelector(".rf-note").focus(); return; }
+      if (!by) { msg.textContent = "Enter your initials."; bar.querySelector(".rf-by").focus(); return; }
+      try { localStorage.setItem("fetch-initials", by); } catch {}
+      try { await api("/api/task", { method: "POST", body: JSON.stringify({ id: bar.dataset.form, outcome: pick, note, by }) }); }
+      catch (e) { msg.textContent = e.message; return; }
+      await after();
+    };
+  });
+  root.querySelectorAll("[data-tpage]").forEach((b) => b.onclick = async () => {
+    if (!state.review || state.review.packet_id !== b.dataset.pid) state.review = await api(`/api/review/${b.dataset.pid}`);
+    openViewer(+b.dataset.tpage, b.dataset.quote, b.dataset.box ? JSON.parse(b.dataset.box) : null);
   });
 }
+
+function savedRole() { try { return localStorage.getItem("fetch-role") || "Coordinator"; } catch { return "Coordinator"; } }
 function renderTasks() {
-  const all = state.desk.tasks.filter((t) => !(state.packets.find((p) => p.id === t.packet_id) || {}).coordinator);
+  const live = state.desk.tasks.filter((t) => !(state.packets.find((p) => p.id === t.packet_id) || {}).coordinator);
+  const role = state.role || savedRole();
   const sev = { problem: 0, coordinator_call: 1, arrange: 2, unchecked: 3, conflict: 4 };
-  const open = all.filter((t) => !t.done).sort((a, b) => sev[a.kind] - sev[b.kind] || a.packet_id.localeCompare(b.packet_id));
-  const groups = state.desk.owners.map((o) => [o, open.filter((t) => t.owner === o)]).filter(([, ts]) => ts.length);
-  const item = (t) => `<div class="task ${t.kind}">
-      <div class="head"><span class="tag ${t.kind}">${esc(t.kind_label)}</span><strong>${esc(t.title)}</strong>
-        <button class="linkbtn" data-open="${t.packet_id}">${esc(packetName({ id: t.packet_id, uploaded: t.packet_id.startsWith("U") }))} ›</button></div>
+  const mine = live.filter((t) => t.owner === role);
+  const open = mine.filter((t) => !t.done).sort((a, b) => a.packet_id.localeCompare(b.packet_id) || sev[a.kind] - sev[b.kind]);
+  const done = mine.filter((t) => t.done).sort((a, b) => (b.done_at || 0) - (a.done_at || 0));
+  const roles = state.desk.owners.map((o) => {
+    const n = live.filter((t) => t.owner === o && !t.done).length;
+    return `<button class="rolebtn" aria-pressed="${o === role}" data-role="${esc(o)}">${esc(o)} <span class="count">${n}</span></button>`;
+  }).join("");
+  const byPacket = {};
+  for (const t of open) (byPacket[t.packet_id] ||= []).push(t);
+  const pname = (id) => packetName({ id, uploaded: id.startsWith("U") });
+  const line = (id) => (state.packets.find((p) => p.id === id) || {}).profile_line || "";
+  const ev = (t) => t.evidence ? `<button class="pagebtn" data-tpage="${t.evidence.page}" data-pid="${t.packet_id}" data-quote="${esc(t.evidence.quote)}" data-box="${t.evidence.box ? esc(JSON.stringify(t.evidence.box)) : ""}">p. ${t.evidence.page}</button>` : "";
+  const item = (t) => `<div class="task ${t.kind}${t.done ? " done" : ""}">
+      <div class="head"><span class="tag ${t.kind}">${esc(t.kind_label)}</span><strong>${esc(t.title)}</strong>${ev(t)}</div>
       <p class="expl">${esc(t.detail)}</p>${taskControls(t)}</div>`;
+  const total = mine.length;
   $("main").innerHTML = `${dashboardHTML()}
-    <h2>Open tasks <span class="count">${open.length}</span></h2>
-    <p class="meta">Every risk Fetch flagged, with who should review it. Owners start from a suggested default by kind of rule; change them here. ${all.length - open.length} done.</p>
-    ${groups.length ? groups.map(([o, ts]) => `<h3>${esc(o)} <span class="count">${ts.length}</span></h3>${ts.map(item).join("")}`).join("") : `<div class="card meta">No open tasks.</div>`}`;
+    <div class="qhead"><h2>My tasks</h2></div>
+    <div class="roles" role="group" aria-label="Your role">${roles}</div>
+    <div class="progress"><div class="pbar2"><i style="width:${total ? Math.round(100 * done.length / total) : 0}%"></i></div>
+      <span><b>${done.length} of ${total} done</b> for ${esc(role)}. Resolve each one with an outcome and why; it goes into the referral's PDF record.</span></div>
+    ${open.length ? Object.entries(byPacket).map(([id, ts]) => `<div class="tgroup"><div class="tg-head"><button class="linkbtn" data-open="${id}">${esc(pname(id))} ›</button><span class="meta">${esc(line(id))}</span></div>${ts.map(item).join("")}</div>`).join("")
+      : `<div class="card clear"><p class="big">Nothing open for ${esc(role)}</p><p class="meta">${total ? "Everything assigned to you is resolved." : "No tasks are assigned to this role."} Pick another role above, or go back to the queue.</p></div>`}
+    ${done.length ? `<details class="fold"><summary>Done <span class="count">${done.length}</span></summary>${done.map(item).join("")}</details>` : ""}`;
   wireDashboard();
   wireTasks($("main"));
   document.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => select(b.dataset.open));
+  document.querySelectorAll(".rolebtn").forEach((b) => b.onclick = () => { state.role = b.dataset.role; try { localStorage.setItem("fetch-role", state.role); } catch {} renderTasks(); });
 }
 
 async function select(id) {

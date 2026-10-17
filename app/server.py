@@ -353,7 +353,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, {"ok": True})
             if path == "/api/task":
                 b = self.body()
-                desk.set_task(b["id"], owner=b.get("owner"), done=b.get("done"))
+                desk.set_task(b["id"], owner=b.get("owner"), outcome=b.get("outcome"), note=b.get("note"),
+                              by=b.get("by"), reopen=bool(b.get("reopen")))
                 return self.send(200, {"ok": True})
             if path == "/api/beds":
                 desk.set_beds(self.body().get("count"))

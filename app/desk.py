@@ -22,6 +22,15 @@ CLINICAL = {"CARD", "CIR", "NEU", "RESP", "RSP", "ID", "INT", "GI", "GU", "END",
 NURSING = {"ADL", "MOB", "COG"}
 PROGRAM = {"OTH", "MH"}
 
+# How each kind of flag can be resolved. A person picks one and writes why.
+OUTCOMES = {
+    "problem": [["confirmed", "Confirmed: rules them out"], ["overruled", "Doesn't rule them out"]],
+    "coordinator_call": [["ok", "OK to accept"], ["not_ok", "Not OK to accept"]],
+    "arrange": [["arranged", "Arranged"], ["cannot", "Can't be arranged"]],
+    "conflict": [["resolved", "Resolved"], ["unresolved", "Can't resolve"]],
+    "unchecked": [["correct", "Checked: Fetch is right"], ["incorrect", "Checked: Fetch is wrong"]],
+}
+
 KIND_LABEL = {"problem": "Rules them out", "coordinator_call": "Your call", "arrange": "Arrange first",
               "conflict": "Pages disagree", "unchecked": "Check by hand"}
 
@@ -88,6 +97,8 @@ def tasks_for(packet_id, review):
             "owner": rec.get("owner") or default_owner(kind, finding.get("rule_id")),
             "owner_set_by_person": bool(rec.get("owner")),
             "done": rec.get("done", False), "done_at": rec.get("done_at"),
+            "outcome": rec.get("outcome"), "outcome_label": dict(OUTCOMES[kind]).get(rec.get("outcome")),
+            "note": rec.get("note"), "by": rec.get("by"), "outcomes": OUTCOMES[kind],
         })
 
     flag = ("problem", "coordinator_call", "arrange")
@@ -104,18 +115,33 @@ def tasks_for(packet_id, review):
     return out
 
 
-def set_task(task_id, owner=None, done=None):
+def set_task(task_id, owner=None, outcome=None, note=None, by=None, reopen=False):
+    """Change who reviews a flag, resolve it with an outcome and a reason, or reopen it."""
+    kind = task_id.split(":")[1]
     with LOCK:
         desk = _load()
         rec = desk["tasks"].setdefault(task_id, {})
         if owner is not None:
             if owner not in OWNERS:
-                raise ValueError("Unknown owner")
+                raise ValueError("Unknown reviewer")
             rec["owner"] = owner
-        if done is not None:
-            rec["done"] = bool(done)
-            rec["done_at"] = time.time() if done else None
-        _log(desk, task_id.split(":")[0], "task", detail={"task": task_id, "owner": owner, "done": done})
+            _log(desk, task_id.split(":")[0], "reassigned", detail=f"{task_id.split(':', 1)[1]} to {owner}")
+        if outcome is not None:
+            if outcome not in dict(OUTCOMES[kind]):
+                raise ValueError("Pick one of the outcomes")
+            note, by = (note or "").strip(), (by or "").strip()
+            if not note:
+                raise ValueError("Write why, so the record explains the outcome.")
+            if not by:
+                raise ValueError("Enter your initials so the record shows who resolved it.")
+            rec.update(outcome=outcome, note=note[:500], by=by[:40], done=True, done_at=time.time())
+            _log(desk, task_id.split(":")[0], "resolved", by=by[:40],
+                 detail=f"{dict(OUTCOMES[kind])[outcome]}: {note[:500]}")
+        if reopen:
+            for k in ("outcome", "note", "by", "done_at"):
+                rec.pop(k, None)
+            rec["done"] = False
+            _log(desk, task_id.split(":")[0], "reopened", detail=task_id.split(":", 1)[1])
         _save(desk)
 
 

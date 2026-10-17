@@ -40,6 +40,15 @@ def _quotes(evidence):
     return "".join(rows)
 
 
+def _resolution(task):
+    if not task:
+        return ""
+    if not task.get("done"):
+        return f"{_e(task['owner'])}<br><b>Open</b>"
+    return (f"{_e(task['owner'])}<br><b>{_e(task.get('outcome_label') or 'Done')}</b><br>"
+            f"{_e(task.get('note') or '')}<br><span class='meta'>{_e(task.get('by') or '')} · {_t(task.get('done_at'))}</span>")
+
+
 def report_html(packet_id):
     r = json.loads((WORK / packet_id / "review.json").read_text())
     rv, s = r["review"], r["review"]["suggestion"]
@@ -67,11 +76,12 @@ def report_html(packet_id):
     flag_rows = "".join(
         f'<tr><td>{_e(STATUS[f["status"]])}</td><td><b>{_e(f["headline"])}</b><br>{_e(f["explanation"])}'
         f'<div class="rule">IHH rule {_e(f["rule_id"])}: {_e(f.get("rule_text"))}</div>{_quotes(f["evidence"])}</td>'
-        f'<td>{_e(task_by_rule.get(f["rule_id"], {}).get("owner", ""))}<br>'
-        f'{"Done" if task_by_rule.get(f["rule_id"], {}).get("done") else "Open"}</td></tr>'
+        f'<td>{_resolution(task_by_rule.get(f["rule_id"]))}</td></tr>'
         for f in flagged)
-    conflict_rows = "".join(f'<tr><td>Pages disagree</td><td><b>{_e(c["topic"])}</b><br>{_e(c["explanation"])}{_quotes(c["evidence"])}</td><td></td></tr>'
-                            for c in rv["conflicts"])
+    task_by_id = {t["id"]: t for t in tasks}
+    conflict_rows = "".join(f'<tr><td>Pages disagree</td><td><b>{_e(c["topic"])}</b><br>{_e(c["explanation"])}{_quotes(c["evidence"])}</td>'
+                            f'<td>{_resolution(task_by_id.get(f"{packet_id}:conflict:{i}"))}</td></tr>'
+                            for i, c in enumerate(rv["conflicts"]))
     rule_rows = "".join(f'<tr><td>{_e(f["rule_id"])}</td><td>{_e(STATUS[f["status"]])}</td><td>{_e(f["headline"])}</td>'
                         f'<td>{", ".join("p. " + str(e["page"]) for e in f["evidence"]) or "–"}</td></tr>'
                         for f in rv["findings"])
@@ -112,7 +122,7 @@ tr {{ page-break-inside: avoid; }} h2 {{ page-break-after: avoid; }} thead {{ di
 <p class="meta">Reviewed {_e(r.get("reviewed_at"))} with {_e(r.get("model"))}. {qc["on_page"] + qc["close"]} of {qc["quotes"]} quotes found in the page text; {img.get("seen", "–")} of {img.get("checked", "–")} seen on the page image.</p>
 {"<h2>Before admission</h2><ul>" + todo + "</ul>" if todo else ""}
 <h2>Flagged for the coordinator</h2>
-<table><thead><tr><th style="width:14%">Type</th><th>Finding and evidence (page and exact words from the fax)</th><th style="width:15%">Reviewer · status</th></tr></thead>{flag_rows}{conflict_rows}</table>
+<table><thead><tr><th style="width:14%">Type</th><th>Finding and evidence (page and exact words from the fax)</th><th style="width:24%">Reviewer · outcome · why</th></tr></thead>{flag_rows}{conflict_rows}</table>
 {prof}
 <h2>Every rule checked</h2>
 <table><thead><tr><th style="width:11%">Rule</th><th style="width:16%">Result</th><th>Finding</th><th style="width:14%">Pages</th></tr></thead>{rule_rows}</table>
