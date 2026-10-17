@@ -321,8 +321,22 @@ $("v-prev").onclick = () => openViewer(state.viewer.page - 1);
 $("v-next").onclick = () => openViewer(state.viewer.page + 1);
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.viewer) closeViewer(); });
 
+function denialsHTML(denials) {
+  const intro = `<h3>Why IHH may have denied these</h3>
+    <p class="meta">IHH didn't record its reasons. These are Claude's reading of each denied packet against IHH's rules, made afterwards with the decision known. They are guesses until IHH staff confirm them, and the review never sees them.</p>`;
+  if (!denials) return intro + `<div class="card meta">No reasons worked out yet.</div>`;
+  const tool = (d) => d.tool_flagged === undefined ? `<span class="meta">Not reviewed</span>`
+    : d.tool_flagged.length ? `Yes: ${d.tool_flagged.map(esc).join(", ")}` : "<b>No</b>";
+  return intro + `<table><thead><tr><th>Packet</th><th>Likely reason</th><th>Rules</th><th>Pages</th><th>Status</th><th>Tool flagged it</th></tr></thead><tbody>
+    ${denials.map((d) => d.reason ? `<tr><td>${d.id}</td><td>${esc(d.reason)}${d.confidence ? `<div class="meta">Confidence: ${esc(d.confidence)}</div>` : ""}</td>
+      <td>${(d.rule_ids || []).map(esc).join(", ")}</td><td>${(d.pages || []).join(", ")}</td>
+      <td>${d.confirmed_by_ihh ? "Confirmed by IHH staff" : "Our guess"}</td><td>${tool(d)}</td></tr>`
+      : `<tr><td>${d.id}</td><td colspan="5" class="meta">No likely reason found yet.</td></tr>`).join("")}
+  </tbody></table>`;
+}
+
 async function renderScore(quiet) {
-  const { rows } = await api("/api/score");
+  const { rows, denials } = await api("/api/score");
   const done = rows.filter((r) => r.state === "done");
   const matched = done.filter((r) => r.match).length;
   const waiting = rows.filter((r) => r.state !== "done" && r.state !== "running");
@@ -342,7 +356,8 @@ async function renderScore(quiet) {
     ${waiting.length ? `<div class="row"><button class="btn primary" id="all">Review ${waiting.length} remaining</button><span class="meta">Reads each packet once; about three minutes each, several at a time.</span></div>` : ""}
     ${running.length ? `<p class="meta"><span class="spinner"></span>&nbsp; Reviewing ${running.length}…</p>` : ""}
     </div>${table}
-    <p class="meta">IHH's real decisions are used only on this screen, after a review is done. The review never sees them. IHH did not record reasons, so a match on the decision does not prove the reasons match.</p>`;
+    <p class="meta">IHH's real decisions are used only on this screen, after a review is done. The review never sees them. IHH did not record reasons, so a match on the decision does not prove the reasons match.</p>
+    ${denialsHTML(denials)}`;
   const all = $("all");
   if (all) all.onclick = async () => {
     all.disabled = true;

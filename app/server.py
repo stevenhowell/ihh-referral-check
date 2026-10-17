@@ -97,7 +97,31 @@ def score():
                        why=r["review"]["suggestion"]["why"])
             row["match"] = item["lean"] == truth[pid]
         rows.append(row)
-    return {"rows": rows}
+    return {"rows": rows, "denials": denial_reasons(truth)}
+
+
+def denial_reasons(truth):
+    """Our after-the-fact reading of why IHH denied each packet, kept in work/denial-reasons.json.
+
+    Written with the decision known, so a review must never see it. It is shown only here,
+    next to the score, and compared with what the review flagged on its own.
+    """
+    f = WORK / "denial-reasons.json"
+    if not f.exists():
+        return None
+    reasons = json.loads(f.read_text())["packets"]
+    out = []
+    for pid in sorted(p for p, d in truth.items() if d == "deny"):
+        entry = dict(reasons.get(pid) or {})
+        entry["id"] = pid
+        review = WORK / pid / "review.json"
+        if entry.get("rule_ids") and review.exists():
+            rv = json.loads(review.read_text())["review"]
+            flagged = {x["rule_id"] for x in rv["findings"] if x["status"] == "problem"}
+            flagged |= set(rv["suggestion"]["deciding_rule_ids"])
+            entry["tool_flagged"] = sorted(flagged & set(entry["rule_ids"]))
+        out.append(entry)
+    return out
 
 
 class Handler(BaseHTTPRequestHandler):
