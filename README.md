@@ -1,124 +1,109 @@
-# Orange County | Claude Impact Lab
+# Fetch
 
-**Saturday, October 17, 2026 · EvoNexus Irvine, 101 Academy Way, Suite 110 · with Illumination Health + Home**
+> For IHH's referral coordinators: Fetch reads a faxed hospital referral, checks it against IHH's admission rules, and hands the coordinator a worklist where every finding points to the page and the exact words it came from.
 
-One day. Three real problems from Illumination Health + Home (IHH), a nonprofit that provides
-housing, healthcare and case management for people experiencing homelessness. Small teams build a
-working prototype with Claude. Everything built today is open source and donated to IHH.
+**F**inds the evidence · **T**races it to the page · **C**hecks it twice · **H**ands it to the coordinator
 
-Organized by Claude Community Orange County. Hosted by EvoNexus Irvine.
+**Team:** Fetch
+**Members:** Steven Howell
+**Challenge:** 1 Referral intake
+**Built at:** Orange County | Claude Impact Lab, October 17, 2026, with Illumination Health + Home
 
-**First hackathon?** You do not need a team, an idea or coding experience to start. Read
-[your first hackathon](docs/first-hackathon.md). Two minutes.
+## The problem
 
-## Bring
+A referral coordinator gets 15 to 35 faxed pages per referral, crooked and handwritten in places, and has to read them against six pages of admission criteria. IHH promises hospitals an answer within two hours, and a slow answer can mean a patient leaves the hospital for the street. The fact that decides the case is often deep in the chart and contradicts the referral form on page 2.
 
-- A laptop and its charger
-- A free [GitHub](https://github.com/signup) account. One per team is enough to start
-- A Claude account at [claude.ai](https://claude.ai)
-- Event credits: $100 in Claude API credits per person (API only, not Claude.ai). Scan the QR code on the screen at kickoff (the claim link is also posted here at 9:00 AM). Claim using your Org ID from [console.anthropic.com](https://console.anthropic.com), not your Claude.ai ID. One claim per person
+## What we built
 
-Wi-Fi: open network, no password.
+A coordinator's desk in the browser:
 
-## The day
+- **Queue.** Referrals oldest first, with time waiting against the 2-hour target, Fetch's suggestion, and the number of open risks. A dashboard shows what's left to review, what Fetch suggests approving or denying, what has risks to look at, and beds available (typed in by a person).
+- **One referral, top to bottom.** A one-line client summary and what Fetch suggests, then **Flagged for the coordinator**: anything that rules the patient out, needs a person's judgment, must be arranged first (home health for IV antibiotics, wound care), or where the pages contradict each other. Then the client profile, a "Before you say yes" checklist, and every IHH rule group, each opening to the rule-by-rule result and reason.
+- **Every claim shows its source.** Each finding and profile fact has a page button. It opens the original fax page with a box drawn around the quoted words.
+- **Decide, then next.** Approve or Deny with your initials and an optional reason; Fetch records the time from opening to decision and opens the next referral. When the queue is empty it says so.
+- **Export PDF.** A record of the decision, who made it and when, Fetch's suggestion (labeled as a suggestion), every flagged item with page and quote, every rule checked, a log of every change, and the fax's SHA-256.
+- **Tasks.** Every flagged risk becomes a task with a suggested reviewer (coordinator, LVN, clinical lead, program manager) that anyone can reassign and mark done.
 
-| Time | What |
-|---|---|
-| 8:30 AM | Doors, check-in, coffee |
-| 9:00 AM | Kickoff. IHH presents the three challenges. Teams form |
-| 9:30 AM | Build |
-| Around noon | Lunch at the tables |
-| **4:00 PM** | **Submissions due.** Judges review every submission and pick the finalists |
-| 4:30 to 5:30 PM | Finalist demos. When called, join the [demo call](https://meet.google.com/ajf-fryh-age) and share your screen |
-| 5:30 PM | Judges rank |
-| 5:45 PM | Winners announced |
-| 6:00 PM | Closing announcement and clean up |
+**Demo video:** to be added
 
-## The three challenges
+## How Claude is used
 
-Teams of up to 4. Each team picks one. At kickoff, say which challenge you want and what you
-bring, and find people who fit.
+When it runs, Fetch makes these calls to Claude (Opus 5.5):
 
-| | Challenge | Who it helps |
-|---|---|---|
-| 1 | [**Referral intake**](challenges/1-referral-intake/) | The referral coordinator, and the patient too sick to recover outside |
-| 2 | [**Finding the right resource**](challenges/2-finding-the-right-resource/) | An IHH client leaving care: shelter, work, a small loan, a way home to family |
-| 3 | [**Make AI approachable**](challenges/3-staff-ai-confidence/) | Frontline staff, LVNs and medical assistants first |
+1. **Read.** Each fax page is sent as an image, a few pages at a time, labeled with its page number. Claude transcribes it word for word, marks checkboxes, writes `[redacted]` for black boxes and `[illegible]` for anything it can't read. Pages scanned sideways are turned upright and read again at higher resolution.
+2. **Review.** The transcripts and IHH's rules (with their rule IDs) go to Claude, which returns a finding per rule with the page and exact quote, plus contradictions between pages and a suggestion.
+3. **Check the quotes against the page image.** Claude looks at the original page image and confirms each quote is really there, and where.
+4. **Profile.** A client profile is built from the transcripts, every fact with its page and quote.
 
-Each challenge page has the problem, who it's for, a short brief and what's in the folder. The
-brief is a direction, not a spec. Build what your team thinks will help.
+Quality control that does not use AI:
 
-New to this field? The short [background](docs/background.md) and the [glossary](docs/glossary.md)
-cover recuperative care and the terms you will hear.
+- **Quote check in code.** Every quote is matched against the transcript of the page it cites. A near match never excuses a changed number or a flipped word ("denies" vs "reports", "with" vs "without").
+- **Timing guard in code.** IHH's dates are blacked out, so rules that depend on a time window (24 hours, 72 hours) can never pass or fail; Fetch shows them as "can't tell" and says why.
+- **Form-only flag.** A pass that rests only on the referral form, which is one person's summary, is marked as not confirmed by the chart.
+- **File fingerprint.** Each fax's SHA-256 is recorded when it's read. A review is only shown for the exact file it came from; originals are made read only.
+- **A person decides.** Fetch's output is always labeled "Fetch suggests". Only a coordinator records a decision.
 
-Two short films about IHH show who you are building for:
-[Recuperative care](https://www.youtube.com/watch?v=Jyu6g8q7sWY) (5:38, California Health Care Foundation) and
-[Family Emergency Homes](https://www.youtube.com/watch?v=FQWH8vxE25I) (3:45).
+How it was built: with Claude Code during the event. IHH's real decisions (`eval/decisions.json`) are read only by the Score screen, after a review is finished; the review never sees them.
 
-## Your first 15 minutes
+## Try it
 
-1. **Get the files.** Use this repo as a template for your team, or download it as a ZIP.
-   [Getting started](docs/getting-started.md) shows both, and three ways to work with Claude:
-   in the browser, in the desktop app, or in a terminal.
-2. **IHH staff are in the room all day.**
+You need macOS (it uses `sips` for images), Python 3.9+, `poppler` for `pdftoppm`, Google Chrome (for PDF export), and a Claude API key.
 
-## The rules
-
-1. **No identifiable patient information.** Nothing real about a patient or client, from anyone,
-   for any reason. The Challenge 1 packets are real referrals with every identifier blacked out. Do
-   not copy them into your repo. Everything else is invented or already public.
-2. **Prototypes only.** Nothing connects to or changes IHH's systems.
-3. **Build in quality control.** AI makes mistakes. Build in a way to catch them. How is up to you.
-4. **Start today.** Build after 9:30 AM. Libraries and frameworks are fine.
-5. **Open source.** Public repo, open license, donated to IHH.
-
-The full version, with the reasons, is in [ground rules](docs/ground-rules.md).
-
-## Submit by 4:00 PM
-
-One per team: a public GitHub repo with a README, plus the submission form at [claudesocal.com/oc-impact-lab](https://claudesocal.com/oc-impact-lab#submit). A short
-screen recording helps. [How to submit](docs/submission.md).
-
-## Judging
-
-The judges, including IHH, review every submission and pick the finalists. Each finalist is scored
-from 1 to 5 in three areas. The areas are weighted:
-
-| Weight | Area | The question |
-|---|---|---|
-| **40%** | **Day-one impact** | Is it ready to be used, and would it matter on day one? |
-| **35%** | **Product and idea** | Could the person it is for use it without help? Is it a creative, useful way in? |
-| **25%** | **Clarity of the demo** | Are the problem, the user and the outcome obvious? |
-
-Slides without a working demo do not place. More in [judging](docs/judging.md).
-
-## Help
-
-- **About the problems:** ask IHH staff. Their experience is the most valuable thing in the room.
-- **About the day, the repo or your setup:** find an organizer.
-- **Something looks like real personal information:** stop and tell an organizer right away.
-
-## What is in this repo
-
-```text
-README.md            this page
-CLAUDE.md            instructions Claude Code reads when you open this repo
-docs/
-  first-hackathon.md   what to expect if this is your first one
-  getting-started.md   get the files, set up Claude
-  ground-rules.md      the rules in full
-  submission.md        what to hand in and how
-  judging.md           how winners are picked
-  background.md        recuperative care and IHH in two pages
-  glossary.md          the terms you will hear
-challenges/
-  1-referral-intake/              IHH's criteria and decisions (packets download from Drive)
-  2-finding-the-right-resource/   resource directory, data sources, client scenarios
-  3-staff-ai-confidence/          role cards
-templates/TEAM-README.md          the README your team's repo needs
+```bash
+brew install poppler
+pip3 install -r app/requirements.txt
+echo "ANTHROPIC_API_KEY=your-key" > .env
+python3 app/server.py
 ```
+
+Then open http://localhost:8811. Put IHH's packets in `challenges/1-referral-intake/packets/` (see that folder's README), or drop any referral PDF or photo onto the queue. A 30-page packet takes about 3 to 5 minutes and roughly $1 to $2 of API use.
+
+## What is real and what is mocked
+
+| Part | Status |
+|---|---|
+| Reading faxed pages, sideways pages upright | Working |
+| Rule-by-rule review against IHH's criteria with rule IDs | Working |
+| Quote check in code, image check by Claude, timing guard | Working |
+| Client profile with page evidence | Working |
+| Queue, dashboard, tasks, decisions, PDF export | Working, stored in local files |
+| Beds available | Typed in by a person; not connected to anything |
+| Who reviews a task | Our suggested defaults by kind of rule; IHH has not confirmed them |
+| Connection to IHH's systems or EMR | None, by design. The PDF is a record a person can file |
+| Login | None. Initials are typed at decision time |
+
+## How well it works
+
+On IHH's 11 real, de-identified referrals:
+
+- **Matches IHH's decision on 9 of 11.** The first run matched 5 of 11. Two rule changes came after seeing that result, both taken from IHH's own documents: unknown items never count against the patient (IHH asks the hospital for them), and "allowed if arranged" rules mean approve once arranged. A later run added accuracy fixes from an audit of Fetch's readings; none of those used IHH's decisions. Because changes came after seeing results, a referral Fetch hasn't seen is the fairest test.
+- **The four denials:** on each, Fetch flagged at least one of the same rules a separate after-the-fact reading identified as the likely reason.
+- **Independent audit of 656 claims** (an earlier version, before the accuracy fixes): 88.9% correct, 10.4% partly right, 0.8% wrong. No quote was invented; every quote was on the page it cited.
+- **Current version:** every quote on all 11 referrals was found in the page text and seen on the page image.
+
+## Where it gets things wrong
+
+- **Sideways and faint numbers.** Most reading errors were on sideways lab and vitals tables. They're now read upright, but a blood pressure on a dense upright page was still misread in one packet. Don't trust a single number without opening its page.
+- **Overstatement.** Earlier versions sometimes wrote a suspected condition as confirmed, or stated a referral-form claim as a chart fact. Rules and flags now guard against this; it isn't eliminated.
+- **Judgment the written rules don't settle.** IHH's aggression rule names staff and other patients; IHH's cardiac rules don't say what to do when an ejection fraction is a chronic baseline. Fetch flags these as "your call" rather than deciding.
+- **Two of eleven decisions differ from IHH's.** In one, the written cardiac rule points to deny while IHH approved; in the other, Fetch leans approve on a psychiatric case IHH denied. Both are questions for IHH staff.
+- **Eleven packets is a small test.** A good score shows Fetch isn't broken, not that it's reliable.
+
+We would not trust it to decide, only to read faster and show its work.
+
+## Next steps
+
+- Confirm with IHH which risks go to which reviewer, and how coordinators treat the rules that are case by case.
+- Test on referrals Fetch has never seen, including ones IHH hasn't decided yet.
+- Re-read dense number-heavy pages (labs, vitals) at higher resolution, not only sideways ones.
+- Sign-in, and a store that several coordinators can share.
+
+## Data and privacy
+
+This project uses only data from the event repo and public sources. It contains no real patient or client information. It does not connect to any Illumination Health + Home system.
+
+The referral packets are never committed: they and everything made from them (page images, transcripts, reviews, profiles, decisions, PDFs) live in `work/` and `challenges/1-referral-intake/packets/`, both ignored by git. Fetch writes `[identifier]` instead of anything that looks like a missed redaction and flags the page; two pages it flagged were checked by a person and showed only IHH's own name and email.
 
 ## License
 
-Code in this repo is released under the [MIT License](LICENSE). The made-up scenarios and role cards are dedicated to the public domain (CC0). The admission criteria and referral
-form are Illumination Health + Home's documents and remain theirs.
+[MIT](LICENSE). The event materials in `docs/` and `challenges/` are from the Orange County Claude Impact Lab repo; IHH's criteria documents remain IHH's.
