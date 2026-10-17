@@ -38,6 +38,7 @@ nav .item:active { background: var(--line); }
 nav .item[aria-current="true"] { background: var(--accent-soft); }
 nav .item b { font-weight: 600; }
 nav .item .st { display: block; font-size: 12.5px; color: var(--muted); }
+.navflag { display: inline-block; margin-left: 6px; font-weight: 700; color: #fff; background: var(--purple); border-radius: 999px; padding: 0 7px; font-size: 11.5px; }
 nav .open { margin-top: 10px; }
 main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
 .btn { border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 16px; min-height: 44px; border-radius: 10px; cursor: pointer; }
@@ -70,7 +71,30 @@ h3 .count { color: var(--muted); font-weight: 400; }
 .imgcheck.yes { color: var(--green); } .imgcheck.no { color: var(--red); font-weight: 600; } .imgcheck.unclear { color: var(--amber); }
 .formonly { font-size: 12.5px; color: var(--amber); margin-top: 6px; font-weight: 600; }
 .groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
-.group { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--row); }
+.group { border: 1px solid var(--line); border-radius: 10px; background: var(--row); }
+.group > summary { list-style: none; cursor: pointer; padding: 10px 12px; min-height: 44px; border-radius: 10px; }
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary:hover { background: var(--bg); }
+.group[open] { grid-column: 1 / -1; background: var(--panel); }
+.group-body { padding: 0 12px 10px; }
+.rulerow { border-top: 1px solid var(--line); }
+.rulerow > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; padding: 10px 2px; min-height: 44px; }
+.rulerow > summary::-webkit-details-marker { display: none; }
+.rulerow > summary, .group > summary { color: var(--text); }
+.rulerow > summary:hover { background: var(--row); }
+.group[open] .showwhy::after { content: "Hide"; } .group:not([open]) .showwhy::after { content: "Show why"; }
+.rulerow .rr-text strong::after { content: " ›"; color: var(--muted); font-weight: 400; } .rulerow[open] .rr-text strong::after { content: " ⌄"; }
+.rr-text { flex: 1; } .rr-why { display: block; color: var(--muted); font-size: 13.5px; }
+.rr-body { padding: 0 2px 10px 72px; }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; min-width: 62px; text-align: center; }
+.pill.pass { color: var(--green); background: var(--green-soft); } .pill.fail { color: var(--red); background: var(--red-soft); }
+.pill.cant { color: var(--amber); background: var(--amber-soft); } .pill.judge { color: var(--purple); background: var(--purple-soft); }
+.flagged { background: var(--purple-soft); border: 2px solid var(--purple); border-radius: 16px; padding: 16px; margin: 0 0 18px; }
+.flagged-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+.flagged-head h2 { margin: 0; font-size: 19px; }
+.flag-count { background: var(--purple); color: #fff; font-weight: 700; font-size: 20px; min-width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; }
+.flagbadge { color: #fff; background: var(--purple); }
+@media (max-width: 760px) { .rr-body { padding-left: 2px; } }
 .group .g { font-size: 13px; color: var(--muted); }
 .group .r { font-weight: 700; }
 .r.pass { color: var(--green); } .r.fail { color: var(--red); } .r.cant { color: var(--amber); } .r.judge { color: var(--purple); }
@@ -183,7 +207,7 @@ async function api(path, opts) {
 function statusLine(p) {
   if (p.state === "running") return esc(p.step || "Reviewing");
   if (p.state === "error") return "Stopped. Open for details";
-  if (p.state === "done") return `Fetch suggests: ${suggestionText(p.decision, p.lean).toLowerCase()}`;
+  if (p.state === "done") return `Fetch suggests: ${suggestionText(p.decision, p.lean).toLowerCase()}${p.flagged ? `<span class="navflag">${p.flagged} flagged</span>` : ""}`;
   if (p.state === "changed") return "File changed. Review hidden";
   return "Not reviewed";
 }
@@ -312,18 +336,40 @@ function folded(title, items) {
 const GROUPS = [["GEN", "General"], ["ADL", "Daily living"], ["MOB", "Mobility"], ["MH", "Mental health"],
   ["COG", "Cognition"], ["OTH", "Other factors"], ["INF", "Infection control"], ["EOL", "End of life"], ["DOC", "Documents"], ["FORM", "Referral form"]];
 function groupOf(id) { const pre = id.split("-")[0]; const g = GROUPS.find(([k]) => k === pre); return g ? g[1] : "Conditions"; }
+const RESULT = { ok: ["pass", "Pass"], problem: ["fail", "Fail"], coordinator_call: ["judge", "Your call"],
+  cant_tell: ["cant", "Can't tell"], missing: ["cant", "Missing"] };
+function ruleResult(f) {
+  // A pass that rests only on the referral form, or on quotes that didn't check out, isn't shown as a pass.
+  if (f.status === "ok" && (f.form_only || f.supported === false)) return ["cant", "Unconfirmed"];
+  return RESULT[f.status];
+}
+function ruleRow(f) {
+  const [cls, word] = ruleResult(f);
+  return `<details class="rulerow">
+    <summary><span class="pill ${cls}">${word}</span><span class="rr-text"><strong>${esc(f.headline)}</strong>
+      <span class="rr-why">${esc(f.explanation)}</span></span><span class="rule">${esc(f.rule_id)}</span></summary>
+    <div class="rr-body">
+      ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
+      ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
+      ${f.evidence.length ? f.evidence.map(quoteHTML).join("") : `<div class="meta">No quote: the packet doesn't say.</div>`}
+    </div></details>`;
+}
 function groupsHTML(findings) {
   const order = [...GROUPS.map(([, n]) => n), "Conditions"];
   const groups = {};
   for (const f of findings) (groups[groupOf(f.rule_id)] ||= []).push(f);
+  const rank = { fail: 0, judge: 1, cant: 2, pass: 3 };
   const cells = order.filter((n) => groups[n]).map((n) => {
-    const fs = groups[n], has = (st) => fs.some((f) => f.status === st);
-    const shaky = fs.some((f) => f.status === "ok" && (f.form_only || !f.supported));
-    const [cls, word] = has("problem") ? ["fail", "Fail"] : has("coordinator_call") ? ["judge", "Your call"]
-      : has("cant_tell") || has("missing") || shaky ? ["cant", "Can't tell"] : ["pass", "Pass"];
-    return `<div class="group"><div class="g">${n}</div><div class="r ${cls}">${word}</div></div>`;
+    const fs = groups[n].slice().sort((a, b) => rank[ruleResult(a)[0]] - rank[ruleResult(b)[0]]);
+    const results = fs.map((f) => ruleResult(f)[0]);
+    const [cls, word] = results.includes("fail") ? ["fail", "Fail"] : results.includes("judge") ? ["judge", "Your call"]
+      : results.includes("cant") ? ["cant", "Can't tell"] : ["pass", "Pass"];
+    const passed = results.filter((r) => r === "pass").length;
+    return `<details class="group ${cls}"><summary><div class="g">${n}</div><div class="r ${cls}">${word}</div>
+      <div class="meta">${passed} of ${fs.length} rule${fs.length > 1 ? "s" : ""} pass · <span class="showwhy"></span></div></summary>
+      <div class="group-body">${fs.map(ruleRow).join("")}</div></details>`;
   }).join("");
-  return `<div class="groups">${cells}</div>`;
+  return `<h3>Rule by rule</h3><div class="groups">${cells}</div>`;
 }
 
 function suggestionText(decision, lean) {
@@ -337,7 +383,8 @@ function reviewHTML(r, name) {
   const quotes = [...rv.findings, ...rv.conflicts].flatMap((f) => f.evidence);
   const handCheck = quotes.filter((e) => !(e.check === "on_page" || e.check === "close") || (e.image_check && e.image_check !== "yes")).length;
   const mins = Math.floor(r.seconds / 60), secs = r.seconds % 60;
-  const first = [...by("problem"), ...by("coordinator_call"), ...rv.conflicts];
+  const unchecked = rv.findings.filter((f) => !["problem", "coordinator_call"].includes(f.status) && f.supported === false);
+  const flaggedItems = [...by("problem"), ...by("coordinator_call"), ...rv.conflicts, ...unchecked];
   const trustLine = handCheck
     ? `<span class="badge bad">${handCheck} of ${quotes.length} quotes to check by hand</span>`
     : `<span class="badge ok">✓ All ${quotes.length} quotes checked against the page text and image</span>`;
@@ -347,21 +394,21 @@ function reviewHTML(r, name) {
     <div class="label">${esc(name)} · Fetch suggests</div>
     <div class="call ${s.decision}">${esc(suggestionText(s.decision, s.lean_if_forced))}</div>
     <div>${esc(s.why)}</div>
-    <div class="trust">${trustLine}<span class="badge ok" title="SHA-256 ${esc(r.sha256 || "")}">✓ Original file unchanged</span></div>
+    <div class="trust"><span class="badge flagbadge">${flaggedItems.length} flagged for you</span>${trustLine}<span class="badge ok" title="SHA-256 ${esc(r.sha256 || "")}">✓ Original file unchanged</span></div>
     <p class="meta" style="margin:10px 0 0">Read ${r.page_count} page${r.page_count === 1 ? "" : "s"} in ${mins} min ${secs} s. Fetch suggests; the coordinator decides.</p>
   </div></div>
+  <section class="flagged">
+    <div class="flagged-head"><span class="flag-count">${flaggedItems.length}</span><div><h2>Flagged for the coordinator</h2>
+      <div class="meta">${flaggedItems.length ? "What rules the patient out, what needs your judgment, where the pages disagree, and anything Fetch couldn't confirm." : "Nothing rules the patient out, needs your judgment or failed a check."}</div></div></div>
+    ${flaggedItems.map(findingHTML).join("")}
+  </section>
   ${groupsHTML(rv.findings)}
-  ${first.length ? `<h3>Look at these first <span class="count">${first.length}</span></h3>${first.map(findingHTML).join("")}`
-    : `<h3>Look at these first</h3><div class="card meta">Nothing in this packet rules the patient out or needs your judgment.</div>`}
   <h3>Reply to the hospital</h3>
   <div class="card">
     ${rv.ask_hospital.length ? `<div class="meta">Ask for:</div><ul class="ask">${rv.ask_hospital.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}
     <textarea id="reply" aria-label="Reply draft">${esc(rv.reply_draft)}</textarea>
     <div class="row"><button class="btn" id="copy">Copy reply</button><span class="meta">A draft to edit. Nothing is sent from here.</span></div></div>
-  <h3>Everything else</h3>
-  ${folded("Can't tell from this packet", by("cant_tell"))}
-  ${folded("Missing documents", by("missing"))}
-  ${folded("Meets the rule", by("ok"))}
+  
   <p class="meta" style="margin-top:14px">${esc(rv.summary)}</p>
   <div class="row" style="margin-top:20px"><button class="btn" id="again">Fetch again</button><span class="meta">Checks the rules again on the pages already read.</span></div>`;
 }

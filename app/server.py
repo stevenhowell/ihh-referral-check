@@ -49,8 +49,11 @@ def summary(packet_id):
     elif review.exists():
         r = json.loads(review.read_text())
         s = r["review"]["suggestion"]
+        fs = r["review"]["findings"]
+        flagged = (sum(f["status"] in ("problem", "coordinator_call") for f in fs) + len(r["review"]["conflicts"])
+                   + sum(f["status"] not in ("problem", "coordinator_call") and f.get("supported") is False for f in fs))
         item.update(state="done", decision=s["decision"], lean=s["lean_if_forced"],
-                    pages=r["page_count"], seconds=r["seconds"])
+                    pages=r["page_count"], seconds=r["seconds"], flagged=flagged)
     else:
         item.update(state="new")
     return item
