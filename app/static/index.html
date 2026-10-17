@@ -56,7 +56,7 @@ main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
 .verdict { display: flex; gap: 18px; align-items: flex-start; }
 .verdict .label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .verdict .call { font-size: 26px; font-weight: 700; margin: 2px 0 6px; }
-.call.approve { color: var(--green); } .call.deny { color: var(--red); } .call.need_more_info { color: var(--amber); }
+.call.approve, .call.approve_once_arranged { color: var(--green); } .call.deny { color: var(--red); } .call.need_more_info { color: var(--amber); }
 .meta { color: var(--muted); font-size: 13px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chip { font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
@@ -88,7 +88,9 @@ h3 .count { color: var(--muted); font-weight: 400; }
 .rr-body { padding: 0 2px 10px 72px; }
 .pill { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; min-width: 62px; text-align: center; }
 .pill.pass { color: var(--green); background: var(--green-soft); } .pill.fail { color: var(--red); background: var(--red-soft); }
-.pill.cant { color: var(--amber); background: var(--amber-soft); } .pill.judge { color: var(--purple); background: var(--purple-soft); }
+.pill.cant { color: var(--amber); background: var(--amber-soft); }
+.pill.arrange, .tag.arrange { color: var(--accent); background: var(--accent-soft); }
+.r.arrange { color: var(--accent); } .pill.judge { color: var(--purple); background: var(--purple-soft); }
 .flagged { background: var(--purple-soft); border: 2px solid var(--purple); border-radius: 16px; padding: 16px; margin: 0 0 18px; }
 .flagged-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
 .flagged-head h2 { margin: 0; font-size: 19px; }
@@ -189,7 +191,7 @@ tbody tr:nth-child(even) { background: var(--row); }
 const state = { view: "packets", selected: null, packets: [], review: null, viewer: null };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const CALL = { approve: "Approve", deny: "Deny", need_more_info: "Needs more information" };
+const CALL = { approve: "Approve", approve_once_arranged: "Approve once arranged", deny: "Deny", need_more_info: "Needs more information" };
 const CHECK = {
   on_page: "✓ On the page",
   close: "≈ On the page, small reading differences",
@@ -313,7 +315,7 @@ function quoteHTML(e) {
     <span class="side">${trust(e)}</span></div>`;
 }
 
-const TAG = { problem: "Rules them out", coordinator_call: "Your call", conflict: "Pages disagree" };
+const TAG = { problem: "Rules them out", arrange: "Arrange first", coordinator_call: "Your call", conflict: "Pages disagree" };
 function findingHTML(f) {
   const kind = f.status || "conflict";
   const tag = TAG[kind] ? `<span class="tag ${kind}">${TAG[kind]}</span>` : "";
@@ -336,7 +338,7 @@ function folded(title, items) {
 const GROUPS = [["GEN", "General"], ["ADL", "Daily living"], ["MOB", "Mobility"], ["MH", "Mental health"],
   ["COG", "Cognition"], ["OTH", "Other factors"], ["INF", "Infection control"], ["EOL", "End of life"], ["DOC", "Documents"], ["FORM", "Referral form"]];
 function groupOf(id) { const pre = id.split("-")[0]; const g = GROUPS.find(([k]) => k === pre); return g ? g[1] : "Conditions"; }
-const RESULT = { ok: ["pass", "Pass"], problem: ["fail", "Fail"], coordinator_call: ["judge", "Your call"],
+const RESULT = { ok: ["pass", "Pass"], problem: ["fail", "Fail"], arrange: ["arrange", "Arrange first"], coordinator_call: ["judge", "Your call"],
   cant_tell: ["cant", "Can't tell"], missing: ["cant", "Missing"] };
 function ruleResult(f) {
   // A pass that rests only on the referral form, or on quotes that didn't check out, isn't shown as a pass.
@@ -358,12 +360,12 @@ function groupsHTML(findings) {
   const order = [...GROUPS.map(([, n]) => n), "Conditions"];
   const groups = {};
   for (const f of findings) (groups[groupOf(f.rule_id)] ||= []).push(f);
-  const rank = { fail: 0, judge: 1, cant: 2, pass: 3 };
+  const rank = { fail: 0, judge: 1, arrange: 2, cant: 3, pass: 4 };
   const cells = order.filter((n) => groups[n]).map((n) => {
     const fs = groups[n].slice().sort((a, b) => rank[ruleResult(a)[0]] - rank[ruleResult(b)[0]]);
     const results = fs.map((f) => ruleResult(f)[0]);
     const [cls, word] = results.includes("fail") ? ["fail", "Fail"] : results.includes("judge") ? ["judge", "Your call"]
-      : results.includes("cant") ? ["cant", "Can't tell"] : ["pass", "Pass"];
+      : results.includes("arrange") ? ["arrange", "Arrange first"] : results.includes("cant") ? ["cant", "Can't tell"] : ["pass", "Pass"];
     const passed = results.filter((r) => r === "pass").length;
     return `<details class="group ${cls}"><summary><div class="g">${n}</div><div class="r ${cls}">${word}</div>
       <div class="meta">${passed} of ${fs.length} rule${fs.length > 1 ? "s" : ""} pass · <span class="showwhy"></span></div></summary>
@@ -383,8 +385,8 @@ function reviewHTML(r, name) {
   const quotes = [...rv.findings, ...rv.conflicts].flatMap((f) => f.evidence);
   const handCheck = quotes.filter((e) => !(e.check === "on_page" || e.check === "close") || (e.image_check && e.image_check !== "yes")).length;
   const mins = Math.floor(r.seconds / 60), secs = r.seconds % 60;
-  const unchecked = rv.findings.filter((f) => !["problem", "coordinator_call"].includes(f.status) && f.supported === false);
-  const flaggedItems = [...by("problem"), ...by("coordinator_call"), ...rv.conflicts, ...unchecked];
+  const unchecked = rv.findings.filter((f) => !["problem", "arrange", "coordinator_call"].includes(f.status) && f.supported === false);
+  const flaggedItems = [...by("problem"), ...by("coordinator_call"), ...by("arrange"), ...rv.conflicts, ...unchecked];
   const trustLine = handCheck
     ? `<span class="badge bad">${handCheck} of ${quotes.length} quotes to check by hand</span>`
     : `<span class="badge ok">✓ All ${quotes.length} quotes checked against the page text and image</span>`;
@@ -399,12 +401,13 @@ function reviewHTML(r, name) {
   </div></div>
   <section class="flagged">
     <div class="flagged-head"><span class="flag-count">${flaggedItems.length}</span><div><h2>Flagged for the coordinator</h2>
-      <div class="meta">${flaggedItems.length ? "What rules the patient out, what needs your judgment, where the pages disagree, and anything Fetch couldn't confirm." : "Nothing rules the patient out, needs your judgment or failed a check."}</div></div></div>
+      <div class="meta">${flaggedItems.length ? "What rules the patient out, what needs your judgment, what must be arranged first, where the pages disagree, and anything Fetch couldn't confirm." : "Nothing rules the patient out, needs your judgment or failed a check."}</div></div></div>
     ${flaggedItems.map(findingHTML).join("")}
   </section>
   ${groupsHTML(rv.findings)}
   <h3>Reply to the hospital</h3>
   <div class="card">
+    ${(rv.arrange_first || []).length ? `<div class="meta">Arrange before admission:</div><ul class="ask">${rv.arrange_first.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}
     ${rv.ask_hospital.length ? `<div class="meta">Ask for:</div><ul class="ask">${rv.ask_hospital.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}
     <textarea id="reply" aria-label="Reply draft">${esc(rv.reply_draft)}</textarea>
     <div class="row"><button class="btn" id="copy">Copy reply</button><span class="meta">A draft to edit. Nothing is sent from here.</span></div></div>
@@ -472,6 +475,8 @@ async function renderScore(quiet) {
   const { rows, denials } = await api("/api/score");
   const done = rows.filter((r) => r.state === "done");
   const matched = done.filter((r) => r.match).length;
+  const withBefore = done.filter((r) => r.before);
+  const matchedBefore = withBefore.filter((r) => r.before.match).length;
   const waiting = rows.filter((r) => r.state !== "done" && r.state !== "running");
   const running = rows.filter((r) => r.state === "running");
   const quotes = done.reduce((a, r) => a + r.quote_check.quotes, 0);
@@ -479,12 +484,13 @@ async function renderScore(quiet) {
   const ok = done.reduce((a, r) => a + both(r.quote_check), 0);
   const head = done.length
     ? `<p class="big">Matched IHH's decision on ${matched} of ${done.length} packets</p>
+       ${withBefore.length ? `<p class="meta">First run: ${matchedBefore} of ${withBefore.length}. Since then two rules were changed, both taken from IHH's documents: unknowns never count against the patient, and "allowed if arranged" rules mean approve once arranged. Because the change came after seeing these results, a packet Fetch hasn't seen is the fairest test.</p>` : ""}
        <p class="meta">${ok} of ${quotes} quotes checked against the page text and image. When Fetch asks for more information, its leaning is what's compared with IHH.</p>`
     : `<p class="big">No packets reviewed yet</p><p class="meta">Review the packets to compare the tool with what IHH actually decided.</p>`;
-  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>Fetch suggests</th><th>IHH decided</th><th>Match</th><th>Quotes checked</th><th>Time</th></tr></thead><tbody>
-    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td>${esc(suggestionText(r.decision, r.lean))}</td><td>${CALL[r.ihh]}</td>
+  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>First run</th><th>Fetch suggests now</th><th>IHH decided</th><th>Match</th><th>Quotes checked</th><th>Time</th></tr></thead><tbody>
+    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td class="meta">${r.before ? `${esc(suggestionText(r.before.decision, r.before.lean))}${r.before.match ? "" : " ✗"}` : ""}</td><td>${esc(suggestionText(r.decision, r.lean))}</td><td>${CALL[r.ihh]}</td>
       <td>${r.match ? "Yes" : "<b>No</b>"}</td><td>${both(r.quote_check)} of ${r.quote_check.quotes}</td><td>${Math.round(r.seconds / 60 * 10) / 10} min</td></tr>`
-      : `<tr><td>${r.id}</td><td colspan="6" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
+      : `<tr><td>${r.id}</td><td colspan="7" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
   </tbody></table>`;
   $("main").innerHTML = `<div class="card">${head}
     ${waiting.length ? `<div class="row"><button class="btn primary" id="all">Review ${waiting.length} remaining</button><span class="meta">Reads each packet once; about three minutes each, several at a time.</span></div>` : ""}

@@ -23,7 +23,7 @@ import anthropic
 from common import MODEL, criteria_prompt, fingerprint, packet_dir, rule_index
 from read_pages import _upload_bytes, read_packet
 
-STATUSES = ["ok", "problem", "coordinator_call", "cant_tell", "missing"]
+STATUSES = ["ok", "problem", "arrange", "coordinator_call", "cant_tell", "missing"]
 
 EVIDENCE = {
     "type": "array",
@@ -71,7 +71,7 @@ REVIEW_SCHEMA = {
         "suggestion": {
             "type": "object",
             "properties": {
-                "decision": {"type": "string", "enum": ["approve", "deny", "need_more_info"]},
+                "decision": {"type": "string", "enum": ["approve", "approve_once_arranged", "deny", "need_more_info"]},
                 "lean_if_forced": {"type": "string", "enum": ["approve", "deny"]},
                 "why": {"type": "string"},
                 "deciding_rule_ids": {"type": "array", "items": {"type": "string"}},
@@ -79,11 +79,12 @@ REVIEW_SCHEMA = {
             "required": ["decision", "lean_if_forced", "why", "deciding_rule_ids"],
             "additionalProperties": False,
         },
+        "arrange_first": {"type": "array", "items": {"type": "string"}},
         "ask_hospital": {"type": "array", "items": {"type": "string"}},
         "reply_draft": {"type": "string"},
     },
     "required": ["summary", "reason_for_hospital_stay", "findings", "conflicts", "suggestion",
-                 "ask_hospital", "reply_draft"],
+                 "arrange_first", "ask_hospital", "reply_draft"],
     "additionalProperties": False,
 }
 
@@ -94,7 +95,7 @@ The packet is above as page transcripts, made from faxed page images. It is a re
 How to read it
 - Check the chart, not only the referral form. The form is one person's summary and can be wrong; the deciding fact is often deep in the chart. When the form and the chart (or two chart pages) disagree, the chart wins: report the conflict, and judge the rule on the chart.
 - Never mark a rule ok on the referral form alone when the rule is about the patient's condition or abilities. If only the form supports it, use cant_tell and say the chart doesn't confirm it.
-- What the packet does not say is unknown, not normal. Use cant_tell.
+- What the packet does not say is unknown, not normal. Use cant_tell. An unknown never counts against the patient: IHH's process is that the coordinator contacts the hospital for anything missing. Put it on ask_hospital.
 - [redacted] marks a privacy redaction, not a missing document. Dates are redacted, so any rule that turns on a date or a number of hours is cant_tell; say "dates removed for privacy".
 - When the outline and the referral form disagree, the outline wins (see "Which document wins"). Where the written rules are unclear (see the last section of the rules), say so in the explanation instead of guessing.
 - Registered sex offender status is never a problem on its own: it is case by case. Report it as coordinator_call.
@@ -108,29 +109,33 @@ Which rules to report
 
 Statuses
 - ok: the packet shows the rule is met. For a document item: the document is in the packet.
-- problem: the packet shows something that breaks the rule or rules the patient out.
+- problem: the packet shows something that rules the patient out under a must or exclude rule. Only use it when the chart shows the fact; never for something unknown, unconfirmed or not yet arranged.
+- arrange: a rule that allows the patient if something is arranged before admission (rules of kind conditional, and condition rules that say a service must be ordered, coordinated or scheduled, such as home health for IV access or wound care, oxygen delivery, hospice, dialysis schedule, follow-up appointments), and the packet doesn't show it arranged yet. This is not a reason to deny: it is something the hospital sets up first. Say exactly what must be arranged.
 - cant_tell: the packet does not settle it.
 - coordinator_call: the packet shows something that matters, but IHH's written rules don't settle it and a person has to judge. Use it for case-by-case rules, for the unclear places listed at the end of the rules, and for facts that come close to a rule without matching its wording. Explain what the coordinator has to weigh.
 - missing: a document item the hospital was asked to send is not in the packet.
 
 Evidence
-- Give at least one quote for every ok, problem and coordinator_call finding, and for a conflict give one quote per side.
+- Give at least one quote for every ok, problem, arrange and coordinator_call finding, and for a conflict give one quote per side.
 - Each quote must be copied character for character from the transcript of the page you cite, 4 to 30 words, one passage per quote. It will be checked automatically against that page; a quote that is not on the page is flagged as unreliable. Never paraphrase inside a quote and never combine words from two places.
 - Use the page numbers from the "=== Page N" headers.
 
 Headline: a few plain words a coordinator can scan, e.g. "Walks 150 ft with a walker". Explanation: one or two sentences.
 
 Suggestion
-- approve: nothing in the packet rules the patient out, the must rules are supported by the chart, and no coordinator_call is serious.
+- deny: only when at least one problem finding shows the chart rules the patient out under IHH's written rules. Unknowns, missing documents and things not yet arranged are never reasons to deny.
+- approve_once_arranged: nothing rules the patient out, and one or more arrange findings must be set up before admission. List them in arrange_first.
+- approve: nothing rules the patient out and nothing needs arranging.
 - A missing date alone never makes a packet need_more_info: dates are removed for privacy in every packet. Judge on what the packet can show.
-- deny: something in the packet rules the patient out under IHH's rules.
-- need_more_info: the answer turns on something the hospital could send or confirm.
-- lean_if_forced: the call you would make if the coordinator had to answer now with only this packet.
+- need_more_info: only when a single missing fact would decide between approve and deny, for example the chart hints at one of IHH's written exclusions without settling it, and only the hospital can confirm it. Ordinary gaps (swabs, notes, vitals, dates) are not enough: approve and ask for them.
+- lean_if_forced: deny only if a problem finding rules the patient out; otherwise approve.
 - why: two sentences at most, naming the rule IDs that decide it.
+
+arrange_first: what the hospital must set up before admission (from the arrange findings). Empty if nothing.
 
 ask_hospital: short items the coordinator would request from the hospital case manager. Empty if nothing is needed.
 
-reply_draft: a short message from the coordinator to the hospital case manager, 120 words at most. Refer to "the patient", never a name. Match the suggestion: for approve, say what is still needed before transport; for deny, a brief reason as IHH's form promises; for need_more_info, the list of what to send. It is a draft the coordinator will edit and send themselves."""
+reply_draft: a short message from the coordinator to the hospital case manager, 120 words at most. Refer to "the patient", never a name. Match the suggestion: for approve, say what is still needed before transport; for approve_once_arranged, say the patient can be accepted once the listed items are arranged; for deny, a brief reason as IHH's form promises; for need_more_info, the list of what to send. It is a draft the coordinator will edit and send themselves."""
 
 
 def _client():

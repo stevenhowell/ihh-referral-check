@@ -50,8 +50,9 @@ def summary(packet_id):
         r = json.loads(review.read_text())
         s = r["review"]["suggestion"]
         fs = r["review"]["findings"]
-        flagged = (sum(f["status"] in ("problem", "coordinator_call") for f in fs) + len(r["review"]["conflicts"])
-                   + sum(f["status"] not in ("problem", "coordinator_call") and f.get("supported") is False for f in fs))
+        flag = ("problem", "arrange", "coordinator_call")
+        flagged = (sum(f["status"] in flag for f in fs) + len(r["review"]["conflicts"])
+                   + sum(f["status"] not in flag and f.get("supported") is False for f in fs))
         item.update(state="done", decision=s["decision"], lean=s["lean_if_forced"],
                     pages=r["page_count"], seconds=r["seconds"], flagged=flagged)
     else:
@@ -144,9 +145,23 @@ def score():
             row.update(decision=item["decision"], lean=item["lean"], pages=item["pages"],
                        seconds=item["seconds"], quote_check=r["quote_check"],
                        why=r["review"]["suggestion"]["why"])
-            row["match"] = item["lean"] == truth[pid]
+            row["match"] = call_of(item["decision"], item["lean"]) == truth[pid]
+        before = WORK / pid / "review-v1.json"
+        if before.exists():
+            b = json.loads(before.read_text())["review"]["suggestion"]
+            row["before"] = {"decision": b["decision"], "lean": b["lean_if_forced"],
+                             "match": call_of(b["decision"], b["lean_if_forced"]) == truth[pid]}
         rows.append(row)
     return {"rows": rows, "denials": denial_reasons(truth)}
+
+
+def call_of(decision, lean):
+    """The approve or deny Fetch's suggestion amounts to, for comparing with IHH."""
+    if decision in ("approve", "approve_once_arranged"):
+        return "approve"
+    if decision == "deny":
+        return "deny"
+    return lean
 
 
 def denial_reasons(truth):
