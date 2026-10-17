@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fetch · Steven Luis Howell</title>
+<meta name="description" content="Fetch reads a hospital referral fax in minutes and shows the page behind every answer. Built in one day at the Orange County Claude Impact Lab for Illumination Health + Home.">
+<style>
+:root {
+  --bg: #f5f5f7; --panel: #fff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
+  --accent: #0a66d8; --accent-press: #0852ad; --accent-soft: #e8f1fc;
+  --green: #1f7a3a; --green-soft: #e9f6ed;
+  --hero1: #071d3d; --hero2: #0a5cc4; --glow: #7fb6ff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0f11; --panel: #1b1b1e; --text: #f2f2f5; --muted: #a1a1a8; --line: #2e2e33;
+    --accent: #4a9bff; --accent-press: #2f86f0; --accent-soft: #17283d;
+    --green: #5fd27f; --green-soft: #17301f;
+    --hero1: #040f22; --hero2: #0a4699;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; overflow-x: hidden; }
+a { color: inherit; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 26px; border-radius: 14px; font-weight: 700; font-size: 17px; text-decoration: none; border: 1px solid transparent; transition: transform .15s ease, background .15s ease; }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: #fff; color: #0b2a55; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.btn.ghost { color: #fff; border-color: rgba(255,255,255,.45); }
+.btn.ghost:hover { background: rgba(255,255,255,.1); }
+.btn.solid { background: var(--accent); color: #fff; box-shadow: 0 12px 30px rgba(10,102,216,.35); animation: pulse 2.6s ease-in-out infinite; }
+.btn.solid:active { background: var(--accent-press); }
+@keyframes pulse { 0%, 100% { box-shadow: 0 12px 30px rgba(10,102,216,.35); } 50% { box-shadow: 0 12px 46px rgba(10,102,216,.65); } }
+
+/* ---------- hero ---------- */
+.hero { min-height: 100svh; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: 40px; padding: 60px max(20px, 6vw) 90px; color: #fff; position: relative; overflow: hidden;
+  background: radial-gradient(900px 500px at 85% 15%, rgba(127,182,255,.28), transparent 60%), radial-gradient(700px 500px at 10% 100%, rgba(10,92,196,.5), transparent 60%), linear-gradient(160deg, var(--hero1), var(--hero2)); }
+.hero::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px); background-size: 26px 26px; mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent); pointer-events: none; animation: drift 30s linear infinite; }
+@keyframes drift { to { background-position: 26px 26px; } }
+.eyebrow { font-size: 14px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+.title { font-size: clamp(64px, 12vw, 136px); line-height: .9; margin: 14px 0 20px; letter-spacing: -.035em; font-weight: 800; display: flex; }
+.title span { display: inline-block; opacity: 0; transform: translateY(40px) rotate(6deg); animation: letterIn .8s cubic-bezier(.2,.9,.2,1.2) forwards; }
+.title span:nth-child(2) { animation-delay: .07s; } .title span:nth-child(3) { animation-delay: .14s; } .title span:nth-child(4) { animation-delay: .21s; } .title span:nth-child(5) { animation-delay: .28s; }
+@keyframes letterIn { to { opacity: 1; transform: none; } }
+.lede { font-size: clamp(21px, 2.6vw, 27px); max-width: 600px; opacity: 0; margin: 0 0 30px; animation: fadeUp .8s .45s ease forwards; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; opacity: 0; animation: fadeUp .7s .8s ease forwards; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.scrollhint { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); font-size: 14px; opacity: .8; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.scrollhint i { width: 22px; height: 34px; border: 2px solid rgba(255,255,255,.7); border-radius: 12px; position: relative; }
+.scrollhint i::after { content: ""; position: absolute; left: 50%; top: 6px; width: 4px; height: 8px; margin-left: -2px; background: #fff; border-radius: 2px; animation: wheel 1.8s infinite; }
+@keyframes wheel { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 0; transform: translateY(12px); } 100% { opacity: 0; } }
+
+.stage { position: relative; height: 470px; }
+.fax { position: absolute; width: 300px; height: 390px; background: #fbfbf7; border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,.35); padding: 26px 24px; overflow: hidden; }
+.fax.back2 { right: 30px; top: 50px; transform: rotate(9deg); opacity: .55; animation: float 7s ease-in-out infinite; }
+.fax.back1 { right: 70px; top: 30px; transform: rotate(-6deg); opacity: .8; animation: float 6s ease-in-out infinite reverse; }
+.fax.front { right: 120px; top: 40px; transform: rotate(-1.5deg); animation: float 8s ease-in-out infinite; }
+@keyframes float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+.ln { height: 8px; border-radius: 4px; background: #c9ccd3; margin: 11px 0; }
+.ln.dark { background: #8a8f99; } .ln.redact { background: #111; height: 10px; }
+.scan { position: absolute; left: 0; right: 0; height: 60px; top: -60px; background: linear-gradient(180deg, transparent, rgba(10,102,216,.18) 70%, rgba(10,102,216,.55) 100%); border-bottom: 2px solid #0a66d8; animation: scan 5.5s ease-in-out infinite; }
+@keyframes scan { 0% { top: -60px; opacity: 0; } 8% { opacity: 1; } 45% { top: 330px; opacity: 1; } 52%, 100% { top: 330px; opacity: 0; } }
+.box { position: absolute; left: 16px; right: 16px; top: 205px; height: 44px; border: 3px solid #0a66d8; border-radius: 6px; background: rgba(10,102,216,.08); opacity: 0; transform: scale(1.15); animation: boxIn 5.5s ease infinite; }
+@keyframes boxIn { 0%, 48% { opacity: 0; transform: scale(1.15); } 56%, 92% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+.tag { position: absolute; left: 70px; top: 300px; background: #fff; color: #1d1d1f; border-radius: 14px; padding: 10px 14px; box-shadow: 0 16px 40px rgba(0,0,0,.35); font-size: 14px; opacity: 0; transform: translateY(10px); animation: tagIn 5.5s ease infinite; }
+.tag b { color: #0a66d8; } .tag .ok { color: #1f7a3a; font-weight: 700; }
+@keyframes tagIn { 0%, 58% { opacity: 0; transform: translateY(10px); } 66%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding-top: 50px; } .stage { height: 420px; } .fax.front { right: auto; left: 10%; } .fax.back1 { right: 5%; } .fax.back2 { right: 0; } }
+@media (max-width: 520px) { .stage { transform: scale(.82); transform-origin: top center; height: 360px; } }
+
+/* ---------- Speed & Accuracy: pinned, scroll-driven ---------- */
+.sa { height: 420vh; position: relative; background: linear-gradient(180deg, #0a5cc4 0%, #071d3d 18%, #050f22 100%); color: #fff; }
+.sa-pin { position: sticky; top: 0; height: 100svh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 70px max(20px, 6vw) 40px; gap: 26px; }
+.sa-glow { position: absolute; width: 900px; height: 900px; left: 50%; top: 55%; transform: translate(-50%, -50%) scale(var(--glow, .6)); background: radial-gradient(circle, rgba(74,155,255,.35), rgba(74,155,255,.08) 40%, transparent 65%); pointer-events: none; transition: transform .2s linear; }
+.sa-head { text-align: center; position: relative; }
+.sa-kicker { font-size: 14px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #7fb6ff; }
+.sa-title { font-size: clamp(34px, 5.4vw, 64px); line-height: 1.02; letter-spacing: -.03em; margin: 8px 0 0; }
+.sa-title span { background: linear-gradient(90deg, #7fb6ff, #5fd27f); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sa-stage { position: relative; display: grid; grid-template-columns: 280px 1fr; gap: 56px; align-items: center; max-width: 980px; width: 100%; margin: 0 auto; }
+@media (max-width: 820px) { .sa-stage { grid-template-columns: 1fr; justify-items: center; gap: 22px; } .sa-pin { gap: 14px; padding-top: 40px; } .sa .rp-fax { transform: scale(.72); margin: -40px 0; } }
+.rp-fax { position: relative; width: 240px; height: 310px; }
+.rp-page { position: absolute; inset: 0; background: #fbfbf7; border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,.45); padding: 22px 20px; overflow: hidden; transition: transform .25s ease, opacity .25s ease; }
+.rp-page.under { transform: translate(12px, 12px) rotate(4deg); opacity: .55; }
+.rp-page.flip { transform: translate(-70px, -24px) rotate(-16deg); opacity: 0; }
+.rp-page .ln { margin: 10px 0; }
+.rp-scan { position: absolute; left: 0; right: 0; height: 50px; top: -50px; background: linear-gradient(180deg, transparent, rgba(10,102,216,.22) 70%, rgba(10,102,216,.65)); border-bottom: 2px solid #0a66d8; }
+.rp-hit { position: absolute; left: 12px; right: 12px; top: 150px; height: 34px; border: 3px solid #0a66d8; border-radius: 6px; background: rgba(10,102,216,.08); opacity: 0; transform: scale(1.2); transition: all .3s cubic-bezier(.2,.9,.2,1.3); }
+.rp-hit.on { opacity: 1; transform: none; }
+.rp-badge { position: absolute; right: -16px; bottom: -14px; background: #0a66d8; color: #fff; font-weight: 800; border-radius: 14px; padding: 8px 12px; font-size: 15px; box-shadow: 0 12px 26px rgba(10,102,216,.5); font-variant-numeric: tabular-nums; }
+.rp-right { width: 100%; max-width: 560px; }
+.rp-kicker { font-size: 14px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #7fb6ff; }
+.rp-time { font-size: clamp(72px, 12vw, 136px); font-weight: 800; letter-spacing: -.05em; line-height: 1; margin: 6px 0 14px; font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; text-shadow: 0 0 40px rgba(127,182,255,.35); }
+.rp-time small { font-size: .28em; color: rgba(255,255,255,.6); letter-spacing: 0; font-weight: 700; }
+.rp-time .done { font-size: .26em; color: #0b3; color: #5fd27f; background: rgba(95,210,127,.15); border: 1px solid rgba(95,210,127,.4); border-radius: 999px; padding: 4px 14px; letter-spacing: 0; opacity: 0; transform: scale(.6); transition: all .35s cubic-bezier(.2,.9,.2,1.4); align-self: center; text-shadow: none; }
+.rp-time .done.on { opacity: 1; transform: none; }
+.rp-steps { display: grid; gap: 9px; }
+.rp-step { display: flex; gap: 12px; align-items: center; font-weight: 600; color: rgba(255,255,255,.45); transition: color .3s; }
+.rp-step .dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #071d3d; font-weight: 900; transition: all .3s; flex: none; }
+.rp-step.now { color: #fff; } .rp-step.now .dot { border-color: #7fb6ff; box-shadow: 0 0 0 5px rgba(127,182,255,.25); }
+.rp-step.ok { color: #fff; } .rp-step.ok .dot { background: #5fd27f; border-color: #5fd27f; }
+.rp-bar { height: 8px; background: rgba(255,255,255,.15); border-radius: 4px; overflow: hidden; margin-top: 18px; max-width: 440px; }
+.rp-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #4a9bff, #5fd27f); box-shadow: 0 0 16px rgba(95,210,127,.6); }
+.rp-sub { color: rgba(255,255,255,.6); font-size: 14px; margin-top: 10px; }
+.sa-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 980px; width: 100%; margin: 0 auto; position: relative; }
+@media (max-width: 820px) { .sa-facts { grid-template-columns: repeat(3, 1fr); gap: 8px; } .sa-fact .s2 { display: none; } }
+.sa-fact { border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); backdrop-filter: blur(8px); border-radius: 22px; padding: 22px; text-align: center; opacity: 0; transform: translateY(40px) scale(.9); transition: opacity .5s ease, transform .6s cubic-bezier(.2,.9,.2,1.25); }
+.sa-fact.on { opacity: 1; transform: none; }
+.sa-fact .n { font-size: clamp(40px, 6vw, 72px); font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; background: linear-gradient(180deg, #fff, #9cc7ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sa-fact:last-child .n { background: linear-gradient(180deg, #b9f5c9, #5fd27f); -webkit-background-clip: text; background-clip: text; }
+.sa-fact .t { font-weight: 700; margin-top: 8px; } .sa-fact .s2 { color: rgba(255,255,255,.6); font-size: 14px; margin-top: 2px; }
+.sa-hint { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); font-size: 13px; color: rgba(255,255,255,.6); transition: opacity .3s; }
+@media (max-width: 820px) {
+  .sa-pin { padding: 24px 16px 18px; gap: 10px; justify-content: flex-start; }
+  .sa-title { font-size: 30px; }
+  .sa .rp-fax { width: 150px; height: 190px; transform: none; margin: 0; }
+  .sa .rp-page { padding: 14px 12px; } .sa .rp-page .ln { height: 6px; margin: 7px 0; }
+  .sa .rp-hit { top: 92px; height: 24px; }
+  .sa .rp-badge { font-size: 12px; padding: 6px 9px; right: -10px; bottom: -10px; }
+  .sa .rp-time { font-size: 64px; margin: 2px 0 8px; }
+  .sa .rp-steps { gap: 5px; font-size: 14px; } .sa .rp-step .dot { width: 20px; height: 20px; font-size: 11px; }
+  .sa .rp-bar { margin-top: 10px; } .sa .rp-sub, .sa .sa-hint { display: none; }
+  .sa-fact { padding: 12px 6px; border-radius: 16px; } .sa-fact .n { font-size: 34px; } .sa-fact .t { font-size: 13px; line-height: 1.25; margin-top: 4px; }
+}
+@media (max-width: 820px) and (max-height: 700px) { .sa .rp-fax { display: none; } }
+
+.final { text-align: center; padding: 110px 20px 120px; }
+.final h2 { font-size: clamp(36px, 5.6vw, 62px); margin: 0 0 26px; letter-spacing: -.03em; }
+footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 20px 40px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .title span, .lede, .ctas, .rise, .stagger > * { opacity: 1 !important; transform: none !important; }
+  .box, .tag { opacity: 1 !important; transform: none !important; } .scan, .rp-scan { display: none; }
+}
+</style>
+</head>
+<body data-avg="402" data-read="103" data-pages="34">
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">For Illumination Health + Home</div>
+    <h1 class="title" aria-label="Fetch"><span>F</span><span>e</span><span>t</span><span>c</span><span>h</span></h1>
+    <p class="lede">Reads a hospital referral fax in minutes and shows the page behind every answer.</p>
+    <div class="ctas"><a class="btn primary" href="https://github.com/stevenhowell/ihh-referral-check">See the code</a><a class="btn ghost" href="#speed">See the numbers</a></div>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="fax back2"><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln redact" style="width:50%"></div><div class="ln"></div><div class="ln" style="width:85%"></div></div>
+    <div class="fax back1"><div class="ln dark" style="width:60%"></div><div class="ln"></div><div class="ln" style="width:75%"></div><div class="ln redact" style="width:40%"></div><div class="ln"></div></div>
+    <div class="fax front">
+      <div class="ln dark" style="width:55%"></div><div class="ln redact" style="width:35%"></div><div class="ln"></div><div class="ln" style="width:80%"></div>
+      <div class="ln"></div><div class="ln" style="width:65%"></div><div class="ln" style="width:90%"></div><div class="ln"></div>
+      <div class="ln dark" style="width:88%"></div><div class="ln dark" style="width:72%"></div>
+      <div class="ln" style="width:60%"></div><div class="ln"></div><div class="ln" style="width:85%"></div><div class="ln redact" style="width:45%"></div><div class="ln" style="width:70%"></div>
+      <div class="scan"></div><div class="box"></div>
+    </div>
+    <div class="tag"><b>p. 12</b> · the line that decides it · <span class="ok">✓ checked twice</span></div>
+  </div>
+  <a class="scrollhint" href="#speed"><i></i>Scroll</a>
+</header>
+
+<section class="sa" id="speed">
+  <div class="sa-pin">
+    <div class="sa-glow" aria-hidden="true"></div>
+    <div class="sa-head"><div class="sa-kicker">Speed &amp; Accuracy</div>
+      <h2 class="sa-title">Two hours of reading,<br><span>done in minutes.</span></h2></div>
+    <div class="sa-stage">
+      <div class="rp-fax" aria-hidden="true">
+        <div class="rp-page under"><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln"></div></div>
+        <div class="rp-page" id="rp-page"><div class="ln dark" style="width:55%"></div><div class="ln redact" style="width:35%"></div><div class="ln"></div><div class="ln" style="width:80%"></div><div class="ln"></div><div class="ln" style="width:65%"></div><div class="ln" style="width:90%"></div><div class="ln"></div><div class="ln" style="width:75%"></div><div class="ln"></div><div class="ln" style="width:60%"></div><div class="ln" style="width:85%"></div><div class="rp-scan" id="rp-scan"></div><div class="rp-hit" id="rp-hit"></div></div>
+        <div class="rp-badge" id="rp-badge">Page 1</div>
+      </div>
+      <div class="rp-right">
+        <div class="rp-kicker">Time to read a 34-page fax</div>
+        <div class="rp-time"><span id="rp-min">0</span><small>min</small><span id="rp-sec">00</span><small>s</small><span class="done" id="rp-done">✓ Read</span></div>
+        <div class="rp-steps">
+          <div class="rp-step"><span class="dot"></span>Read every page</div>
+          <div class="rp-step"><span class="dot"></span>Check 155 IHH rules</div>
+          <div class="rp-step"><span class="dot"></span>Check every quote twice</div>
+          <div class="rp-step"><span class="dot"></span>Build the client profile</div>
+        </div>
+        <div class="rp-bar"><i id="rp-bar"></i></div>
+        <div class="rp-sub" id="rp-sub">Measured on a fresh read of IHH's longest referral.</div>
+      </div>
+    </div>
+    <div class="sa-facts">
+      <div class="sa-fact" data-at="0.72"><div class="n" data-to="155">0</div><div class="t">IHH rules checked</div><div class="s2">every quote checked twice</div></div>
+      <div class="sa-fact" data-at="0.80"><div class="n" data-to="11">0</div><div class="t">Client profiles generated</div><div class="s2">461 facts, each with its page</div></div>
+      <div class="sa-fact" data-at="0.88"><div class="n" data-to="0">0</div><div class="t">Invented quotes</div><div class="s2">in an independent audit of 656 claims</div></div>
+    </div>
+    <div class="sa-hint" id="sa-hint">Keep scrolling ↓</div>
+  </div>
+</section>
+
+<section class="final">
+  <h2 class="rise">Open source, built in a day.</h2>
+  <p class="rise" style="color:var(--muted);font-size:18px;max-width:620px;margin:0 auto 26px">The app runs on a laptop, not on this site, because it reads real (de-identified) hospital referrals that can't be posted publicly. The code, the README and how to run it are on GitHub.</p>
+  <a class="btn solid" href="https://github.com/stevenhowell/ihh-referral-check">See the code on GitHub</a>
+</section>
+
+<footer>Built in one day at the Orange County Claude Impact Lab, October 17, 2026 · A prototype, not connected to any IHH system · No identifiable patient information</footer>
+
+<script>
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const AVG = Number(document.body.dataset.read || 0);      // measured seconds to read a 34-page fax
+const PAGES = Number(document.body.dataset.pages || 26);   // average pages per referral
+
+function countUp(el) {
+  const end = Number(el.dataset.count), dur = 1400, t0 = performance.now();
+  if (reduce || end === 0) { el.textContent = end; return; }
+  const tick = (t) => { const k = Math.min(1, (t - t0) / dur); el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(tick); };
+  el.textContent = 0; requestAnimationFrame(tick);
+}
+
+// Speed & Accuracy: the section is pinned and scroll position drives one document's scan.
+const R = { min: document.getElementById("rp-min"), sec: document.getElementById("rp-sec"), done: document.getElementById("rp-done"),
+  badge: document.getElementById("rp-badge"), page: document.getElementById("rp-page"), scan: document.getElementById("rp-scan"),
+  hit: document.getElementById("rp-hit"), bar: document.getElementById("rp-bar"), steps: [...document.querySelectorAll(".rp-step")],
+  facts: [...document.querySelectorAll(".sa-fact")], sec_: document.getElementById("speed"), pin: document.querySelector(".sa-pin"), hint: document.getElementById("sa-hint") };
+const PHASES = [0.55, 0.75, 0.9, 1];
+let lastPage = -1;
+function showTime(t) { R.min.textContent = Math.floor(t / 60); R.sec.textContent = String(Math.floor(t % 60)).padStart(2, "0"); }
+function scanFrame(k) {
+  showTime(AVG * Math.min(1, k / PHASES[0]));
+  R.bar.style.width = (100 * k) + "%";
+  const phase = PHASES.findIndex((p) => k < p);
+  R.steps.forEach((st, i) => { st.classList.toggle("ok", k >= PHASES[i]); st.classList.toggle("now", i === phase); st.querySelector(".dot").textContent = k >= PHASES[i] ? "✓" : ""; });
+  const readK = Math.min(1, k / PHASES[0]);
+  const pg = Math.min(PAGES, 1 + Math.floor(readK * PAGES));
+  R.badge.textContent = k < PHASES[0] ? `Page ${pg} of ${PAGES}` : k < 1 ? "Checking…" : "Ready";
+  if (pg !== lastPage && k < PHASES[0] && lastPage !== -1) { R.page.classList.add("flip"); setTimeout(() => R.page.classList.remove("flip"), 90); }
+  lastPage = pg;
+  R.scan.style.top = (k < PHASES[0] ? -50 + ((readK * PAGES) % 1) * 360 : -50) + "px";
+  R.hit.classList.toggle("on", k >= PHASES[0] && k < 1 ? true : k >= 1);
+  R.done.classList.toggle("on", k >= PHASES[0]);
+}
+function factsFrame(p) {
+  R.facts.forEach((f) => {
+    const at = Number(f.dataset.at), on = p >= at;
+    f.classList.toggle("on", on);
+    const n = f.querySelector(".n"), to = Number(n.dataset.to);
+    const k = Math.max(0, Math.min(1, (p - at) / 0.08));
+    n.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
+  });
+}
+function onScroll() {
+  const r = R.sec_.getBoundingClientRect(), span = R.sec_.offsetHeight - window.innerHeight;
+  const p = Math.max(0, Math.min(1, -r.top / span));
+  scanFrame(AVG ? Math.min(1, p / 0.62) : 0);
+  factsFrame(p);
+  R.pin.style.setProperty("--glow", (0.6 + p * 0.7).toFixed(3));
+  R.hint.style.opacity = p > 0.95 ? 0 : 1;
+}
+function staticFinal() { scanFrame(1); R.facts.forEach((f) => { f.classList.add("on"); const n = f.querySelector(".n"); n.textContent = n.dataset.to; }); R.hint.hidden = true; }
+if (!AVG) { R.min.textContent = "–"; R.sec.textContent = "–"; }
+if (reduce) { R.sec_.style.height = "auto"; R.pin.style.position = "relative"; R.pin.style.height = "auto"; R.pin.style.padding = "90px max(20px, 6vw)"; staticFinal(); }
+else { window.addEventListener("scroll", onScroll, { passive: true }); window.addEventListener("resize", onScroll); onScroll(); }
+
+const targets = document.querySelectorAll(".rise, .stagger");
+if ("IntersectionObserver" in window && !reduce) {
+  document.querySelectorAll("[data-count]").forEach((el) => el.textContent = "0");
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add("in");
+    e.target.querySelectorAll("[data-count]").forEach(countUp);
+    io.unobserve(e.target);
+  }), { threshold: 0.2 });
+  targets.forEach((el) => io.observe(el));
+} else {
+  targets.forEach((el) => el.classList.add("in"));
+}
+</script>
+</body>
+</html>
