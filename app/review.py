@@ -181,44 +181,61 @@ def _words(text):
     return re.sub(r"[^a-z0-9]+", " ", text.lower()).split()
 
 
+# Words that flip a clinical meaning. A near match may never differ on one of these.
+POLARITY = {"no", "not", "yes", "denies", "denied", "deny", "negative", "positive", "neg", "pos", "without",
+            "with", "none", "never", "unable", "able", "independent", "dependent", "assist", "assistance",
+            "x", "normal", "abnormal", "absent", "present", "is", "isn"}
+
+
 def _match(quote_words, page_words):
-    """How closely the quote appears in the page: 1.0 is word for word."""
+    """Best match of the quote in the page: (score, window). 1.0 is word for word."""
     n = len(quote_words)
     if not n or not page_words:
-        return 0.0
-    q = " ".join(quote_words)
-    if q in " ".join(page_words):
-        return 1.0
-    # Cheap filter before the slower fuzzy search.
+        return 0.0, []
+    if " ".join(quote_words) in " ".join(page_words):
+        return 1.0, quote_words
     vocab = set(page_words)
     if sum(w in vocab for w in quote_words) / n < 0.6:
-        return 0.0
+        return 0.0, []
     # Only try windows that start near one of the quote's first words.
     starts = set(quote_words[:3])
-    best = 0.0
+    best, best_window = 0.0, []
     for i, word in enumerate(page_words):
         if word not in starts:
             continue
         for start in range(max(0, i - 2), i + 1):
             for length in (n - 1, n, n + 1):
                 window = page_words[start:start + length]
-                best = max(best, SequenceMatcher(None, quote_words, window, autojunk=False).ratio())
+                r = SequenceMatcher(None, quote_words, window, autojunk=False).ratio()
+                if r > best:
+                    best, best_window = r, window
         if best > 0.97:
             break
-    return best
+    return best, best_window
+
+
+def _meaning_changed(quote_words, window):
+    """True if the words that differ include a number or a word that flips the meaning."""
+    sm = SequenceMatcher(None, quote_words, window, autojunk=False)
+    for op, a1, a2, b1, b2 in sm.get_opcodes():
+        if op == "equal":
+            continue
+        for w in quote_words[a1:a2] + window[b1:b2]:
+            if w in POLARITY or any(ch.isdigit() for ch in w):
+                return True
+    return False
 
 
 def check_quote(evidence, page_words):
     """Label one quote: on_page, close (small transcription differences), other_page or not_found."""
     qw = _words(evidence["quote"])
-    # A near match never excuses a different number: "50 ft" is not "150 ft".
-    numbers = {w for w in qw if any(ch.isdigit() for ch in w)}
 
     def near(words):
-        return _match(qw, words) >= 0.8 and numbers <= set(words)
+        score, window = _match(qw, words)
+        return score >= 0.8 and not _meaning_changed(qw, window)
 
     cited = page_words.get(evidence["page"], [])
-    if _match(qw, cited) >= 0.999:
+    if _match(qw, cited)[0] >= 0.999:
         return {"check": "on_page"}
     if near(cited):
         return {"check": "close"}
@@ -350,7 +367,7 @@ def review_packet(packet_id, progress=lambda text: None, fresh=False):
 
     started = time.time()
     read = read_packet(packet_id, progress)
-    progress(f"Checking {read['page_count']} pages against IHH's rules")
+    progress(f"Checking {read['page_count']} page{'' if read['page_count'] == 1 else 's'} against IHH's rules")
     review, usage, review_seconds = ask_claude(read)
     progress("Checking every quote against its page")
     counts = check_review(review, read)

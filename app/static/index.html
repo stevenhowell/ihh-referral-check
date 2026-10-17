@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Referral Check</title>
+<title>Fetch</title>
 <style>
 :root {
   --bg: #f5f5f7; --panel: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
@@ -49,6 +49,8 @@ main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
 .empty { text-align: center; padding: 70px 20px; color: var(--muted); }
 .empty h2 { color: var(--text); font-size: 22px; margin: 0 0 8px; }
 .empty p { max-width: 460px; margin: 0 auto 20px; }
+.acro { color: var(--text); letter-spacing: .01em; }
+.acro b { color: var(--accent); }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; }
 .verdict { display: flex; gap: 18px; align-items: flex-start; }
 .verdict .label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
@@ -118,8 +120,8 @@ tbody tr:nth-child(even) { background: var(--row); }
 <body>
 <header>
   <div>
-    <h1>Referral Check</h1>
-    <div class="sub">Illumination Health + Home · recuperative care referrals</div>
+    <h1>Fetch</h1>
+    <div class="sub">Referral review for Illumination Health + Home</div>
   </div>
   <div class="seg" role="group" aria-label="View">
     <button id="tab-packets" aria-pressed="true">Packets</button>
@@ -166,7 +168,7 @@ async function api(path, opts) {
 function statusLine(p) {
   if (p.state === "running") return esc(p.step || "Reviewing");
   if (p.state === "error") return "Stopped. Open for details";
-  if (p.state === "done") return `Suggests ${CALL[p.decision].toLowerCase()} · ${p.pages} pages`;
+  if (p.state === "done") return `Suggests ${CALL[p.decision].toLowerCase()} · ${p.pages} page${p.pages === 1 ? "" : "s"}`;
   return "Not reviewed";
 }
 
@@ -215,9 +217,9 @@ async function renderPacket() {
   if (!p) return;
   const name = p.uploaded ? `Opened packet ${p.id.slice(1)}` : `Packet ${p.id}`;
   if (p.state === "new") {
-    main.innerHTML = `<div class="empty"><h2>${name} hasn't been reviewed</h2>
-      <p>Review reads every page of the fax and checks it against IHH's admission rules. Each finding shows the page and the words it came from. It takes about three minutes.</p>
-      <button class="btn primary" id="go">Review</button></div>`;
+    main.innerHTML = `<div class="empty"><h2>${name} hasn't been fetched</h2>
+      <p>Fetch reads every page of the fax and checks it against IHH's admission rules. Each finding shows the page and the words it came from. It takes about three minutes.</p>
+      <button class="btn primary" id="go">Fetch</button></div>`;
     $("go").onclick = () => startReview(p.id);
     return;
   }
@@ -421,6 +423,7 @@ $("file").onchange = async () => {
 
 function showWelcome() {
   $("main").innerHTML = `<div class="empty"><h2>Choose a referral packet</h2>
+    <p class="acro"><b>F</b>inds the <b>E</b>vidence · <b>T</b>races it to the page · <b>C</b>hecks it twice · <b>H</b>ands it to you</p>
     <p>Pick one of IHH's eleven packets on the left, or open a new fax as a PDF or a photo. The review shows which of IHH's rules the packet meets, which it breaks, and what it doesn't say, each with the page it came from.</p></div>`;
 }
 
