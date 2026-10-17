@@ -74,7 +74,19 @@ h3 .count { color: var(--muted); font-weight: 400; }
 .group .g { font-size: 13px; color: var(--muted); }
 .group .r { font-weight: 700; }
 .r.pass { color: var(--green); } .r.fail { color: var(--red); } .r.cant { color: var(--amber); } .r.judge { color: var(--purple); }
-.quote .side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.quote .side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; max-width: 200px; text-align: right; }
+.badge { font-size: 12.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; display: inline-block; }
+.badge.ok { color: var(--green); background: var(--green-soft); }
+.badge.bad { color: var(--red); background: var(--red-soft); }
+.badge-why { font-size: 12px; color: var(--red); }
+.trust { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.tag { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+.tag.problem { color: var(--red); background: var(--red-soft); }
+.tag.coordinator_call, .tag.conflict { color: var(--purple); background: var(--purple-soft); }
+details.fold { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px; margin-bottom: 8px; }
+details.fold > summary { color: var(--text); font-weight: 600; min-height: 44px; display: flex; align-items: center; gap: 8px; }
+details.fold[open] { padding-bottom: 10px; }
+.call .lean { font-weight: 500; }
 .finding .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .finding .head strong { font-weight: 600; }
 .finding .rule { font-size: 12.5px; color: var(--muted); }
@@ -171,7 +183,8 @@ async function api(path, opts) {
 function statusLine(p) {
   if (p.state === "running") return esc(p.step || "Reviewing");
   if (p.state === "error") return "Stopped. Open for details";
-  if (p.state === "done") return `Suggests ${CALL[p.decision].toLowerCase()} · ${p.pages} page${p.pages === 1 ? "" : "s"}`;
+  if (p.state === "done") return `Fetch suggests: ${suggestionText(p.decision, p.lean).toLowerCase()}`;
+  if (p.state === "changed") return "File changed. Review hidden";
   return "Not reviewed";
 }
 
@@ -230,6 +243,13 @@ async function renderPacket() {
     main.innerHTML = `<div class="empty"><h2><span class="spinner"></span>&nbsp; Reviewing ${name}</h2><p>${esc(p.step)}</p></div>`;
     return;
   }
+  if (p.state === "changed") {
+    main.innerHTML = `<div class="empty"><h2>${name} changed after it was reviewed</h2>
+      <p>The file no longer matches the one Fetch read, so its review is hidden. Fetch it again to review the file as it is now.</p>
+      <button class="btn primary" id="go">Fetch again</button></div>`;
+    $("go").onclick = () => startReview(p.id, true);
+    return;
+  }
   if (p.state === "error") {
     main.innerHTML = `<div class="empty"><h2>The review of ${name} stopped</h2><p>${esc(p.error)}</p>
       <button class="btn primary" id="go">Review again</button></div>`;
@@ -249,37 +269,44 @@ async function renderPacket() {
   if (again) again.onclick = () => startReview(p.id, true);
 }
 
-const IMG = { yes: "✓ Seen on the page image", no: "✗ Not on the page image. Check by hand", unclear: "? Hard to read on the image. Check by hand" };
-function imageCheck(e) {
-  if (!e.image_check) return "";
-  const says = e.image_says ? `<div class="imgcheck ${e.image_check}">Page shows: ${esc(e.image_says)}</div>` : "";
-  return `<span class="imgcheck ${e.image_check}">${IMG[e.image_check]}</span>${says}`;
+// One badge per quote. "Checked" means it was found in Fetch's reading of the page AND on the page image.
+function trust(e) {
+  const textOk = e.check === "on_page" || e.check === "close";
+  const imageOk = e.image_check === undefined ? null : e.image_check === "yes";
+  if (textOk && imageOk) return `<span class="badge ok" title="Found word for word in the page text and seen on the page image">✓ Checked</span>`;
+  if (textOk && imageOk === null) return `<span class="badge ok" title="Found in the page text; not yet checked on the image">✓ In the page text</span>`;
+  let why = "Not found on this page";
+  if (e.check === "other_page") why = `It's on page ${e.found_on}, not ${e.page}`;
+  else if (textOk && e.image_check === "unclear") why = "Hard to read on the page image";
+  else if (textOk) why = "Not seen on the page image";
+  const says = e.image_says ? `<div class="badge-why">Page shows: ${esc(e.image_says)}</div>` : "";
+  return `<span class="badge bad">Check by hand</span><div class="badge-why">${why}</div>${says}`;
 }
 function quoteHTML(e) {
-  const label = typeof CHECK[e.check] === "function" ? CHECK[e.check](e) : CHECK[e.check];
   return `<div class="quote">
     <button class="pagebtn" data-page="${e.page}" data-quote="${esc(e.quote)}" data-box="${e.box ? esc(JSON.stringify(e.box)) : ""}" aria-label="Open page ${e.page}">p. ${e.page}</button>
     <q>${esc(e.quote)}</q>
-    <span class="side"><span class="check ${e.check}">${label}</span>${imageCheck(e)}</span></div>`;
+    <span class="side">${trust(e)}</span></div>`;
 }
 
+const TAG = { problem: "Rules them out", coordinator_call: "Your call", conflict: "Pages disagree" };
 function findingHTML(f) {
-  const rule = f.known_rule ? `${esc(f.rule_id)} · ${esc(f.rule_section)}` : `${esc(f.rule_id)} · not a rule ID in IHH's documents`;
-  return `<div class="finding ${f.status}">
-    <div class="head"><strong>${esc(f.headline)}</strong><span class="rule">${rule}</span></div>
+  const kind = f.status || "conflict";
+  const tag = TAG[kind] ? `<span class="tag ${kind}">${TAG[kind]}</span>` : "";
+  const rule = f.rule_id ? `<span class="rule">${esc(f.rule_id)}${f.known_rule ? "" : " (not an IHH rule ID)"}</span>` : "";
+  return `<div class="finding ${kind}">
+    <div class="head">${tag}<strong>${esc(f.headline || f.topic)}</strong>${rule}</div>
     <p class="expl">${esc(f.explanation)}</p>
     ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
     ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
-    ${f.supported ? "" : `<div class="unsupported">No quote for this finding was found on its page. Treat it as unchecked.</div>`}
+    ${f.supported === false ? `<div class="unsupported">None of its quotes checked out. Treat this finding as unchecked.</div>` : ""}
     ${f.evidence.map(quoteHTML).join("")}
   </div>`;
 }
 
-function section(title, items, render, open = true) {
+function folded(title, items) {
   if (!items.length) return "";
-  const body = items.map(render).join("");
-  if (open) return `<h3>${title} <span class="count">${items.length}</span></h3>${body}`;
-  return `<h3>${title} <span class="count">${items.length}</span></h3><details><summary>Show ${items.length}</summary>${body}</details>`;
+  return `<details class="fold"><summary>${title} <span class="count">${items.length}</span></summary>${items.map(findingHTML).join("")}</details>`;
 }
 
 const GROUPS = [["GEN", "General"], ["ADL", "Daily living"], ["MOB", "Mobility"], ["MH", "Mental health"],
@@ -292,41 +319,51 @@ function groupsHTML(findings) {
   const cells = order.filter((n) => groups[n]).map((n) => {
     const fs = groups[n], has = (st) => fs.some((f) => f.status === st);
     const shaky = fs.some((f) => f.status === "ok" && (f.form_only || !f.supported));
-    const [cls, word] = has("problem") ? ["fail", "Fail"] : has("coordinator_call") ? ["judge", "Coordinator's call"]
+    const [cls, word] = has("problem") ? ["fail", "Fail"] : has("coordinator_call") ? ["judge", "Your call"]
       : has("cant_tell") || has("missing") || shaky ? ["cant", "Can't tell"] : ["pass", "Pass"];
-    return `<div class="group"><div class="g">${n}</div><div class="r ${cls}">${word}</div><div class="meta">${fs.length} rule${fs.length > 1 ? "s" : ""}</div></div>`;
+    return `<div class="group"><div class="g">${n}</div><div class="r ${cls}">${word}</div></div>`;
   }).join("");
-  return `<h3>By rule group</h3><div class="groups">${cells}</div>`;
+  return `<div class="groups">${cells}</div>`;
 }
+
+function suggestionText(decision, lean) {
+  return decision === "need_more_info" ? `${CALL[decision]}, leaning ${lean}` : CALL[decision];
+}
+
 function reviewHTML(r, name) {
   const rv = r.review, s = rv.suggestion, qc = r.quote_check;
   const by = (st) => rv.findings.filter((f) => f.status === st);
   const flagged = r.pages.filter((p) => p.possible_unredacted_identifier).map((p) => p.page);
-  const checked = qc.on_page + qc.close;
+  const quotes = [...rv.findings, ...rv.conflicts].flatMap((f) => f.evidence);
+  const handCheck = quotes.filter((e) => !(e.check === "on_page" || e.check === "close") || (e.image_check && e.image_check !== "yes")).length;
   const mins = Math.floor(r.seconds / 60), secs = r.seconds % 60;
-  const lean = s.decision === "need_more_info" ? `<div class="meta">If it had to be decided now with only this packet: ${CALL[s.lean_if_forced].toLowerCase()}.</div>` : "";
+  const first = [...by("problem"), ...by("coordinator_call"), ...rv.conflicts];
+  const trustLine = handCheck
+    ? `<span class="badge bad">${handCheck} of ${quotes.length} quotes to check by hand</span>`
+    : `<span class="badge ok">✓ All ${quotes.length} quotes checked against the page text and image</span>`;
   return `
   ${flagged.length ? `<div class="banner">Page ${flagged.join(", ")} may show an identifier the redaction missed. Stop and tell an organizer before going further.</div>` : ""}
   <div class="card verdict"><div style="flex:1">
-    <div class="label">${esc(name)} · suggested decision</div>
-    <div class="call ${s.decision}">${CALL[s.decision]}</div>
-    <div>${esc(s.why)}</div>${lean}
-    <div class="chips">${s.deciding_rule_ids.map((id) => `<span class="chip">${esc(id)}</span>`).join("")}</div>
-    <p class="meta" style="margin:12px 0 0">${esc(rv.summary)}</p>
-    <p class="meta" style="margin:8px 0 0">Read ${r.page_count} pages in ${mins} min ${secs} s. ${checked} of ${qc.quotes} quotes found on the page they cite${qc.quotes - checked ? `; ${qc.quotes - checked} need a look` : ""}. ${qc.image ? ` ${qc.image.seen} of ${qc.image.checked} quotes seen on the page image${qc.image.checked - qc.image.seen ? `; ${qc.image.checked - qc.image.seen} to check by hand` : ""}.` : ""} The coordinator makes the decision.</p>
+    <div class="label">${esc(name)} · Fetch suggests</div>
+    <div class="call ${s.decision}">${esc(suggestionText(s.decision, s.lean_if_forced))}</div>
+    <div>${esc(s.why)}</div>
+    <div class="trust">${trustLine}<span class="badge ok" title="SHA-256 ${esc(r.sha256 || "")}">✓ Original file unchanged</span></div>
+    <p class="meta" style="margin:10px 0 0">Read ${r.page_count} page${r.page_count === 1 ? "" : "s"} in ${mins} min ${secs} s. Fetch suggests; the coordinator decides.</p>
   </div></div>
   ${groupsHTML(rv.findings)}
-  ${section("Rules the patient out", by("problem"), findingHTML)}
-  ${section("Needs the coordinator's judgment", by("coordinator_call"), findingHTML)}
-  ${section("The packet disagrees with itself", rv.conflicts, (c) => `<div class="finding conflict"><div class="head"><strong>${esc(c.topic)}</strong></div><p class="expl">${esc(c.explanation)}</p>${c.evidence.map(quoteHTML).join("")}</div>`)}
-  ${section("Can't tell from this packet", by("cant_tell"), findingHTML)}
-  ${section("Missing documents", by("missing"), findingHTML)}
-  ${rv.ask_hospital.length ? `<h3>Ask the hospital for</h3><div class="card"><ul class="ask">${rv.ask_hospital.map((a) => `<li>${esc(a)}</li>`).join("")}</ul></div>` : ""}
+  ${first.length ? `<h3>Look at these first <span class="count">${first.length}</span></h3>${first.map(findingHTML).join("")}`
+    : `<h3>Look at these first</h3><div class="card meta">Nothing in this packet rules the patient out or needs your judgment.</div>`}
   <h3>Reply to the hospital</h3>
-  <div class="card"><textarea id="reply" aria-label="Reply draft">${esc(rv.reply_draft)}</textarea>
-    <div class="row"><button class="btn" id="copy">Copy reply</button><span class="meta">A draft for the coordinator to edit. Nothing is sent from here.</span></div></div>
-  ${section("Meets the rule", by("ok"), findingHTML, false)}
-  <div class="row" style="margin-top:28px"><button class="btn" id="again">Review again</button><span class="meta">Runs the rules check again on the pages already read.</span></div>`;
+  <div class="card">
+    ${rv.ask_hospital.length ? `<div class="meta">Ask for:</div><ul class="ask">${rv.ask_hospital.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}
+    <textarea id="reply" aria-label="Reply draft">${esc(rv.reply_draft)}</textarea>
+    <div class="row"><button class="btn" id="copy">Copy reply</button><span class="meta">A draft to edit. Nothing is sent from here.</span></div></div>
+  <h3>Everything else</h3>
+  ${folded("Can't tell from this packet", by("cant_tell"))}
+  ${folded("Missing documents", by("missing"))}
+  ${folded("Meets the rule", by("ok"))}
+  <p class="meta" style="margin-top:14px">${esc(rv.summary)}</p>
+  <div class="row" style="margin-top:20px"><button class="btn" id="again">Fetch again</button><span class="meta">Checks the rules again on the pages already read.</span></div>`;
 }
 
 async function openViewer(page, quote, box) {
@@ -391,15 +428,16 @@ async function renderScore(quiet) {
   const waiting = rows.filter((r) => r.state !== "done" && r.state !== "running");
   const running = rows.filter((r) => r.state === "running");
   const quotes = done.reduce((a, r) => a + r.quote_check.quotes, 0);
-  const ok = done.reduce((a, r) => a + r.quote_check.on_page + r.quote_check.close, 0);
+  const both = (q) => q.image ? Math.min(q.on_page + q.close, q.image.seen) : q.on_page + q.close;
+  const ok = done.reduce((a, r) => a + both(r.quote_check), 0);
   const head = done.length
     ? `<p class="big">Matched IHH's decision on ${matched} of ${done.length} packets</p>
-       <p class="meta">${ok} of ${quotes} quotes were found on the page they cite. For packets where it asks for more information, the score uses the call it would make with only the packet.</p>`
+       <p class="meta">${ok} of ${quotes} quotes checked against the page text and image. When Fetch asks for more information, its leaning is what's compared with IHH.</p>`
     : `<p class="big">No packets reviewed yet</p><p class="meta">Review the packets to compare the tool with what IHH actually decided.</p>`;
-  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>Suggests</th><th>If decided now</th><th>IHH decided</th><th>Match</th><th>Quotes on page</th><th>Time</th></tr></thead><tbody>
-    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td>${CALL[r.decision]}</td><td>${CALL[r.lean]}</td><td>${CALL[r.ihh]}</td>
-      <td>${r.match ? "Yes" : "<b>No</b>"}</td><td>${r.quote_check.on_page + r.quote_check.close} of ${r.quote_check.quotes}</td><td>${Math.round(r.seconds / 60 * 10) / 10} min</td></tr>`
-      : `<tr><td>${r.id}</td><td colspan="7" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
+  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>Fetch suggests</th><th>IHH decided</th><th>Match</th><th>Quotes checked</th><th>Time</th></tr></thead><tbody>
+    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td>${esc(suggestionText(r.decision, r.lean))}</td><td>${CALL[r.ihh]}</td>
+      <td>${r.match ? "Yes" : "<b>No</b>"}</td><td>${both(r.quote_check)} of ${r.quote_check.quotes}</td><td>${Math.round(r.seconds / 60 * 10) / 10} min</td></tr>`
+      : `<tr><td>${r.id}</td><td colspan="6" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
   </tbody></table>`;
   $("main").innerHTML = `<div class="card">${head}
     ${waiting.length ? `<div class="row"><button class="btn primary" id="all">Review ${waiting.length} remaining</button><span class="meta">Reads each packet once; about three minutes each, several at a time.</span></div>` : ""}

@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from common import DECISIONS, PACKETS, UPLOADS, WORK, load_env, packet_path  # noqa: E402
+from common import DECISIONS, PACKETS, UPLOADS, WORK, fingerprint, load_env, packet_path, protect  # noqa: E402
 from review import review_packet  # noqa: E402
 
 STATIC = Path(__file__).parent / "static"
@@ -44,6 +44,8 @@ def summary(packet_id):
         item.update(state="error", error=job.get("error"))
     elif not review.exists() and (status := running_elsewhere(packet_id)):
         item.update(state="running", step=status)
+    elif review.exists() and not matches_file(packet_id):
+        item.update(state="changed")
     elif review.exists():
         r = json.loads(review.read_text())
         s = r["review"]["suggestion"]
@@ -52,6 +54,15 @@ def summary(packet_id):
     else:
         item.update(state="new")
     return item
+
+
+def matches_file(packet_id):
+    """A result is shown only for the exact file it was made from."""
+    r = json.loads((WORK / packet_id / "review.json").read_text())
+    try:
+        return r.get("sha256") == fingerprint(packet_id)
+    except FileNotFoundError:
+        return False
 
 
 def running_elsewhere(packet_id):
@@ -183,7 +194,11 @@ class Handler(BaseHTTPRequestHandler):
         m = re.match(r"^/api/review/([RU]\d{2})$", path)
         if m:
             f = WORK / m.group(1) / "review.json"
-            return self.send(200, json.loads(f.read_text())) if f.exists() else self.send(404, {"error": "Not reviewed yet"})
+            if not f.exists():
+                return self.send(404, {"error": "Not reviewed yet"})
+            if not matches_file(m.group(1)):
+                return self.send(409, {"error": "This file changed after it was reviewed, so the review isn't shown."})
+            return self.send(200, json.loads(f.read_text()))
         m = re.match(r"^/api/transcript/([RU]\d{2})/(\d+)$", path)
         if m:
             f = WORK / m.group(1) / "pages.json"
@@ -230,8 +245,10 @@ class Handler(BaseHTTPRequestHandler):
                                       capture_output=True)
                 if done.returncode or not target.exists():
                     return self.send(400, {"error": "That photo couldn't be opened. Try a PDF or a JPEG."})
+            protect(target)
             pages = page_count(target)
             if pages > 150:
+                target.chmod(0o644)
                 target.unlink()
                 return self.send(400, {"error": f"That file has {pages} pages. The review handles up to 150."})
             start(pid)
@@ -241,5 +258,7 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     load_env()
+    for pdf in list(PACKETS.glob("R[0-9][0-9].pdf")) + list(UPLOADS.glob("U[0-9][0-9].pdf")):
+        protect(pdf)
     print(f"Referral check running at http://localhost:{PORT}")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

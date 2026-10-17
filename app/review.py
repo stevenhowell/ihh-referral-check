@@ -20,7 +20,7 @@ from difflib import SequenceMatcher
 
 import anthropic
 
-from common import MODEL, criteria_prompt, packet_dir, rule_index
+from common import MODEL, criteria_prompt, fingerprint, packet_dir, rule_index
 from read_pages import _upload_bytes, read_packet
 
 STATUSES = ["ok", "problem", "coordinator_call", "cant_tell", "missing"]
@@ -405,6 +405,7 @@ def review_packet(packet_id, progress=lambda text: None, fresh=False):
 
     result = {
         "packet_id": packet_id,
+        "sha256": read["sha256"],
         "page_count": read["page_count"],
         "pages": [{k: p[k] for k in ("page", "kind", "rotated", "legibility", "possible_unredacted_identifier")}
                   for p in read["pages"]],
@@ -425,7 +426,8 @@ def recheck(packet_id, images=True):
     """Re-run the quote checks on a saved review without asking for a new review."""
     out = packet_dir(packet_id) / "review.json"
     result = json.loads(out.read_text())
-    read = json.loads((packet_dir(packet_id) / "pages.json").read_text())
+    read = read_packet(packet_id)  # verifies the file's fingerprint first
+    result["sha256"] = read["sha256"]
     review = result["review"]
     for item in review["findings"] + review["conflicts"]:
         for ev in item["evidence"]:

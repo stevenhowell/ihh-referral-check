@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import anthropic
 
-from common import MODEL, packet_dir, packet_path
+from common import MODEL, ChangedFile, fingerprint, packet_dir, packet_path
 
 DPI = 150          # about 1275 x 1650 px per page: legible, and well under the image size cap
 PAGES_PER_CALL = 3
@@ -134,8 +134,15 @@ def _read_batch(client, images, first_page, total):
 def read_packet(packet_id, progress=lambda text: None):
     """Transcribe every page of a packet. Cached in work/<id>/pages.json."""
     cache = packet_dir(packet_id) / "pages.json"
+    sha = fingerprint(packet_id)
     if cache.exists():
-        return json.loads(cache.read_text())
+        read = json.loads(cache.read_text())
+        if "sha256" not in read:  # read before fingerprints existed; record it once
+            read["sha256"] = sha
+            cache.write_text(json.dumps(read, indent=1))
+        if read["sha256"] != sha:
+            raise ChangedFile(f"{packet_id} changed after its pages were read. Its reading can't be trusted.")
+        return read
 
     progress("Opening the fax")
     images = render_pages(packet_id)
@@ -159,6 +166,8 @@ def read_packet(packet_id, progress=lambda text: None):
             progress(f"Read {done} of {total} pages")
 
     pages.sort(key=lambda p: p["page"])
-    result = {"packet_id": packet_id, "page_count": total, "pages": pages, "usage": usage}
+    if fingerprint(packet_id) != sha:
+        raise ChangedFile(f"{packet_id} changed while it was being read.")
+    result = {"packet_id": packet_id, "sha256": sha, "page_count": total, "pages": pages, "usage": usage}
     cache.write_text(json.dumps(result, indent=1))
     return result

@@ -37,6 +37,29 @@ def packet_path(packet_id):
     return PACKETS / f"{packet_id}.pdf"
 
 
+class ChangedFile(Exception):
+    """The packet file is not the one that was read. Its results must not be shown."""
+
+
+_FINGERPRINTS = {}
+
+
+def fingerprint(packet_id):
+    """SHA-256 of the packet file, cached until the file's size or time changes."""
+    path = packet_path(packet_id)
+    st = path.stat()
+    key = (str(path), st.st_size, st.st_mtime_ns)
+    if key not in _FINGERPRINTS:
+        import hashlib
+        _FINGERPRINTS[key] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return _FINGERPRINTS[key]
+
+
+def protect(path):
+    """Originals are read only: nothing in the app may write to them."""
+    path.chmod(0o444)
+
+
 def packet_dir(packet_id):
     d = WORK / packet_id
     d.mkdir(parents=True, exist_ok=True)
