@@ -182,11 +182,12 @@ def score():
                        seconds=item["seconds"], quote_check=r["quote_check"],
                        why=r["review"]["suggestion"]["why"])
             row["match"] = call_of(item["decision"], item["lean"]) == truth[pid]
-        before = WORK / pid / "review-v1.json"
-        if before.exists():
-            b = json.loads(before.read_text())["review"]["suggestion"]
-            row["before"] = {"decision": b["decision"], "lean": b["lean_if_forced"],
-                             "match": call_of(b["decision"], b["lean_if_forced"]) == truth[pid]}
+        for key, name in (("before", "review-v1.json"), ("second", "review-v2.json")):
+            f = WORK / pid / name
+            if f.exists():
+                b = json.loads(f.read_text())["review"]["suggestion"]
+                row[key] = {"decision": b["decision"], "lean": b["lean_if_forced"],
+                            "match": call_of(b["decision"], b["lean_if_forced"]) == truth[pid]}
         rows.append(row)
     return {"rows": rows, "denials": denial_reasons(truth), "audit": audit_summary()}
 

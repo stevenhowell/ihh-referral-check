@@ -716,6 +716,7 @@ async function renderScore(quiet) {
   const matched = done.filter((r) => r.match).length;
   const withBefore = done.filter((r) => r.before);
   const matchedBefore = withBefore.filter((r) => r.before.match).length;
+  const withSecond = done.filter((r) => r.second), matchedSecond = withSecond.filter((r) => r.second.match).length;
   const waiting = rows.filter((r) => r.state !== "done" && r.state !== "running");
   const running = rows.filter((r) => r.state === "running");
   const quotes = done.reduce((a, r) => a + r.quote_check.quotes, 0);
@@ -723,13 +724,13 @@ async function renderScore(quiet) {
   const ok = done.reduce((a, r) => a + both(r.quote_check), 0);
   const head = done.length
     ? `<p class="big">Matched IHH's decision on ${matched} of ${done.length} packets</p>
-       ${withBefore.length ? `<p class="meta">First run: ${matchedBefore} of ${withBefore.length}. Since then two rules were changed, both taken from IHH's documents: unknowns never count against the patient, and "allowed if arranged" rules mean approve once arranged. Because the change came after seeing these results, a packet Fetch hasn't seen is the fairest test.</p>` : ""}
+       ${withBefore.length ? `<p class="meta">First run: ${matchedBefore} of ${withBefore.length}.${withSecond.length ? ` Second run: ${matchedSecond} of ${withSecond.length}.` : ""} Since the first run, two rules were changed, both taken from IHH's documents: unknowns never count against the patient, and "allowed if arranged" rules mean approve once arranged. The third run added accuracy fixes from an independent audit of Fetch's readings; none of those fixes used IHH's decisions. Because changes came after seeing results, a packet Fetch hasn't seen is the fairest test.</p>` : ""}
        <p class="meta">${ok} of ${quotes} quotes checked against the page text and image. When Fetch asks for more information, its leaning is what's compared with IHH.</p>`
     : `<p class="big">No packets reviewed yet</p><p class="meta">Review the packets to compare the tool with what IHH actually decided.</p>`;
-  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>First run</th><th>Fetch suggests now</th><th>IHH decided</th><th>Match</th><th>Quotes checked</th><th>Time</th></tr></thead><tbody>
-    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td class="meta">${r.before ? `${esc(suggestionText(r.before.decision, r.before.lean))}${r.before.match ? "" : " ✗"}` : ""}</td><td>${esc(suggestionText(r.decision, r.lean))}</td><td>${CALL[r.ihh]}</td>
+  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>First run</th><th>Second run</th><th>Fetch suggests now</th><th>IHH decided</th><th>Match</th><th>Quotes checked</th><th>Time</th></tr></thead><tbody>
+    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td class="meta">${r.before ? `${esc(suggestionText(r.before.decision, r.before.lean))}${r.before.match ? "" : " ✗"}` : ""}</td><td class="meta">${r.second ? `${esc(suggestionText(r.second.decision, r.second.lean))}${r.second.match ? "" : " ✗"}` : ""}</td><td>${esc(suggestionText(r.decision, r.lean))}</td><td>${CALL[r.ihh]}</td>
       <td>${r.match ? "Yes" : "<b>No</b>"}</td><td>${both(r.quote_check)} of ${r.quote_check.quotes}</td><td>${Math.round(r.seconds / 60 * 10) / 10} min</td></tr>`
-      : `<tr><td>${r.id}</td><td colspan="7" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
+      : `<tr><td>${r.id}</td><td colspan="8" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
   </tbody></table>`;
   $("main").innerHTML = `<div class="card">${head}
     ${waiting.length ? `<div class="row"><button class="btn primary" id="all">Review ${waiting.length} remaining</button><span class="meta">Reads each packet once; about three minutes each, several at a time.</span></div>` : ""}
