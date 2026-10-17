@@ -145,6 +145,9 @@ def queue():
         item = summary(pid)
         item["added_at"] = desk.added_at(pid)
         item["coordinator"] = d["decisions"].get(pid)
+        timed = WORK / "timing" / f"{pid}.json"
+        if timed.exists():
+            item["scan_seconds"] = json.loads(timed.read_text())["seconds_total"]
         if item["state"] == "done":
             r = json.loads((WORK / pid / "review.json").read_text())
             t = desk.tasks_for(pid, r)
@@ -195,12 +198,15 @@ def score():
                        seconds=item["seconds"], quote_check=r["quote_check"],
                        why=r["review"]["suggestion"]["why"])
             row["match"] = call_of(item["decision"], item["lean"]) == truth[pid]
-        for key, name in (("before", "review-v1.json"), ("second", "review-v2.json")):
+        for key, name in (("before", "review-v1.json"), ("second", "review-v2.json"), ("third", "review-v3.json")):
             f = WORK / pid / name
             if f.exists():
                 b = json.loads(f.read_text())["review"]["suggestion"]
                 row[key] = {"decision": b["decision"], "lean": b["lean_if_forced"],
                             "match": call_of(b["decision"], b["lean_if_forced"]) == truth[pid]}
+        timed = WORK / "timing" / f"{pid}.json"
+        if timed.exists():
+            row["scan_seconds"] = json.loads(timed.read_text())["seconds_total"]
         rows.append(row)
     return {"rows": rows, "denials": denial_reasons(truth), "audit": audit_summary()}
 

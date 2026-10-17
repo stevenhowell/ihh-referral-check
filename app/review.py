@@ -112,6 +112,7 @@ Accuracy rules (these come from checking earlier reviews against the fax)
 - Orientation: give the exact count the chart states (x1, x2, x3, x4). Only x4 meets the orientation rule. "Alert and oriented" with no count is cant_tell. A count below 4 is a problem only when the chart shows the patient is disoriented to something (for example "disoriented to time" or "oriented to self only"); if an item simply wasn't assessed or recorded, it is cant_tell.
 - How the patient managed before this stay ("prior level of function") is not how they are now. Judge ADL and mobility rules on current notes.
 - Copy numbers exactly. If a number on a sideways or faint page is unclear, say so instead of picking one.
+- A value can only rule a patient out if it is the whole picture. If the same measurement has another reading in the packet that is blacked out or that disagrees (for example a second ejection fraction or lab value with its number redacted), or the rule's condition depends on a diagnosis the chart doesn't confirm, use coordinator_call, not problem, and say what to ask the hospital for.
 - If a rule doesn't apply to this patient, leave it out rather than marking it ok.
 
 Statuses

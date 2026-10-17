@@ -24,7 +24,13 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
 button { font: inherit; }
-header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; position: sticky; top: 0; z-index: 5; color: #fff;
+  background: radial-gradient(600px 200px at 85% 0%, rgba(127,182,255,.3), transparent 70%), linear-gradient(120deg, #071d3d, #0a5cc4); box-shadow: 0 4px 20px rgba(7,29,61,.25); }
+header .sub { color: rgba(255,255,255,.75) !important; }
+header h1 { font-size: 22px !important; font-weight: 800; letter-spacing: -.02em; }
+header .seg { background: rgba(255,255,255,.14); }
+header .seg button { color: #fff; }
+header .seg button[aria-pressed="true"] { background: #fff; color: #0b2a55; }
 header h1 { font-size: 17px; margin: 0; }
 header .sub { color: var(--muted); font-size: 13px; }
 .homelink { color: inherit; text-decoration: none; }
@@ -99,6 +105,7 @@ table.queue td { vertical-align: top; } .qrow { cursor: pointer; } .qrow:hover {
 .linkbtn { margin-left: auto; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; min-height: 44px; }
 .tag.unchecked { color: var(--red); background: var(--red-soft); }
 .chip2.info { color: var(--amber); background: var(--amber-soft); }
+.matchcell { font-weight: 700; white-space: nowrap; } .red { color: var(--red); } .green { color: var(--green); }
 .decfields { display: flex; gap: 12px; align-items: flex-end; flex: 1; flex-wrap: wrap; }
 .decfields label { display: flex; flex-direction: column; font-size: 12.5px; color: var(--muted); gap: 2px; }
 .decfields label.grow { flex: 1; min-width: 220px; }
@@ -142,6 +149,14 @@ details.profile[open] .showwhy::after { content: "Hide"; } details.profile:not([
 .dot.done { background: var(--green); } .dot.now { background: var(--accent); } .dot.next { background: var(--line); color: var(--muted); }
 .pbar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin: 0 0 6px 42px; }
 .pbar i { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+.steps.fetching { display: grid; grid-template-columns: 150px 1fr; gap: 28px; align-items: center; }
+@media (max-width: 640px) { .steps.fetching { grid-template-columns: 1fr; } }
+.mini-fax { width: 140px; height: 180px; background: #fbfbf7; border-radius: 6px; box-shadow: 0 14px 30px rgba(0,0,0,.18); padding: 16px 14px; position: relative; overflow: hidden; transform: rotate(-2deg); }
+.mini-fax i { display: block; height: 6px; border-radius: 3px; background: #c9ccd3; margin: 9px 0; }
+.mini-fax i:nth-child(3n) { width: 70%; } .mini-fax i:nth-child(4) { background: #111; width: 45%; }
+.mini-scan { position: absolute; left: 0; right: 0; height: 36px; top: -36px; background: linear-gradient(180deg, transparent, rgba(10,102,216,.2) 70%, rgba(10,102,216,.6)); border-bottom: 2px solid #0a66d8; animation: miniscan 2.2s ease-in-out infinite; }
+@keyframes miniscan { 0% { top: -36px; } 90%, 100% { top: 180px; } }
+@media (prefers-reduced-motion: reduce) { .mini-scan { animation: none; display: none; } }
 .todo { padding: 4px 16px; }
 .todo-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
 .todo-item:first-child { border-top: 0; }
@@ -391,12 +406,12 @@ function renderQueue() {
     return `<tr class="qrow" data-id="${p.id}" tabindex="0">
       <td><b>${esc(packetName(p))}</b><div class="meta qline">${esc(p.profile_line || (p.state === "running" ? p.step : "") || "")}</div></td>
       <td>${p.coordinator ? "–" : ago(waited)}</td>
-      <td>${p.seconds ? ago(p.seconds).replace(" min", " min").replace(/^0 min$/, "<1 min") : "–"}${p.pages ? `<div class="meta tiny">${p.pages} pages</div>` : ""}</td>
+      <td>${p.scan_seconds ? `${Math.floor(p.scan_seconds / 60)} min ${String(p.scan_seconds % 60).padStart(2, "0")} s` : p.state === "done" ? '<span class="meta">Not timed</span>' : "–"}${p.pages ? `<div class="meta tiny">${p.pages} pages</div>` : ""}</td>
       <td>${suggestionChip(p)}</td>
       <td>${p.open_tasks ? `<span class="riskn">${p.open_tasks}</span>` : p.state === "done" ? `<span class="meta">None open</span>` : ""}</td>
       <td>${dec}</td></tr>`;
   };
-  const table = (rows) => `<table class="queue"><thead><tr><th>Referral</th><th title="Since the referral was added to Fetch. The fax's own time is blacked out.">Waiting</th><th title="How long Fetch's last run on this referral took. A rerun reuses pages it already read, so it is shorter.">Last Fetch run</th><th>Fetch suggests</th><th>Open risks</th><th>Decision</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
+  const table = (rows) => `<table class="queue"><thead><tr><th>Referral</th><th title="Since the referral was added to Fetch. The fax's own time is blacked out.">Waiting</th><th title="A fresh, full scan of this referral: every page read, every rule checked, every quote checked twice, client profile built.">Time to scan</th><th>Fetch suggests</th><th>Open risks</th><th>Decision</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
   $("main").innerHTML = `${dashboardHTML()}
     <div class="qhead"><h2>${filt ? esc(filt[0]) : "Queue"} <span class="count">${open.length}</span></h2><button class="btn" id="add">Add a referral…</button></div>
     ${filt ? `<div class="filterbar">Showing ${esc(filt[0].toLowerCase())} only. <button class="linkbtn" id="clearf">Show all referrals</button></div>` : ""}
@@ -405,7 +420,7 @@ function renderQueue() {
     ${open.length ? table(open) : filt ? `<div class="card meta">No referrals match this filter. <button class="linkbtn" id="clearf2">Show all referrals</button></div>`
       : `<div class="card clear"><p class="big">Queue clear</p><p>All ${done.length} referrals have a decision${state.desk.counts.median_seconds ? `, a median of ${ago(state.desk.counts.median_seconds)} each from opening to decision` : ""}.${state.desk.beds ? ` Beds available: ${state.desk.beds.count}.` : ""}</p><p class="meta">New referrals appear here when you add them. Each decided referral below has its PDF record.</p></div>`}
     ${done.length ? `<h3>Decided <span class="count">${done.length}</span></h3>${table(done)}` : ""}
-    <p class="meta">"Waiting" counts from when the referral was added to Fetch; the fax's own date and time are blacked out. "Last Fetch run" is how long Fetch's most recent check took; reruns reuse pages already read, so they're shorter than a first read.</p>`;
+    <p class="meta">"Waiting" counts from when the referral was added to Fetch; the fax's own date and time are blacked out. "Time to scan" is a fresh, full scan of the referral: every page read, every rule checked, every quote checked twice, client profile built.</p>`;
   wireDashboard();
   if ($("clearf")) $("clearf").onclick = () => { state.filter = null; showQueue(); };
   if ($("clearf2")) $("clearf2").onclick = () => { state.filter = null; showQueue(); };
@@ -867,24 +882,29 @@ async function renderScore(quiet) {
   const { rows, denials, audit } = await api("/api/score");
   const done = rows.filter((r) => r.state === "done");
   const matched = done.filter((r) => r.match).length;
-  const withBefore = done.filter((r) => r.before);
+  const withBefore = rows.filter((r) => r.before);   // past runs are saved, so they always count every packet
   const matchedBefore = withBefore.filter((r) => r.before.match).length;
-  const withSecond = done.filter((r) => r.second), matchedSecond = withSecond.filter((r) => r.second.match).length;
+  const withSecond = rows.filter((r) => r.second), matchedSecond = withSecond.filter((r) => r.second.match).length;
+  const withThird = rows.filter((r) => r.third), matchedThird = withThird.filter((r) => r.third.match).length;
   const waiting = rows.filter((r) => r.state !== "done" && r.state !== "running");
   const running = rows.filter((r) => r.state === "running");
   const quotes = done.reduce((a, r) => a + r.quote_check.quotes, 0);
   const both = (q) => q.image ? Math.min(q.on_page + q.close, q.image.seen) : q.on_page + q.close;
   const ok = done.reduce((a, r) => a + both(r.quote_check), 0);
   const head = done.length
-    ? `<p class="big">Matched IHH's decision on ${matched} of ${done.length} packets${done.length < rows.length ? ` so far` : ""}</p>
-       ${done.length < rows.length ? `<p class="meta">${rows.length - done.length} still reviewing; the score changes when they finish.</p>` : ""}
-       ${withBefore.length ? `<p class="meta">First run: ${matchedBefore} of ${withBefore.length}.${withSecond.length ? ` Second run: ${matchedSecond} of ${withSecond.length}.` : ""} Since the first run, two rules were changed, both taken from IHH's documents: unknowns never count against the patient, and "allowed if arranged" rules mean approve once arranged. The third run added accuracy fixes from an independent audit of Fetch's readings; none of those fixes used IHH's decisions. Because changes came after seeing results, a packet Fetch hasn't seen is the fairest test.</p>` : ""}
+    ? `<p class="big">${done.length < rows.length ? `Matched IHH on ${matched} of the ${done.length} finished so far` : `Matched IHH's decision on ${matched} of ${rows.length} packets`}</p>
+       ${done.length < rows.length ? `<p class="meta">${rows.length - done.length} of ${rows.length} packets are being reviewed again right now (${rows.filter((r) => r.state !== "done").map((r) => r.id).join(", ")}); the score covers all ${rows.length} when they finish.</p>` : ""}
+       ${withBefore.length ? `<p class="meta">First run: ${matchedBefore} of ${withBefore.length}.${withSecond.length ? ` Second run: ${matchedSecond} of ${withSecond.length}.` : ""}${withThird.length ? ` Third run: ${matchedThird} of ${withThird.length}.` : ""} Since the first run, two rules were changed, both taken from IHH's documents: unknowns never count against the patient, and "allowed if arranged" rules mean approve once arranged. The third run added accuracy fixes from an independent audit of Fetch's readings; none of those fixes used IHH's decisions. The latest run adds one rule found by studying a disagreement with IHH: a value can't rule a patient out when another reading of it is blacked out or the diagnosis behind the rule isn't confirmed. Because changes came after seeing results, a packet Fetch hasn't seen is the fairest test.</p>` : ""}
        <p class="meta">${ok} of ${quotes} quotes checked against the page text and image. When Fetch asks for more information, its leaning is what's compared with IHH.</p>`
     : `<p class="big">No packets reviewed yet</p><p class="meta">Review the packets to compare the tool with what IHH actually decided.</p>`;
-  const table = `<table><thead><tr><th>Packet</th><th>Pages</th><th>First run</th><th>Second run</th><th>Fetch suggests now</th><th>IHH decided</th><th>Match</th><th>Quotes checked</th><th>Time</th></tr></thead><tbody>
-    ${rows.map((r) => r.state === "done" ? `<tr><td>${r.id}</td><td>${r.pages}</td><td class="meta">${r.before ? `${esc(suggestionText(r.before.decision, r.before.lean))}${r.before.match ? "" : " ✗"}` : ""}</td><td class="meta">${r.second ? `${esc(suggestionText(r.second.decision, r.second.lean))}${r.second.match ? "" : " ✗"}` : ""}</td><td>${esc(suggestionText(r.decision, r.lean))}</td><td>${CALL[r.ihh]}</td>
-      <td>${r.match ? "Yes" : "<b>No</b>"}</td><td>${both(r.quote_check)} of ${r.quote_check.quotes}</td><td>${Math.round(r.seconds / 60 * 10) / 10} min</td></tr>`
-      : `<tr><td>${r.id}</td><td colspan="8" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
+  const ihhChip = (d) => `<span class="chip2 ${d}">${d === "approve" ? "Approved" : "Denied"}</span>`;
+  const fetchChip = (r) => { const cls = r.decision === "need_more_info" ? "info" : (["approve", "approve_once_arranged"].includes(r.decision) ? "approve" : "deny"); return `<span class="chip2 ${cls}">${esc(suggestionText(r.decision, r.lean))}</span>`; };
+  const past = (x) => x ? `${esc(suggestionText(x.decision, x.lean))} ${x.match ? '<span class="green">✓</span>' : '<span class="red">✗</span>'}` : "";
+  const table = `<table class="scoretable"><thead><tr><th>Packet</th><th>IHH decided</th><th>Fetch suggests now</th><th>Match</th><th>First run</th><th>Second run</th><th>Third run</th><th>Pages</th><th title="A fresh, full scan of this referral: every page read, every rule checked, every quote checked twice, client profile built.">Time to scan</th><th>Quotes checked</th></tr></thead><tbody>
+    ${rows.map((r) => r.state === "done" ? `<tr><td><b>${r.id}</b></td><td>${ihhChip(r.ihh)}</td><td>${fetchChip(r)}</td>
+      <td class="matchcell">${r.match ? '<span class="green">✓ Yes</span>' : '<span class="red">✗ No</span>'}</td>
+      <td class="meta">${past(r.before)}</td><td class="meta">${past(r.second)}</td><td class="meta">${past(r.third)}</td><td>${r.pages}</td><td>${r.scan_seconds ? `${Math.floor(r.scan_seconds / 60)} min ${String(r.scan_seconds % 60).padStart(2, "0")} s` : '<span class="meta">Measuring…</span>'}</td><td>${both(r.quote_check)} of ${r.quote_check.quotes}</td></tr>`
+      : `<tr><td><b>${r.id}</b></td><td>${ihhChip(r.ihh)}</td><td colspan="8" class="meta">${r.state === "running" ? "Reviewing…" : r.state === "error" ? "Stopped" : "Not reviewed"}</td></tr>`).join("")}
   </tbody></table>`;
   $("main").innerHTML = `<div class="card">${head}
     ${waiting.length ? `<div class="row"><button class="btn primary" id="all">Review ${waiting.length} remaining</button><span class="meta">Reads each packet once; about three minutes each, several at a time.</span></div>` : ""}
@@ -941,7 +961,7 @@ function progressHTML(name, step) {
     const bar = n === 2 && read && at === 2 ? `<div class="pbar"><i style="width:${Math.round(100 * read[1] / read[2])}%"></i></div>` : "";
     return `<div class="pstep"><span class="dot ${cls}">${cls === "done" ? "✓" : n}</span>${label}</div>${bar}`;
   }).join("");
-  return `<div class="steps"><h2 style="margin:0 0 10px;font-size:20px">Fetching ${esc(name)}</h2>${rows}</div>
+  return `<div class="steps fetching"><div class="mini-fax" aria-hidden="true">${'<i></i>'.repeat(9)}<span class="mini-scan"></span></div><div><h2 style="margin:0 0 10px;font-size:20px">Fetching ${esc(name)}</h2>${rows}</div></div>
     <p class="meta" style="margin-top:12px">${waiting ? "Waiting for another review to finish." : "About 3 minutes. You can open another packet while you wait."}</p>`;
 }
 

@@ -56,7 +56,7 @@ echo "ANTHROPIC_API_KEY=your-key" > .env
 python3 app/server.py
 ```
 
-Then open http://localhost:8811. Put IHH's packets in `challenges/1-referral-intake/packets/` (see that folder's README), or drop any referral PDF or photo onto the queue. A 30-page packet takes about 3 to 5 minutes and roughly $1 to $2 of API use.
+Then open http://localhost:8811. Put IHH's packets in `challenges/1-referral-intake/packets/` (see that folder's README), or drop any referral PDF or photo onto the queue. A fresh scan averaged 6 min 42 s per referral across IHH's 11 (3 to 15 minutes, measured three at a time on venue Wi-Fi), at roughly $1 to $2 of API use each.
 
 ## What is real and what is mocked
 
@@ -76,17 +76,17 @@ Then open http://localhost:8811. Put IHH's packets in `challenges/1-referral-int
 
 On IHH's 11 real, de-identified referrals:
 
-- **Matches IHH's decision on 9 of 11.** The first run matched 5 of 11. Two rule changes came after seeing that result, both taken from IHH's own documents: unknown items never count against the patient (IHH asks the hospital for them), and "allowed if arranged" rules mean approve once arranged. A later run added accuracy fixes from an audit of Fetch's readings; none of those used IHH's decisions. Because changes came after seeing results, a referral Fetch hasn't seen is the fairest test.
+- **Matches IHH's decision on 10 of 11.** Runs went 5, 9, 9, then 10 of 11. Two rule changes after the first run came from IHH's own documents: unknown items never count against the patient (IHH asks the hospital for them), and "allowed if arranged" rules mean approve once arranged. The third run added accuracy fixes from an independent audit of Fetch's readings, none using IHH's decisions. The last change came from studying a disagreement with IHH: a value can't rule a patient out when another reading of the same measurement is blacked out, or when the diagnosis behind the rule isn't confirmed. Because changes came after seeing results, a referral Fetch hasn't seen is the fairest test.
 - **The four denials:** on each, Fetch flagged at least one of the same rules a separate after-the-fact reading identified as the likely reason.
 - **Independent audit of 656 claims** (an earlier version, before the accuracy fixes): 88.9% correct, 10.4% partly right, 0.8% wrong. No quote was invented; every quote was on the page it cited.
-- **Current version:** every quote on all 11 referrals was found in the page text and seen on the page image.
+- **Current version:** 511 quotes across the 11 referrals: 510 found in the page text and 508 seen on the page image. The few that miss either check are marked "check by hand" on screen.
 
 ## Where it gets things wrong
 
 - **Sideways and faint numbers.** Most reading errors were on sideways lab and vitals tables. They're now read upright, but a blood pressure on a dense upright page was still misread in one packet. Don't trust a single number without opening its page.
 - **Overstatement.** Earlier versions sometimes wrote a suspected condition as confirmed, or stated a referral-form claim as a chart fact. Rules and flags now guard against this; it isn't eliminated.
 - **Judgment the written rules don't settle.** IHH's aggression rule names staff and other patients; IHH's cardiac rules don't say what to do when an ejection fraction is a chronic baseline. Fetch flags these as "your call" rather than deciding.
-- **Two of eleven decisions differ from IHH's.** In one, the written cardiac rule points to deny while IHH approved; in the other, Fetch leans approve on a psychiatric case IHH denied. Both are questions for IHH staff.
+- **One of eleven decisions differs from IHH's.** Fetch leans approve on a psychiatric case IHH denied: the only clinical note contradicts the stability rule, and Fetch should have leaned deny. It's a question for IHH staff and a known weakness.
 - **Eleven packets is a small test.** A good score shows Fetch isn't broken, not that it's reliable.
 
 We would not trust it to decide, only to read faster and show its work.
