@@ -49,13 +49,16 @@ nav .item .st { display: block; font-size: 12.5px; color: var(--muted); }
 nav .open { margin-top: 10px; }
 main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
 main.wide { max-width: 1120px; margin: 0 auto; }
-.dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.dashboard { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+@media (max-width: 1100px) { .dashboard { grid-template-columns: repeat(3, 1fr); } }
 .dash { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; text-align: left; color: var(--text); display: flex; flex-direction: column; gap: 2px; min-height: 92px; }
 button.dash { cursor: pointer; } button.dash:active { background: var(--bg); }
 .dash .n { font-size: 30px; font-weight: 800; line-height: 1.1; }
 .dash .top { display: flex; align-items: center; gap: 10px; }
 .ico { width: 30px; height: 30px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); }
-.dash.approve .ico { color: var(--green); } .dash.deny .ico { color: var(--red); } .dash.beds .ico { color: var(--accent); } .dash .l { font-size: 13.5px; color: var(--muted); font-weight: 600; }
+.dash.approve .ico { color: var(--green); } .dash.deny .ico { color: var(--red); } .dash.beds .ico { color: var(--accent); }
+.dash.leanok .n, .dash.leanok .ico, .dash.leanno .n, .dash.leanno .ico { color: var(--amber); }
+.dash.leanok .l::after { content: " ↗"; color: var(--green); } .dash.leanno .l::after { content: " ↘"; color: var(--red); } .dash .l { font-size: 13.5px; color: var(--muted); font-weight: 600; }
 .dash.approve .n { color: var(--green); } .dash.deny .n { color: var(--red); } .dash.look .n { color: var(--purple); } .dash.beds .n { color: var(--accent); }
 .bedsrow { display: flex; gap: 6px; margin-top: 6px; } .bedsrow input { width: 64px; min-height: 44px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; font: inherit; background: var(--panel); color: var(--text); }
 .btn.small { min-height: 44px; padding: 0 10px; font-size: 14px; }
@@ -355,6 +358,8 @@ const ICON = {
   all: '<path d="M4 13l2.5-7h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h5l1 2h4l1-2h5"/>',
   approve: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/>',
   deny: '<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
+  leanapprove: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3 2"/><path d="M15.5 4.5l2 2"/>',
+  leandeny: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3 2"/><path d="M15.5 4.5l2 2"/>',
   beds: '<path d="M3 18V7M3 14h18v4M21 14v-2.5a2.5 2.5 0 0 0-2.5-2.5H11v5"/><circle cx="7" cy="11" r="1.8"/>',
 };
 const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
@@ -363,15 +368,17 @@ function dashboardHTML() {
   const tile = (n, label, cls, go) => `<button class="dash ${cls}${state.filter === go || (go === "all" && !state.filter && state.view === "queue") ? " on" : ""}" ${go ? `data-go="${go}" aria-pressed="${state.filter === go}"` : "disabled"}><span class="top">${icon(go)}<span class="n">${n}</span></span><span class="l">${label}</span></button>`;
   return `<div class="dashboard">
     ${tile(c.to_review, "To review", "", "all")}
-    ${tile(c.suggest_approve, "Fetch suggests approve", "approve", "approve")}
-    ${tile(c.suggest_deny, "Fetch suggests deny", "deny", "deny")}
+    ${tile(c.suggest_approve, "Approve", "approve", "approve")}
+    ${tile(c.suggest_deny, "Deny", "deny", "deny")}
+    ${tile(c.lean_approve, "Needs info, leaning approve", "leanok", "leanapprove")}
+    ${tile(c.lean_deny, "Needs info, leaning deny", "leanno", "leandeny")}
     <div class="dash beds"><span class="top">${icon("beds")}<span class="n" id="beds-n">${beds ? beds.count : "–"}</span></span><span class="l">Beds available</span>
       <span class="bedsrow"><input id="beds-in" type="number" min="0" max="500" inputmode="numeric" aria-label="Beds available" value="${beds ? beds.count : ""}"><button class="btn small" id="beds-save">Update</button></span>
       <span class="meta tiny">${beds ? `Entered at ${clock(beds.at)}` : "Not entered yet"}</span></div>
   </div>
   <div class="progress"><div class="pbar2"><i style="width:${c.total ? Math.round(100 * c.decided / c.total) : 0}%"></i></div>
     <span><b>${c.decided} of ${c.total} decided</b> · ${c.approved} approved, ${c.denied} denied${c.median_seconds ? ` · median ${ago(c.median_seconds)} from opening to decision` : ""}</span></div>
-  <p class="meta dash-note">"Fetch suggests" is not a decision until a person records one.</p>`;
+  <p class="meta dash-note">Approve, Deny and the two leanings are what Fetch suggests. None is a decision until a person records one.</p>`;
 }
 function wireDashboard() {
   document.querySelectorAll(".dash[data-go]").forEach((b) => b.onclick = () => { state.filter = b.dataset.go === "all" ? null : b.dataset.go; showQueue(); });
@@ -394,11 +401,13 @@ function suggestionChip(p) {
 }
 function renderQueue() {
   const now = state.desk.now;
-  const FILTERS = { approve: ["Fetch suggests approve", (p) => p.state === "done" && leanOf(p) === "approve"],
-    deny: ["Fetch suggests deny", (p) => p.state === "done" && leanOf(p) === "deny"],
+  const FILTERS = { approve: ["Fetch suggests approve", (p) => p.state === "done" && ["approve", "approve_once_arranged"].includes(p.decision)],
+    deny: ["Fetch suggests deny", (p) => p.state === "done" && p.decision === "deny"],
+    leanapprove: ["Needs info, leaning approve", (p) => p.state === "done" && p.decision === "need_more_info" && p.lean === "approve"],
+    leandeny: ["Needs info, leaning deny", (p) => p.state === "done" && p.decision === "need_more_info" && p.lean === "deny"],
     look: ["To look at (open risks)", (p) => (p.open_tasks || 0) > 0] };
   const filt = FILTERS[state.filter];
-  const open = state.packets.filter((p) => !p.coordinator && (!filt || filt[1](p))).sort((a, b) => a.added_at - b.added_at);
+  const open = state.packets.filter((p) => !p.coordinator && (!filt || filt[1](p))).sort((a, b) => a.added_at - b.added_at || a.id.localeCompare(b.id));
   const done = state.packets.filter((p) => p.coordinator).sort((a, b) => b.coordinator.at - a.coordinator.at);
   const row = (p) => {
     const waited = now - p.added_at;

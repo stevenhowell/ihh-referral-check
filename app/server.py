@@ -164,8 +164,10 @@ def queue():
     lean = lambda x: call_of(x["decision"], x["lean"])
     counts = {
         "to_review": len(undecided),
-        "suggest_approve": sum(x["state"] == "done" and lean(x) == "approve" for x in undecided),
-        "suggest_deny": sum(x["state"] == "done" and lean(x) == "deny" for x in undecided),
+        "suggest_approve": sum(x["state"] == "done" and x["decision"] in ("approve", "approve_once_arranged") for x in undecided),
+        "suggest_deny": sum(x["state"] == "done" and x["decision"] == "deny" for x in undecided),
+        "lean_approve": sum(x["state"] == "done" and x["decision"] == "need_more_info" and x["lean"] == "approve" for x in undecided),
+        "lean_deny": sum(x["state"] == "done" and x["decision"] == "need_more_info" and x["lean"] == "deny" for x in undecided),
         "to_look_at": sum(x.get("open_tasks", 0) > 0 for x in undecided),
         "decided": sum(bool(x["coordinator"]) for x in rows),
         "total": len(rows),
