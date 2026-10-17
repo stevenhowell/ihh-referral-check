@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from common import DECISIONS, PACKETS, UPLOADS, WORK, fingerprint, load_env, packet_path, protect  # noqa: E402
 from review import review_packet  # noqa: E402
 import desk  # noqa: E402
-from profile import build_profile  # noqa: E402
+from client_profile import build_profile  # noqa: E402
 
 STATIC = Path(__file__).parent / "static"
 PORT = 8811
