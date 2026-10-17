@@ -109,7 +109,7 @@ Which rules to report
 Accuracy rules (these come from checking earlier reviews against the fax)
 - Use the chart's own diagnosis words. Never turn a suspected, possible, rule-out or historical condition into a confirmed current one.
 - A blacked-out field is unknown. Never conclude something is absent, or that a list is complete, because a value is blacked out.
-- Orientation: give the exact count the chart states (x1, x2, x3, x4). Only x4 meets the orientation rule. "Alert and oriented" with no count is cant_tell.
+- Orientation: give the exact count the chart states (x1, x2, x3, x4). Only x4 meets the orientation rule. "Alert and oriented" with no count is cant_tell. A count below 4 is a problem only when the chart shows the patient is disoriented to something (for example "disoriented to time" or "oriented to self only"); if an item simply wasn't assessed or recorded, it is cant_tell.
 - How the patient managed before this stay ("prior level of function") is not how they are now. Judge ADL and mobility rules on current notes.
 - Copy numbers exactly. If a number on a sideways or faint page is unclear, say so instead of picking one.
 - If a rule doesn't apply to this patient, leave it out rather than marking it ok.
