@@ -133,7 +133,7 @@ details.profile[open] { padding-bottom: 16px; }
 details.profile .showwhy { color: var(--accent); font-weight: 600; white-space: nowrap; }
 details.profile[open] .showwhy::after { content: "Hide"; } details.profile:not([open]) .showwhy::after { content: "Show"; }
 .decbar.sticky { position: sticky; bottom: 12px; z-index: 4; box-shadow: 0 6px 24px rgba(0,0,0,.12); margin-top: 18px; }
-@media (max-width: 900px) { .dashboard { grid-template-columns: repeat(2, 1fr); } .fact { grid-template-columns: 90px 1fr auto; } table.queue th:nth-child(3), table.queue td:nth-child(3) { display: none; } }
+@media (max-width: 900px) { .dashboard { grid-template-columns: repeat(2, 1fr); } .fact { grid-template-columns: 90px 1fr auto; }  }
 .btn { border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 16px; min-height: 44px; border-radius: 10px; cursor: pointer; }
 .btn:hover { border-color: var(--muted); }
 .btn:active { background: var(--bg); }
@@ -415,12 +415,11 @@ function renderQueue() {
     return `<tr class="qrow" data-id="${p.id}" tabindex="0">
       <td><b>${esc(packetName(p))}</b><div class="meta qline">${esc(p.profile_line || (p.state === "running" ? p.step : "") || "")}</div></td>
       <td>${p.coordinator ? "–" : ago(waited)}</td>
-      <td>${p.scan_seconds ? `${Math.floor(p.scan_seconds / 60)} min ${String(p.scan_seconds % 60).padStart(2, "0")} s` : p.state === "done" ? '<span class="meta">Not timed</span>' : "–"}${p.pages ? `<div class="meta tiny">${p.pages} pages</div>` : ""}</td>
       <td>${suggestionChip(p)}</td>
       <td>${p.open_tasks ? `<span class="riskn">${p.open_tasks}</span>` : p.state === "done" ? `<span class="meta">None open</span>` : ""}</td>
       <td>${dec}</td></tr>`;
   };
-  const table = (rows) => `<table class="queue"><thead><tr><th>Referral</th><th title="Since the referral was added to Fetch. The fax's own time is blacked out.">Waiting</th><th title="A fresh, full scan of this referral: every page read, every rule checked, every quote checked twice, client profile built.">Time to scan</th><th>Fetch suggests</th><th>Open risks</th><th>Decision</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
+  const table = (rows) => `<table class="queue"><thead><tr><th>Referral</th><th title="Since the referral was added to Fetch. The fax's own time is blacked out.">Waiting</th><th>Fetch suggests</th><th>Open risks</th><th>Decision</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
   $("main").innerHTML = `${dashboardHTML()}
     <div class="qhead"><h2>${filt ? esc(filt[0]) : "Queue"} <span class="count">${open.length}</span></h2><button class="btn" id="add">Add a referral…</button></div>
     ${filt ? `<div class="filterbar">Showing ${esc(filt[0].toLowerCase())} only. <button class="linkbtn" id="clearf">Show all referrals</button></div>` : ""}
@@ -429,7 +428,7 @@ function renderQueue() {
     ${open.length ? table(open) : filt ? `<div class="card meta">No referrals match this filter. <button class="linkbtn" id="clearf2">Show all referrals</button></div>`
       : `<div class="card clear"><p class="big">Queue clear</p><p>All ${done.length} referrals have a decision${state.desk.counts.median_seconds ? `, a median of ${ago(state.desk.counts.median_seconds)} each from opening to decision` : ""}.${state.desk.beds ? ` Beds available: ${state.desk.beds.count}.` : ""}</p><p class="meta">New referrals appear here when you add them. Each decided referral below has its PDF record.</p></div>`}
     ${done.length ? `<h3>Decided <span class="count">${done.length}</span></h3>${table(done)}` : ""}
-    <p class="meta">"Waiting" counts from when the referral was added to Fetch; the fax's own date and time are blacked out. "Time to scan" is a fresh, full scan of the referral: every page read, every rule checked, every quote checked twice, client profile built.</p>`;
+    <p class="meta">"Waiting" counts from when the referral was added to Fetch; the fax's own date and time are blacked out.</p>`;
   wireDashboard();
   if ($("clearf")) $("clearf").onclick = () => { state.filter = null; showQueue(); };
   if ($("clearf2")) $("clearf2").onclick = () => { state.filter = null; showQueue(); };
