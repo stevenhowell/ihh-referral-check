@@ -427,9 +427,10 @@ function renderQueue() {
   $("add").onclick = () => $("file").click();
   document.querySelectorAll(".qrow").forEach((r) => { r.onclick = () => select(r.dataset.id); r.onkeydown = (e) => { if (e.key === "Enter") select(r.dataset.id); }; });
   const drop = $("main");
-  drop.ondragover = (e) => { e.preventDefault(); $("drop").classList.add("over"); };
-  drop.ondragleave = () => $("drop").classList.remove("over");
-  drop.ondrop = (e) => { e.preventDefault(); $("drop").classList.remove("over"); if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]); };
+  const strip = (on) => { const d = $("drop"); if (d) d.classList.toggle("over", on); };   // the strip only exists on the queue
+  drop.ondragover = (e) => { e.preventDefault(); strip(true); };
+  drop.ondragleave = () => strip(false);
+  drop.ondrop = (e) => { e.preventDefault(); strip(false); if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]); };
 }
 
 function overdueNote(open, now) {
