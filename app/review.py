@@ -281,8 +281,14 @@ IMAGE_SCHEMA = {
                     "n": {"type": "integer"},
                     "seen": {"type": "string", "enum": ["yes", "no", "unclear"]},
                     "page_says": {"type": "string"},
+                    "box": {
+                        "type": "object",
+                        "properties": {k: {"type": "integer"} for k in ("x0", "y0", "x1", "y1")},
+                        "required": ["x0", "y0", "x1", "y1"],
+                        "additionalProperties": False,
+                    },
                 },
-                "required": ["n", "seen", "page_says"],
+                "required": ["n", "seen", "page_says", "box"],
                 "additionalProperties": False,
             },
         }
@@ -292,14 +298,14 @@ IMAGE_SCHEMA = {
 }
 
 
-def _needs_image_check(item, deciding):
-    """Quotes a decision rests on, and any quote with a number in it."""
-    if item.get("status") in ("problem", "coordinator_call") or item.get("rule_id") in deciding:
-        return True
-    return "status" not in item  # a conflict
+def _png_size(path):
+    with open(path, "rb") as f:
+        head = f.read(24)
+    return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
 
 
 def _check_page_image(client, image, quotes):
+    width, height = _png_size(image)
     listing = "\n".join(f"{i}. {q}" for i, q in enumerate(quotes, 1))
     content = [
         {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
@@ -309,7 +315,9 @@ def _check_page_image(client, image, quotes):
             "For each numbered passage below, look at the image and say whether the page really shows it, "
             "with the same meaning and the same numbers, doses and yes/no marks. Small spelling or spacing "
             "differences are fine. Answer yes, no, or unclear (unreadable). In page_says, give what the page "
-            "actually shows at that spot, in a few words, without copying any identifier.\n\n" + listing)},
+            "actually shows at that spot, in a few words, without copying any identifier. In box, give the "
+            f"rectangle around the passage in pixels of this image, which is {width} wide and {height} tall: "
+            "x0,y0 top-left and x1,y1 bottom-right. If you can't find it, give all zeros.\n\n" + listing)},
     ]
     with client.messages.stream(
         model=MODEL, max_tokens=8000, thinking={"type": "adaptive"},
@@ -320,24 +328,29 @@ def _check_page_image(client, image, quotes):
     if message.stop_reason in ("refusal", "max_tokens"):
         return {}
     text = next(b.text for b in message.content if b.type == "text")
-    return {it["n"]: it for it in json.loads(text)["items"]}
+    items = {it["n"]: it for it in json.loads(text)["items"]}
+    for it in items.values():
+        b = it.pop("box")
+        if b["x1"] > b["x0"] and b["y1"] > b["y0"]:
+            # Fractions of the page, so the viewer can draw the box at any size.
+            it["box"] = [round(min(max(v / d, 0), 1), 4) for v, d in
+                         ((b["x0"], width), (b["y0"], height), (b["x1"], width), (b["y1"], height))]
+    return items
 
 
 def image_check(packet_id, review):
     """Look at the page image itself for the quotes that matter most.
 
     The text check only proves a quote matches what Claude read. This one asks Claude to
-    find each important quote again on the original page image, one page at a time.
+    find each quote again on the original page image, one page at a time, and say where it is
+    so the viewer can mark the spot.
     """
     from read_pages import render_pages
     images = render_pages(packet_id)
-    deciding = set(review["suggestion"]["deciding_rule_ids"])
     by_page = {}
     for item in review["findings"] + review["conflicts"]:
-        important = _needs_image_check(item, deciding)
         for ev in item["evidence"]:
-            has_number = any(ch.isdigit() for ch in ev["quote"])
-            if (important or has_number) and 1 <= ev["page"] <= len(images):
+            if 1 <= ev["page"] <= len(images):
                 by_page.setdefault(ev["page"], []).append(ev)
     client = _client()
     with ThreadPoolExecutor(3) as pool:
@@ -353,6 +366,8 @@ def image_check(packet_id, review):
                 ev["image_check"] = a["seen"] if a else "unclear"
                 if a and a["seen"] != "yes":
                     ev["image_says"] = a["page_says"]
+                if a and a.get("box"):
+                    ev["box"] = a["box"]
     checked = [ev for evs in by_page.values() for ev in evs]
     return {"checked": len(checked), "seen": sum(ev["image_check"] == "yes" for ev in checked),
             "not_seen": sum(ev["image_check"] == "no" for ev in checked)}
@@ -366,6 +381,13 @@ def review_packet(packet_id, progress=lambda text: None, fresh=False):
         return json.loads(out.read_text())
 
     started = time.time()
+    status = packet_dir(packet_id) / "status.json"
+    shown = progress
+
+    def progress(text):  # noqa: F811  also visible to the app when run from a terminal
+        status.write_text(json.dumps({"step": text, "at": time.time()}))
+        shown(text)
+
     read = read_packet(packet_id, progress)
     progress(f"Checking {read['page_count']} page{'' if read['page_count'] == 1 else 's'} against IHH's rules")
     review, usage, review_seconds = ask_claude(read)
@@ -395,13 +417,35 @@ def review_packet(packet_id, progress=lambda text: None, fresh=False):
         "reviewed_at": time.strftime("%Y-%m-%d %H:%M"),
     }
     out.write_text(json.dumps(result, indent=1))
+    status.unlink(missing_ok=True)
     return result
+
+
+def recheck(packet_id, images=True):
+    """Re-run the quote checks on a saved review without asking for a new review."""
+    out = packet_dir(packet_id) / "review.json"
+    result = json.loads(out.read_text())
+    read = json.loads((packet_dir(packet_id) / "pages.json").read_text())
+    review = result["review"]
+    for item in review["findings"] + review["conflicts"]:
+        for ev in item["evidence"]:
+            for k in ("check", "found_on", "bad_page", "image_check", "image_says", "box"):
+                ev.pop(k, None)
+    counts = check_review(review, read)
+    if images:
+        counts["image"] = image_check(packet_id, review)
+    result["quote_check"] = counts
+    out.write_text(json.dumps(result, indent=1))
+    return counts
 
 
 if __name__ == "__main__":
     import sys
     from common import load_env
     load_env()
+    if "--recheck" in sys.argv:
+        print(json.dumps(recheck(sys.argv[1]), indent=1))
+        sys.exit()
     r = review_packet(sys.argv[1], progress=print, fresh="--fresh" in sys.argv)
     s = r["review"]["suggestion"]
     print(json.dumps({"decision": s["decision"], "lean": s["lean_if_forced"], "why": s["why"],

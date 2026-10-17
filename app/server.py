@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 import threading
+import time
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -41,6 +42,8 @@ def summary(packet_id):
         item.update(state="running", step=job.get("step"))
     elif job.get("state") == "error":
         item.update(state="error", error=job.get("error"))
+    elif not review.exists() and (status := running_elsewhere(packet_id)):
+        item.update(state="running", step=status)
     elif review.exists():
         r = json.loads(review.read_text())
         s = r["review"]["suggestion"]
@@ -49,6 +52,15 @@ def summary(packet_id):
     else:
         item.update(state="new")
     return item
+
+
+def running_elsewhere(packet_id):
+    """A review started from a terminal leaves its current step in status.json."""
+    f = WORK / packet_id / "status.json"
+    if not f.exists():
+        return None
+    status = json.loads(f.read_text())
+    return status["step"] if time.time() - status["at"] < 600 else None
 
 
 def start(packet_id, fresh=False):

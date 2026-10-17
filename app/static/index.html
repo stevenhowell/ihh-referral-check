@@ -97,7 +97,10 @@ textarea { width: 100%; min-height: 150px; border: 1px solid var(--line); border
 .viewer .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
 .viewer .bar .t { flex: 1; font-weight: 600; }
 .viewer .body { overflow: auto; padding: 14px; }
-.viewer img { width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.viewer img { width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff; display: block; }
+.pagewrap { position: relative; }
+.hl { position: absolute; border: 3px solid var(--accent); background: rgba(10, 102, 216, .14); border-radius: 4px; pointer-events: none; }
+.hl[hidden] { display: none; }
 .viewer pre { white-space: pre-wrap; font: 13px/1.5 ui-monospace, Menlo, monospace; background: var(--row); padding: 12px; border-radius: 8px; }
 mark { background: var(--mark); color: inherit; }
 table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 12px; overflow: hidden; }
@@ -141,7 +144,7 @@ tbody tr:nth-child(even) { background: var(--row); }
   </div>
   <div class="body">
     <div id="v-note" class="meta"></div>
-    <img id="v-img" alt="">
+    <div class="pagewrap"><img id="v-img" alt=""><div class="hl" id="v-hl" hidden></div></div>
     <details id="v-tr-wrap"><summary>Show what Claude read on this page</summary><pre id="v-tr"></pre></details>
   </div>
 </aside>
@@ -235,7 +238,7 @@ async function renderPacket() {
   }
   if (!state.review || state.review.packet_id !== p.id) state.review = await api(`/api/review/${p.id}`);
   main.innerHTML = reviewHTML(state.review, name);
-  main.querySelectorAll(".pagebtn").forEach((b) => b.onclick = () => openViewer(+b.dataset.page, b.dataset.quote));
+  main.querySelectorAll(".pagebtn").forEach((b) => b.onclick = () => openViewer(+b.dataset.page, b.dataset.quote, b.dataset.box ? JSON.parse(b.dataset.box) : null));
   const copy = $("copy");
   if (copy) copy.onclick = async () => {
     try { await navigator.clipboard.writeText($("reply").value); copy.textContent = "Copied"; }
@@ -255,7 +258,7 @@ function imageCheck(e) {
 function quoteHTML(e) {
   const label = typeof CHECK[e.check] === "function" ? CHECK[e.check](e) : CHECK[e.check];
   return `<div class="quote">
-    <button class="pagebtn" data-page="${e.page}" data-quote="${esc(e.quote)}" aria-label="Open page ${e.page}">p. ${e.page}</button>
+    <button class="pagebtn" data-page="${e.page}" data-quote="${esc(e.quote)}" data-box="${e.box ? esc(JSON.stringify(e.box)) : ""}" aria-label="Open page ${e.page}">p. ${e.page}</button>
     <q>${esc(e.quote)}</q>
     <span class="side"><span class="check ${e.check}">${label}</span>${imageCheck(e)}</span></div>`;
 }
@@ -310,7 +313,7 @@ function reviewHTML(r, name) {
     <div>${esc(s.why)}</div>${lean}
     <div class="chips">${s.deciding_rule_ids.map((id) => `<span class="chip">${esc(id)}</span>`).join("")}</div>
     <p class="meta" style="margin:12px 0 0">${esc(rv.summary)}</p>
-    <p class="meta" style="margin:8px 0 0">Read ${r.page_count} pages in ${mins} min ${secs} s. ${checked} of ${qc.quotes} quotes found on the page they cite${qc.quotes - checked ? `; ${qc.quotes - checked} need a look` : ""}. ${qc.image ? ` ${qc.image.seen} of ${qc.image.checked} key quotes seen on the page image${qc.image.checked - qc.image.seen ? `; ${qc.image.checked - qc.image.seen} to check by hand` : ""}.` : ""} The coordinator makes the decision.</p>
+    <p class="meta" style="margin:8px 0 0">Read ${r.page_count} pages in ${mins} min ${secs} s. ${checked} of ${qc.quotes} quotes found on the page they cite${qc.quotes - checked ? `; ${qc.quotes - checked} need a look` : ""}. ${qc.image ? ` ${qc.image.seen} of ${qc.image.checked} quotes seen on the page image${qc.image.checked - qc.image.seen ? `; ${qc.image.checked - qc.image.seen} to check by hand` : ""}.` : ""} The coordinator makes the decision.</p>
   </div></div>
   ${groupsHTML(rv.findings)}
   ${section("Rules the patient out", by("problem"), findingHTML)}
@@ -326,9 +329,18 @@ function reviewHTML(r, name) {
   <div class="row" style="margin-top:28px"><button class="btn" id="again">Review again</button><span class="meta">Runs the rules check again on the pages already read.</span></div>`;
 }
 
-async function openViewer(page, quote) {
+async function openViewer(page, quote, box) {
   const r = state.review;
   state.viewer = { page, quote };
+  const hl = $("v-hl");
+  hl.hidden = true;
+  if (box) {
+    const pad = 0.006;
+    Object.assign(hl.style, { left: `${(box[0] - pad) * 100}%`, top: `${(box[1] - pad) * 100}%`,
+      width: `${(box[2] - box[0] + 2 * pad) * 100}%`, height: `${(box[3] - box[1] + 2 * pad) * 100}%` });
+    hl.hidden = false;
+    $("v-img").onload = () => hl.scrollIntoView({ block: "center", behavior: "smooth" });
+  } else { $("v-img").onload = null; }
   const info = r.pages.find((p) => p.page === page) || {};
   $("viewer").hidden = false;
   $("v-title").textContent = `Page ${page} of ${r.page_count}`;
