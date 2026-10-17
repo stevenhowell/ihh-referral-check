@@ -50,6 +50,23 @@ main { padding: 24px 28px 60px; max-width: 980px; width: 100%; }
 .empty { text-align: center; padding: 70px 20px; color: var(--muted); }
 .empty h2 { color: var(--text); font-size: 22px; margin: 0 0 8px; }
 .empty p { max-width: 460px; margin: 0 auto 20px; }
+.drop { border: 2px dashed #b9c6d8; border-radius: 18px; background: var(--panel); padding: 44px 20px; text-align: center; margin-top: 20px; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop h2 { margin: 0 0 6px; font-size: 22px; } .drop p { color: var(--muted); margin: 0 0 18px; }
+.steps { background: var(--panel); border-radius: 18px; padding: 24px; border: 1px solid var(--line); }
+.pstep { display: flex; gap: 14px; align-items: center; padding: 9px 0; font-size: 17px; }
+.dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; flex: none; }
+.dot.done { background: var(--green); } .dot.now { background: var(--accent); } .dot.next { background: var(--line); color: var(--muted); }
+.pbar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin: 0 0 6px 42px; }
+.pbar i { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+.todo { padding: 4px 16px; }
+.todo-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
+.todo-item:first-child { border-top: 0; }
+.todo-item .txt { flex: 1; } .todo-item .tt { font-weight: 600; }
+.todo-item.done .tt { text-decoration: line-through; color: var(--muted); }
+.tick { width: 44px; height: 44px; flex: none; border-radius: 10px; border: 2px solid var(--line); background: var(--panel); color: #fff; font-weight: 800; font-size: 18px; margin: -6px 0; }
+.tick:active { background: var(--bg); }
+.todo-item.done .tick { background: var(--green); border-color: var(--green); }
 .acro { color: var(--text); letter-spacing: .01em; }
 .acro b { color: var(--accent); }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; }
@@ -266,7 +283,7 @@ async function renderPacket() {
     return;
   }
   if (p.state === "running") {
-    main.innerHTML = `<div class="empty"><h2><span class="spinner"></span>&nbsp; Reviewing ${name}</h2><p>${esc(p.step)}</p></div>`;
+    main.innerHTML = progressHTML(name, p.step || "");
     return;
   }
   if (p.state === "changed") {
@@ -285,12 +302,18 @@ async function renderPacket() {
   if (!state.review || state.review.packet_id !== p.id) state.review = await api(`/api/review/${p.id}`);
   main.innerHTML = reviewHTML(state.review, name);
   main.querySelectorAll(".pagebtn").forEach((b) => b.onclick = () => openViewer(+b.dataset.page, b.dataset.quote, b.dataset.box ? JSON.parse(b.dataset.box) : null));
-  const copy = $("copy");
-  if (copy) copy.onclick = async () => {
-    try { await navigator.clipboard.writeText($("reply").value); copy.textContent = "Copied"; }
-    catch { copy.textContent = "Select the text and copy it"; }
-    setTimeout(() => copy.textContent = "Copy reply", 2000);
-  };
+  main.querySelectorAll(".tick").forEach((b) => b.onclick = () => {
+    const r = state.review, ticks = loadTicks(r);
+    ticks[b.dataset.i] = !ticks[b.dataset.i];
+    try { localStorage.setItem(todoKey(r), JSON.stringify(ticks)); } catch {}
+    const on = !!ticks[b.dataset.i];
+    b.closest(".todo-item").classList.toggle("done", on);
+    b.setAttribute("aria-checked", on);
+    b.textContent = on ? "✓" : "";
+    const all = main.querySelectorAll(".tick").length, done = main.querySelectorAll(".todo-item.done").length;
+    const count = b.closest(".todo").previousElementSibling.querySelector(".count");
+    if (count) count.textContent = `${done} of ${all} done`;
+  });
   const again = $("again");
   if (again) again.onclick = () => startReview(p.id, true);
 }
@@ -378,6 +401,26 @@ function suggestionText(decision, lean) {
   return decision === "need_more_info" ? `${CALL[decision]}, leaning ${lean}` : CALL[decision];
 }
 
+// "Before you say yes": what must be arranged (with its page) and what to ask the hospital for.
+// Ticks are kept in this browser only, per packet.
+function todoKey(r) { return `fetch-todo-${r.packet_id}-${(r.sha256 || "").slice(0, 12)}`; }
+function loadTicks(r) { try { return JSON.parse(localStorage.getItem(todoKey(r)) || "{}"); } catch { return {}; } }
+function todoHTML(r) {
+  const rv = r.review, ticks = loadTicks(r);
+  const items = [
+    ...rv.findings.filter((f) => f.status === "arrange").map((f) => ({ text: f.headline, why: f.explanation, ev: f.evidence[0] })),
+    ...rv.ask_hospital.map((a) => ({ text: a, why: "Ask the hospital: not in the fax." })),
+  ];
+  if (!items.length) return "";
+  const done = items.filter((_, i) => ticks[i]).length;
+  return `<h3>Before you say yes <span class="count">${done} of ${items.length} done</span></h3><div class="card todo">
+    ${items.map((it, i) => `<div class="todo-item${ticks[i] ? " done" : ""}">
+      <button class="tick" data-i="${i}" role="checkbox" aria-checked="${!!ticks[i]}" aria-label="Done: ${esc(it.text)}">${ticks[i] ? "✓" : ""}</button>
+      <div class="txt"><div class="tt">${esc(it.text)}</div><div class="meta">${esc(it.why)}</div></div>
+      ${it.ev ? `<button class="pagebtn" data-page="${it.ev.page}" data-quote="${esc(it.ev.quote)}" data-box="${it.ev.box ? esc(JSON.stringify(it.ev.box)) : ""}">Page ${it.ev.page}</button>` : ""}
+    </div>`).join("")}</div>`;
+}
+
 function reviewHTML(r, name) {
   const rv = r.review, s = rv.suggestion, qc = r.quote_check;
   const by = (st) => rv.findings.filter((f) => f.status === st);
@@ -404,14 +447,9 @@ function reviewHTML(r, name) {
       <div class="meta">${flaggedItems.length ? "What rules the patient out, what needs your judgment, what must be arranged first, where the pages disagree, and anything Fetch couldn't confirm." : "Nothing rules the patient out, needs your judgment or failed a check."}</div></div></div>
     ${flaggedItems.map(findingHTML).join("")}
   </section>
+  ${todoHTML(r)}
   ${groupsHTML(rv.findings)}
-  <h3>Reply to the hospital</h3>
-  <div class="card">
-    ${(rv.arrange_first || []).length ? `<div class="meta">Arrange before admission:</div><ul class="ask">${rv.arrange_first.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}
-    ${rv.ask_hospital.length ? `<div class="meta">Ask for:</div><ul class="ask">${rv.ask_hospital.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}
-    <textarea id="reply" aria-label="Reply draft">${esc(rv.reply_draft)}</textarea>
-    <div class="row"><button class="btn" id="copy">Copy reply</button><span class="meta">A draft to edit. Nothing is sent from here.</span></div></div>
-  
+
   <p class="meta" style="margin-top:14px">${esc(rv.summary)}</p>
   <div class="row" style="margin-top:20px"><button class="btn" id="again">Fetch again</button><span class="meta">Checks the rules again on the pages already read.</span></div>`;
 }
@@ -513,21 +551,52 @@ function setTab() {
 $("tab-packets").onclick = () => { if (state.selected) select(state.selected); else { state.view = "packets"; setTab(); renderList(); showWelcome(); } };
 $("tab-score").onclick = async () => { state.view = "score"; setTab(); closeViewer(); renderList(); await renderScore(); };
 
-$("file").onchange = async () => {
-  const f = $("file").files[0];
-  if (!f) return;
+$("file").onchange = () => { if ($("file").files[0]) uploadFile($("file").files[0]); };
+async function uploadFile(f) {
   try {
     const p = await api("/api/upload", { method: "POST", body: await f.arrayBuffer(), headers: { "Content-Type": "application/octet-stream" } });
     $("file").value = "";
     await refresh();
     await select(p.id);
   } catch (e) { alert(e.message); }
-};
+}
+
+// The four steps a review goes through, worked out from the step text the server reports.
+function progressHTML(name, step) {
+  const read = step.match(/Read (\d+) of (\d+) page/);
+  const total = (step.match(/(\d+) page/) || [])[1];
+  let at = 1;
+  if (/Reading|Read \d/.test(step)) at = 2;
+  if (/against IHH/.test(step)) at = 3;
+  if (/quote/.test(step)) at = 4;
+  const waiting = /Waiting/.test(step);
+  const labels = [
+    total && at > 1 ? `Opened the fax: ${read ? read[2] : total} pages` : "Opening the fax",
+    read ? `Reading the pages: ${read[1]} of ${read[2]}` : "Reading the pages",
+    "Checking IHH's admission rules",
+    "Double-checking every quote against the fax",
+  ];
+  const rows = labels.map((label, i) => {
+    const n = i + 1, cls = waiting ? "next" : n < at ? "done" : n === at ? "now" : "next";
+    const bar = n === 2 && read && at === 2 ? `<div class="pbar"><i style="width:${Math.round(100 * read[1] / read[2])}%"></i></div>` : "";
+    return `<div class="pstep"><span class="dot ${cls}">${cls === "done" ? "✓" : n}</span>${label}</div>${bar}`;
+  }).join("");
+  return `<div class="steps"><h2 style="margin:0 0 10px;font-size:20px">Fetching ${esc(name)}</h2>${rows}</div>
+    <p class="meta" style="margin-top:12px">${waiting ? "Waiting for another review to finish." : "About 3 minutes. You can open another packet while you wait."}</p>`;
+}
 
 function showWelcome() {
-  $("main").innerHTML = `<div class="empty"><h2>Choose a referral packet</h2>
-    <p class="acro"><b>F</b>inds the <b>E</b>vidence · <b>T</b>races it to the page · <b>C</b>hecks it twice · <b>H</b>ands it to you</p>
-    <p>Pick one of IHH's eleven packets on the left, or open a new fax as a PDF or a photo. The review shows which of IHH's rules the packet meets, which it breaks, and what it doesn't say, each with the page it came from.</p></div>`;
+  $("main").innerHTML = `<div class="drop" id="drop">
+    <h2>Drop a referral fax here</h2>
+    <p>A PDF or a photo. Fetch reads every page and checks it against IHH's admission rules.</p>
+    <button class="btn primary" id="choose">Choose a file</button></div>
+    <p class="acro" style="text-align:center;margin-top:18px"><b>F</b>inds the <b>E</b>vidence · <b>T</b>races it to the page · <b>C</b>hecks it twice · <b>H</b>ands it to you</p>
+    <p class="meta" style="text-align:center">Or pick one of IHH's eleven packets.</p>`;
+  $("choose").onclick = () => $("file").click();
+  const drop = $("drop");
+  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+  drop.ondragleave = () => drop.classList.remove("over");
+  drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]); };
 }
 
 showWelcome();

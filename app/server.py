@@ -42,7 +42,7 @@ def summary(packet_id):
         item.update(state="running", step=job.get("step"))
     elif job.get("state") == "error":
         item.update(state="error", error=job.get("error"))
-    elif not review.exists() and (status := running_elsewhere(packet_id)):
+    elif status := running_elsewhere(packet_id):  # a run in progress outranks an older result
         item.update(state="running", step=status)
     elif review.exists() and not matches_file(packet_id):
         item.update(state="changed")
