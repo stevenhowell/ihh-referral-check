@@ -276,7 +276,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?")[0]
-        if path in ("/", "/index.html"):
+        if path in ("/", "/landing"):
+            return self.send(200, (STATIC / "landing.html").read_bytes(), "text/html; charset=utf-8")
+        if path in ("/app", "/app/", "/index.html"):
             return self.send(200, (STATIC / "index.html").read_bytes(), "text/html; charset=utf-8")
         if path == "/api/packets":
             return self.send(200, {"packets": [summary(p) for p in packet_ids()]})
