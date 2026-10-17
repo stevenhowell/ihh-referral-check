@@ -136,7 +136,7 @@ footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 20
 }
 </style>
 </head>
-<body data-avg="402" data-read="103" data-pages="34">
+<body data-avg="402" data-pages="26">
 
 <header class="hero">
   <div>
@@ -172,8 +172,8 @@ footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 20
         <div class="rp-badge" id="rp-badge">Page 1</div>
       </div>
       <div class="rp-right">
-        <div class="rp-kicker">Time to read a 34-page fax</div>
-        <div class="rp-time"><span id="rp-min">0</span><small>min</small><span id="rp-sec">00</span><small>s</small><span class="done" id="rp-done">✓ Read</span></div>
+        <div class="rp-kicker">Time to scan one document</div>
+        <div class="rp-time"><span id="rp-min">0</span><small>min</small><span id="rp-sec">00</span><small>s</small><span class="done" id="rp-done">✓ Done</span></div>
         <div class="rp-steps">
           <div class="rp-step"><span class="dot"></span>Read every page</div>
           <div class="rp-step"><span class="dot"></span>Check 155 IHH rules</div>
@@ -181,7 +181,7 @@ footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 20
           <div class="rp-step"><span class="dot"></span>Build the client profile</div>
         </div>
         <div class="rp-bar"><i id="rp-bar"></i></div>
-        <div class="rp-sub" id="rp-sub">Measured on a fresh read of IHH's longest referral.</div>
+        <div class="rp-sub" id="rp-sub">Average of fresh full scans of IHH's 11 referrals.</div>
       </div>
     </div>
     <div class="sa-facts">
@@ -203,7 +203,7 @@ footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 20
 
 <script>
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const AVG = Number(document.body.dataset.read || 0);      // measured seconds to read a 34-page fax
+const AVG = Number(document.body.dataset.avg || 0);       // measured seconds for a full scan of one document (average of 11)
 const PAGES = Number(document.body.dataset.pages || 26);   // average pages per referral
 
 function countUp(el) {
@@ -222,7 +222,7 @@ const PHASES = [0.55, 0.75, 0.9, 1];
 let lastPage = -1;
 function showTime(t) { R.min.textContent = Math.floor(t / 60); R.sec.textContent = String(Math.floor(t % 60)).padStart(2, "0"); }
 function scanFrame(k) {
-  showTime(AVG * Math.min(1, k / PHASES[0]));
+  showTime(AVG * k);
   R.bar.style.width = (100 * k) + "%";
   const phase = PHASES.findIndex((p) => k < p);
   R.steps.forEach((st, i) => { st.classList.toggle("ok", k >= PHASES[i]); st.classList.toggle("now", i === phase); st.querySelector(".dot").textContent = k >= PHASES[i] ? "✓" : ""; });
@@ -233,7 +233,7 @@ function scanFrame(k) {
   lastPage = pg;
   R.scan.style.top = (k < PHASES[0] ? -50 + ((readK * PAGES) % 1) * 360 : -50) + "px";
   R.hit.classList.toggle("on", k >= PHASES[0] && k < 1 ? true : k >= 1);
-  R.done.classList.toggle("on", k >= PHASES[0]);
+  R.done.classList.toggle("on", k >= 1);
 }
 function factsFrame(p) {
   R.facts.forEach((f) => {
