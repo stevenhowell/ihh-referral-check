@@ -29,7 +29,13 @@ KIND_LABEL = {"problem": "Rules them out", "coordinator_call": "Your call", "arr
 def _load():
     if DESK.exists():
         return json.loads(DESK.read_text())
-    return {"decisions": {}, "tasks": {}, "beds": None, "added": {}}
+    return {"decisions": {}, "tasks": {}, "beds": None, "added": {}, "opened": {}, "log": []}
+
+
+def _log(desk, packet_id, action, by=None, detail=None):
+    """Every recorded change, in order. It goes into the exported record."""
+    desk.setdefault("log", []).append({"at": time.time(), "packet": packet_id, "action": action,
+                                       "by": by, "detail": detail})
 
 
 def _save(desk):
@@ -109,16 +115,36 @@ def set_task(task_id, owner=None, done=None):
         if done is not None:
             rec["done"] = bool(done)
             rec["done_at"] = time.time() if done else None
+        _log(desk, task_id.split(":")[0], "task", detail={"task": task_id, "owner": owner, "done": done})
         _save(desk)
 
 
-def set_decision(packet_id, decision):
+def mark_opened(packet_id):
+    """The first time a person opens a referral, so time-to-decision is measured, not guessed."""
+    with LOCK:
+        desk = _load()
+        desk.setdefault("opened", {})
+        if packet_id not in desk["opened"] and packet_id not in desk["decisions"]:
+            desk["opened"][packet_id] = time.time()
+            _save(desk)
+
+
+def set_decision(packet_id, decision, by=None, note=None):
     with LOCK:
         desk = _load()
         if decision is None:
-            desk["decisions"].pop(packet_id, None)
+            old = desk["decisions"].pop(packet_id, None)
+            _log(desk, packet_id, "undo", detail=(old or {}).get("decision"))
         elif decision in ("approve", "deny"):
-            desk["decisions"][packet_id] = {"decision": decision, "at": time.time()}
+            by = (by or "").strip()
+            if not by:
+                raise ValueError("Enter your initials so the record shows who decided.")
+            now = time.time()
+            opened = desk.get("opened", {}).get(packet_id)
+            desk["decisions"][packet_id] = {"decision": decision, "at": now, "by": by[:40],
+                                            "note": (note or "").strip()[:500],
+                                            "seconds_to_decide": round(now - opened) if opened else None}
+            _log(desk, packet_id, decision, by=by[:40], detail=(note or "").strip()[:500])
         else:
             raise ValueError("Decision must be approve or deny")
         _save(desk)

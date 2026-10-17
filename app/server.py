@@ -19,6 +19,7 @@ from common import DECISIONS, PACKETS, UPLOADS, WORK, fingerprint, load_env, pac
 from review import review_packet  # noqa: E402
 import desk  # noqa: E402
 from client_profile import build_profile  # noqa: E402
+from report import export_pdf  # noqa: E402
 
 STATIC = Path(__file__).parent / "static"
 PORT = 8811
@@ -163,10 +164,22 @@ def queue():
         "suggest_approve": sum(x["state"] == "done" and lean(x) == "approve" for x in undecided),
         "suggest_deny": sum(x["state"] == "done" and lean(x) == "deny" for x in undecided),
         "to_look_at": sum(x.get("open_tasks", 0) > 0 for x in undecided),
+        "decided": sum(bool(x["coordinator"]) for x in rows),
+        "total": len(rows),
+        "median_seconds": median([x["coordinator"]["seconds_to_decide"] for x in rows
+                                  if x["coordinator"] and x["coordinator"].get("seconds_to_decide")]),
         "approved": sum((x["coordinator"] or {}).get("decision") == "approve" for x in rows),
         "denied": sum((x["coordinator"] or {}).get("decision") == "deny" for x in rows),
     }
     return {"rows": rows, "tasks": tasks, "counts": counts, "beds": d["beds"], "owners": desk.OWNERS, "now": time.time()}
+
+
+def median(values):
+    values = sorted(values)
+    if not values:
+        return None
+    mid = len(values) // 2
+    return values[mid] if len(values) % 2 else round((values[mid - 1] + values[mid]) / 2)
 
 
 def score():
@@ -267,6 +280,19 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, (STATIC / "index.html").read_bytes(), "text/html; charset=utf-8")
         if path == "/api/packets":
             return self.send(200, {"packets": [summary(p) for p in packet_ids()]})
+        m = re.match(r"^/api/export/([RU]\d{2})\.pdf$", path)
+        if m:
+            pid = m.group(1)
+            if not (WORK / pid / "review.json").exists() or not matches_file(pid):
+                return self.send(404, {"error": "There is no current review to export."})
+            pdf = export_pdf(pid).read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/pdf")
+            self.send_header("Content-Disposition", f'attachment; filename="Fetch-{pid}-record.pdf"')
+            self.send_header("Content-Length", str(len(pdf)))
+            self.end_headers()
+            self.wfile.write(pdf)
+            return
         if path == "/api/queue":
             return self.send(200, queue())
         m = re.match(r"^/api/profile/([RU]\d{2})$", path)
@@ -318,7 +344,12 @@ class Handler(BaseHTTPRequestHandler):
         try:
             m = re.match(r"^/api/decision/([RU]\d{2})$", path)
             if m:
-                desk.set_decision(m.group(1), self.body().get("decision"))
+                b = self.body()
+                desk.set_decision(m.group(1), b.get("decision"), by=b.get("by"), note=b.get("note"))
+                return self.send(200, {"ok": True})
+            m = re.match(r"^/api/opened/([RU]\d{2})$", path)
+            if m:
+                desk.mark_opened(m.group(1))
                 return self.send(200, {"ok": True})
             if path == "/api/task":
                 b = self.body()
