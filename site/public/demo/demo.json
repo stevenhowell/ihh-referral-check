@@ -1,0 +1,1287 @@
+{
+ "frozen": {
+  "packet_id": "U01",
+  "source_file": "referral-1010-linh-pham-scan-medium.pdf",
+  "scanned_at": "2026-10-26 14:54",
+  "profile_built_at": "2026-10-26 14:55",
+  "frozen_at": "2026-10-26 14:56",
+  "model": "claude-opus-5-5",
+  "note": "A made-up referral from the hackathon's synthetic test set. Not a real patient."
+ },
+ "queue": {
+  "id": "U01",
+  "uploaded": true,
+  "state": "done",
+  "decision": "deny",
+  "lean": "deny",
+  "pages": 5,
+  "seconds": 79,
+  "flagged": 2,
+  "open_tasks": 2,
+  "profile_line": "68-year-old Vietnamese-speaking man living in his vehicle, recovering from a small stroke with mild right-sided weakness and walking on his own with a rolling walker.",
+  "scan_seconds": null,
+  "added_at": 1793051424.7284517
+ },
+ "review": {
+  "packet_id": "U01",
+  "sha256": "41843c99717057f9cea6505edf8b525b563ba42a631acf1532f702e9680f074d",
+  "page_count": 5,
+  "pages": [
+   {
+    "page": 1,
+    "kind": "ihh_referral_form",
+    "rotated": false,
+    "legibility": "clear",
+    "possible_unredacted_identifier": true
+   },
+   {
+    "page": 2,
+    "kind": "face_sheet",
+    "rotated": false,
+    "legibility": "clear",
+    "possible_unredacted_identifier": true
+   },
+   {
+    "page": 3,
+    "kind": "discharge_summary",
+    "rotated": false,
+    "legibility": "clear",
+    "possible_unredacted_identifier": true
+   },
+   {
+    "page": 4,
+    "kind": "medication_record",
+    "rotated": false,
+    "legibility": "clear",
+    "possible_unredacted_identifier": true
+   },
+   {
+    "page": 5,
+    "kind": "health_plan_authorization",
+    "rotated": false,
+    "legibility": "clear",
+    "possible_unredacted_identifier": true
+   }
+  ],
+  "review": {
+   "summary": "68-year-old man, unsheltered and living in his vehicle, being discharged after a small left MCA stroke with mild right-sided weakness. He is modified independent with a rolling walker. The discharge summary names a stroke with a neurological deficit, which IHH's outline lists as ineligible (NEU-X1). The packet is also missing MRSA and COVID swabs, vitals, and an H&P. Clopidogrel is on the discharge summary but not on the pharmacy medication reconciliation.",
+   "reason_for_hospital_stay": "Stroke (small left MCA) with mild right-sided weakness.",
+   "findings": [
+    {
+     "rule_id": "GEN-1",
+     "status": "ok",
+     "headline": "Unsheltered, recovering from stroke",
+     "explanation": "The referral form says he lives in his vehicle. The chart confirms a recent stroke that is still improving.",
+     "evidence": [
+      {
+       "page": 1,
+       "quote": "Unsheltered \u2014 lives in vehicle",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.2933,
+        0.3048,
+        0.4816,
+        0.32
+       ]
+      },
+      {
+       "page": 3,
+       "quote": "with stroke (small left MCA), mild right-sided weakness",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.4431,
+        0.097,
+        0.8251,
+        0.1164
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Homeless/at risk of homelessness and too ill or frail to recover from illness or injury",
+     "rule_section": "General (meets one or more)",
+     "known_rule": true
+    },
+    {
+     "rule_id": "NEU-X1",
+     "status": "problem",
+     "headline": "Stroke with right-sided weakness",
+     "explanation": "The discharge summary documents a stroke with mild right-sided weakness and new walker use. The outline lists stroke syndrome with neurological residual/deficit as ineligible. The weakness is described as mild and improving, so the coordinator may want to confirm with the hospital whether any deficit remains at discharge.",
+     "evidence": [
+      {
+       "page": 3,
+       "quote": "with stroke (small left MCA), mild right-sided weakness",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.4431,
+        0.097,
+        0.8251,
+        0.1164
+       ]
+      },
+      {
+       "page": 3,
+       "quote": "Functional status. Modified independent; uses rolling walker.",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0863,
+        0.1333,
+        0.5176,
+        0.1515
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Stroke syndrome with neurological residual/deficit (e.g. ambulatory difficulty, seizure)",
+     "rule_section": "Neurology: ineligible",
+     "known_rule": true
+    },
+    {
+     "rule_id": "ADL-1",
+     "status": "cant_tell",
+     "headline": "ADLs not detailed",
+     "explanation": "The chart gives overall function as modified independent but does not describe individual ADLs.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Able to complete all Activities of Daily Living (ADLs) independently including personal hygiene",
+     "rule_section": "ADLs",
+     "known_rule": true
+    },
+    {
+     "rule_id": "ADL-2",
+     "status": "cant_tell",
+     "headline": "Hygiene/showering not documented",
+     "explanation": "No note says whether he can gather supplies, transfer to the shower and bathe on his own.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Patient must be able to complete personal hygiene independently. Benches are available for bathing so seated shower is acceptable. Patient must be able to gather all of their own bathing/showering supplies, transfer to shower area and perform shower/bath independently",
+     "rule_section": "ADLs",
+     "known_rule": true
+    },
+    {
+     "rule_id": "ADL-3",
+     "status": "cant_tell",
+     "headline": "Toileting not documented",
+     "explanation": "No note addresses whether he toilets independently.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Able to toilet independently and/or change briefs/diapers independently",
+     "rule_section": "ADLs",
+     "known_rule": true
+    },
+    {
+     "rule_id": "MOB-1",
+     "status": "ok",
+     "headline": "Uses rolling walker independently",
+     "explanation": "The PT/OT assessment rates him modified independent with a rolling walker.",
+     "evidence": [
+      {
+       "page": 4,
+       "quote": "Assessment: Modified independent; uses rolling walker.",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0737,
+        0.303,
+        0.4588,
+        0.3212
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "If using DME (wheelchair, walker, etc) must be able to use independently",
+     "rule_section": "Mobility",
+     "known_rule": true
+    },
+    {
+     "rule_id": "MOB-2",
+     "status": "ok",
+     "headline": "PT/OT evaluation sent",
+     "explanation": "A PT/OT evaluation is included on page 4.",
+     "evidence": [
+      {
+       "page": 4,
+       "quote": "Recommendation: discharge to community setting with outpatient follow-up.",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0737,
+        0.2927,
+        0.9114,
+        0.3376
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "PT/OT notes must be sent for review",
+     "rule_section": "Mobility",
+     "known_rule": true
+    },
+    {
+     "rule_id": "MOB-3",
+     "status": "cant_tell",
+     "headline": "Walking distance not stated",
+     "explanation": "He is modified independent with a walker, but no distance is recorded.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Patient must be able to ambulate at least 100 ft (rest breaks are acceptable) at modified independence if not wheelchair dependent",
+     "rule_section": "Mobility",
+     "known_rule": true
+    },
+    {
+     "rule_id": "MH-1",
+     "status": "cant_tell",
+     "headline": "Mental status not documented",
+     "explanation": "The packet has no psychiatric history or mental status assessment.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Patient must be mentally stable on medications",
+     "rule_section": "Mental Health",
+     "known_rule": true
+    },
+    {
+     "rule_id": "MH-2",
+     "status": "cant_tell",
+     "headline": "SI not addressed",
+     "explanation": "Suicidal ideation is not documented either way.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "No suicidal ideation",
+     "rule_section": "Mental Health",
+     "known_rule": true
+    },
+    {
+     "rule_id": "MH-3",
+     "status": "cant_tell",
+     "headline": "Hallucinations not addressed",
+     "explanation": "Hallucinations are not documented either way.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "No commanding auditory or visual hallucinations",
+     "rule_section": "Mental Health",
+     "known_rule": true
+    },
+    {
+     "rule_id": "MH-5",
+     "status": "cant_tell",
+     "headline": "Conservatorship/FSP unknown",
+     "explanation": "Not mentioned in the packet. FSP is likely Full Service Partnership.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Cannot qualify, have history of or currently be under a conservatorship or FSP",
+     "rule_section": "Mental Health",
+     "known_rule": true
+    },
+    {
+     "rule_id": "COG-1",
+     "status": "cant_tell",
+     "headline": "Med self-administration not assessed",
+     "explanation": "No note confirms he can self-administer medications. He speaks Vietnamese, so interpreter needs for medical education should be confirmed. No insulin is listed.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Must be capable of self-administering medications (must confirm that patient can self-administer insulin) and receiving medical education",
+     "rule_section": "Cognition",
+     "known_rule": true
+    },
+    {
+     "rule_id": "COG-2",
+     "status": "cant_tell",
+     "headline": "Orientation not recorded",
+     "explanation": "The chart gives no orientation count, which matters after a stroke.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "AOx4",
+     "rule_section": "Cognition",
+     "known_rule": true
+    },
+    {
+     "rule_id": "OTH-1",
+     "status": "cant_tell",
+     "headline": "Behavior not documented",
+     "explanation": "The packet does not mention aggression either way.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Ineligible if client is verbally or physically aggressive towards staff or other patients",
+     "rule_section": "Other Factors",
+     "known_rule": true
+    },
+    {
+     "rule_id": "OTH-4",
+     "status": "cant_tell",
+     "headline": "Isolation status not stated",
+     "explanation": "Isolation status is not documented.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Cannot accept patients on isolation unless isolation status is cleared prior to admission to recuperative care",
+     "rule_section": "Other Factors",
+     "known_rule": true
+    },
+    {
+     "rule_id": "INF-1",
+     "status": "missing",
+     "headline": "No MRSA swab",
+     "explanation": "A negative MRSA swab is required from an inpatient stay and is not in the packet.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "MRSA swab, documented negative prior to recuperative care admission if coming from inpatient hospitalization",
+     "rule_section": "Infection Control",
+     "known_rule": true
+    },
+    {
+     "rule_id": "INF-2",
+     "status": "missing",
+     "headline": "No COVID swab",
+     "explanation": "A negative COVID swab within 24 hours of admission is required and is not in the packet.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Covid swab (rapid swab acceptable) documented negative within 24 hours of recuperative care admission if coming from inpatient admission",
+     "rule_section": "Infection Control",
+     "known_rule": true
+    },
+    {
+     "rule_id": "FORM-X4",
+     "status": "cant_tell",
+     "headline": "TB screen: chest X-ray only",
+     "explanation": "The TB screening section notes a clear chest X-ray, but there is no formal TB clearance.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Active infection has not been cleared by a doctor or CID: MRSA, Tuberculosis, C-DIFF",
+     "rule_section": "Referral form: not eligible if",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-1",
+     "status": "ok",
+     "headline": "Referral form present",
+     "explanation": "The IHH referral form is on page 1.",
+     "evidence": [
+      {
+       "page": 1,
+       "quote": "Reason for referral | Medically stable for discharge; no safe place to recover",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0925,
+        0.323,
+        0.8016,
+        0.36
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Illumination Health + Home Referral Form",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-2",
+     "status": "ok",
+     "headline": "Face sheet present",
+     "explanation": "Demographic face sheet is on page 2.",
+     "evidence": [
+      {
+       "page": 2,
+       "quote": "Emergency contact | Friend \u2014 no number",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0878,
+        0.1376,
+        0.5231,
+        0.1588
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Client's Demographic Page",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-3",
+     "status": "ok",
+     "headline": "Health plan auth present",
+     "explanation": "Recuperative care is authorized for 30 days.",
+     "evidence": [
+      {
+       "page": 5,
+       "quote": "Recuperative care authorized: 30 days from",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0808,
+        0.0976,
+        0.6,
+        0.1127
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "CalOptima Form/LOA/AUTH",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-4",
+     "status": "missing",
+     "headline": "No H&P",
+     "explanation": "Only a draft discharge summary was sent. There is no History and Physical.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "H&P (History and Physical)",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-5",
+     "status": "missing",
+     "headline": "No progress notes",
+     "explanation": "No progress notes were sent. The checklist marks these 'if needed', but they would help clarify the residual deficit.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Current Progress Notes (if needed)",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-6",
+     "status": "missing",
+     "headline": "No vitals",
+     "explanation": "There are no vital signs from the last 24 hours, only 'afebrile x 48h'.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Updated Vitals (last 24 hours)",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-7",
+     "status": "ok",
+     "headline": "Med list present, with mismatch",
+     "explanation": "Both a discharge medication list and a pharmacy reconciliation were sent, but they disagree on clopidogrel (see conflicts).",
+     "evidence": [
+      {
+       "page": 4,
+       "quote": "Pantoprazole | 40 mg PO daily | Yes",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0706,
+        0.1545,
+        0.8604,
+        0.1855
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Medication List",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-8",
+     "status": "ok",
+     "headline": "PT/OT evaluation present",
+     "explanation": "PT/OT assessment is on page 4.",
+     "evidence": [
+      {
+       "page": 4,
+       "quote": "Assessment: Modified independent; uses rolling walker.",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0737,
+        0.303,
+        0.4588,
+        0.3212
+       ]
+      }
+     ],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "PT/OT or Nursing Notes",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-9",
+     "status": "cant_tell",
+     "headline": "Cultures likely not needed",
+     "explanation": "No infection is documented, so cultures are probably not required.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "Blood or Wound Culture (if needed)",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    },
+    {
+     "rule_id": "DOC-10",
+     "status": "missing",
+     "headline": "30-day med supply not shown",
+     "explanation": "Nothing in the packet confirms a 30-day supply of medications.",
+     "evidence": [],
+     "supported": true,
+     "form_only": false,
+     "rule_text": "30-day supply of all medications",
+     "rule_section": "Referral checklist",
+     "known_rule": true
+    }
+   ],
+   "conflicts": [
+    {
+     "topic": "Clopidogrel on discharge list but not in reconciliation",
+     "explanation": "The discharge summary lists clopidogrel 75 mg daily. The pharmacy reconciliation lists only acetaminophen, docusate and pantoprazole. The hospital needs to confirm whether the antiplatelet continues.",
+     "evidence": [
+      {
+       "page": 3,
+       "quote": "Clopidogrel | 75 mg PO daily",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0863,
+        0.2715,
+        0.8745,
+        0.2909
+       ]
+      },
+      {
+       "page": 4,
+       "quote": "Pantoprazole | 40 mg PO daily | Yes",
+       "check": "on_page",
+       "image_check": "yes",
+       "box": [
+        0.0706,
+        0.1545,
+        0.8604,
+        0.1855
+       ]
+      }
+     ]
+    }
+   ],
+   "suggestion": {
+    "decision": "deny",
+    "lean_if_forced": "deny",
+    "why": "The chart documents a stroke with mild right-sided weakness, which falls under NEU-X1 (stroke syndrome with neurological residual/deficit). If the hospital confirms the weakness has fully resolved, the coordinator could reconsider.",
+    "deciding_rule_ids": [
+     "NEU-X1"
+    ]
+   },
+   "arrange_first": [],
+   "ask_hospital": [
+    "Confirm whether right-sided weakness or any other neurological deficit persists at discharge",
+    "Is the rolling walker new since the stroke? What distance can he walk?",
+    "Orientation count (AOx?) and ability to self-administer medications; interpreter needs (Vietnamese)",
+    "ADL/hygiene/toileting assessment",
+    "Negative MRSA swab and COVID swab within 24 hours of admission",
+    "Last 24 hours of vital signs",
+    "H&P and current progress notes",
+    "Clarify whether clopidogrel is continued (discharge summary vs. med reconciliation)",
+    "PCP follow-up appointment within 7 days and neurology follow-up",
+    "Confirm a 30-day medication supply",
+    "Psych history, conservatorship/FSP status, isolation status, behavior concerns"
+   ]
+  },
+  "quote_check": {
+   "quotes": 13,
+   "on_page": 13,
+   "close": 0,
+   "other_page": 0,
+   "not_found": 0,
+   "bad_page": 0,
+   "image": {
+    "checked": 13,
+    "seen": 13,
+    "not_seen": 0
+   }
+  },
+  "seconds": 79,
+  "review_seconds": 60,
+  "model": "claude-opus-5-5",
+  "reviewed_at": "2026-10-26 14:54"
+ },
+ "profile": {
+  "packet_id": "U01",
+  "sha256": "41843c99717057f9cea6505edf8b525b563ba42a631acf1532f702e9680f074d",
+  "profile": {
+   "one_line": "68-year-old Vietnamese-speaking man living in his vehicle, recovering from a small stroke with mild right-sided weakness and walking on his own with a rolling walker.",
+   "sections": [
+    {
+     "title": "About",
+     "facts": [
+      {
+       "label": "Age",
+       "value": "68",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "Hospital course. 68-year-old admitted",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0878,
+          0.0939,
+          0.3569,
+          0.1103
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Sex",
+       "value": "Male",
+       "evidence": [
+        {
+         "page": 2,
+         "quote": "Name | [identifier] | Sex | M",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0878,
+          0.0927,
+          0.8769,
+          0.1206
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Housing",
+       "value": "Referral form says: unsheltered, lives in a vehicle",
+       "evidence": [
+        {
+         "page": 1,
+         "quote": "Housing status | Unsheltered \u2014 lives in vehicle",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0863,
+          0.3012,
+          0.8729,
+          0.3224
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": true
+      },
+      {
+       "label": "Insurance",
+       "value": "Medi-Cal fee-for-service",
+       "evidence": [
+        {
+         "page": 2,
+         "quote": "Insurance | Medi-Cal FFS | Member ID | On file",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0871,
+          0.1576,
+          0.8761,
+          0.1824
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Recuperative care authorization",
+       "value": "Authorized for 30 days",
+       "evidence": [
+        {
+         "page": 5,
+         "quote": "Recuperative care authorized: 30 days from",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0808,
+          0.0976,
+          0.6,
+          0.1121
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Preferred language",
+       "value": "Vietnamese",
+       "evidence": [
+        {
+         "page": 2,
+         "quote": "DOB | [identifier] | Language | Vietnamese",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0878,
+          0.1164,
+          0.8769,
+          0.1418
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      }
+     ]
+    },
+    {
+     "title": "Why they're in hospital",
+     "facts": [
+      {
+       "label": "Reason for stay",
+       "value": "Small stroke on the left side of the brain (left middle cerebral artery)",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "with stroke (small left MCA), mild right-sided weakness. Improving; afebrile x 48h.",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0878,
+          0.097,
+          0.902,
+          0.1242
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Other problems",
+       "value": "Mild right-sided weakness",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "with stroke (small left MCA), mild right-sided weakness. Improving; afebrile x 48h.",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0878,
+          0.097,
+          0.902,
+          0.1242
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Current condition",
+       "value": "Improving; no fever for 48 hours",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "with stroke (small left MCA), mild right-sided weakness. Improving; afebrile x 48h.",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0878,
+          0.097,
+          0.902,
+          0.1242
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Surgery or procedure",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      }
+     ]
+    },
+    {
+     "title": "Getting around and daily care",
+     "facts": [
+      {
+       "label": "Walking",
+       "value": "Modified independent with a rolling walker",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "Functional status. Modified independent; uses rolling walker.",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0863,
+          0.1333,
+          0.5176,
+          0.1515
+         ]
+        },
+        {
+         "page": 4,
+         "quote": "Assessment: Modified independent; uses rolling walker.",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0737,
+          0.303,
+          0.4588,
+          0.3212
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Devices",
+       "value": "Rolling walker",
+       "evidence": [
+        {
+         "page": 4,
+         "quote": "Assessment: Modified independent; uses rolling walker.",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0737,
+          0.303,
+          0.4588,
+          0.3212
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Transfers",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Bathing",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Dressing",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Toileting",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Continence",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      }
+     ]
+    },
+    {
+     "title": "Care needs",
+     "facts": [
+      {
+       "label": "IV lines or IV medicines",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Oxygen",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Wounds",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Diabetes and insulin",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Dialysis",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Catheters",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Home health",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Follow-up",
+       "value": "No primary care doctor; primary care visit within 7 days still to be arranged; specialty follow-up per team",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "Follow-up. PCP within 7 days (to be arranged). Specialty follow-up per team.",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0839,
+          0.297,
+          0.6157,
+          0.3164
+         ]
+        },
+        {
+         "page": 2,
+         "quote": "PCP | None | Attending | Dr. [identifier] (fictional)",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0863,
+          0.1776,
+          0.8761,
+          0.2036
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      }
+     ]
+    },
+    {
+     "title": "Mind and mood",
+     "facts": [
+      {
+       "label": "Orientation",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Memory",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Mental health diagnoses",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Substance use",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Behavior",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      },
+      {
+       "label": "Suicidal thoughts",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      }
+     ]
+    },
+    {
+     "title": "Medicines",
+     "facts": [
+      {
+       "label": "Pain medicine",
+       "value": "Acetaminophen 650 mg by mouth every 6 hours as needed for pain",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "Acetaminophen | 650 mg PO q6h PRN pain",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0863,
+          0.2085,
+          0.8745,
+          0.2291
+         ]
+        },
+        {
+         "page": 4,
+         "quote": "Acetaminophen | 650 mg PO q6h PRN pain | Yes",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0706,
+          0.1127,
+          0.8588,
+          0.1442
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Clopidogrel",
+       "value": "Discharge summary lists clopidogrel 75 mg daily; pharmacy medication reconciliation does not include it",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "Clopidogrel | 75 mg PO daily",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0847,
+          0.2703,
+          0.8745,
+          0.2921
+         ]
+        },
+        {
+         "page": 4,
+         "quote": "Pantoprazole | 40 mg PO daily | Yes",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0706,
+          0.1539,
+          0.8604,
+          0.1855
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Docusate",
+       "value": "100 mg by mouth twice daily",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "Docusate | 100 mg PO BID",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0863,
+          0.2291,
+          0.8745,
+          0.2503
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Pantoprazole",
+       "value": "40 mg by mouth daily",
+       "evidence": [
+        {
+         "page": 3,
+         "quote": "Pantoprazole | 40 mg PO daily",
+         "check": "on_page",
+         "image_check": "yes",
+         "box": [
+          0.0855,
+          0.2497,
+          0.8745,
+          0.2715
+         ]
+        }
+       ],
+       "checked": true,
+       "form_only": false
+      },
+      {
+       "label": "Takes own medicines",
+       "value": "Not in the fax",
+       "evidence": [],
+       "checked": null,
+       "form_only": false
+      }
+     ]
+    }
+   ]
+  },
+  "seconds": 38,
+  "built_at": "2026-10-26 14:55"
+ },
+ "tasks": [
+  {
+   "id": "U01:problem:NEU-X1",
+   "packet_id": "U01",
+   "kind": "problem",
+   "kind_label": "Rules them out",
+   "title": "Stroke with right-sided weakness",
+   "detail": "The discharge summary documents a stroke with mild right-sided weakness and new walker use. The outline lists stroke syndrome with neurological residual/deficit as ineligible. The weakness is described as mild and improving, so the coordinator may want to confirm with the hospital whether any deficit remains at discharge.",
+   "rule_id": "NEU-X1",
+   "evidence": {
+    "page": 3,
+    "quote": "with stroke (small left MCA), mild right-sided weakness",
+    "check": "on_page",
+    "image_check": "yes",
+    "box": [
+     0.4431,
+     0.097,
+     0.8251,
+     0.1164
+    ]
+   },
+   "owner": "Clinical lead"
+  },
+  {
+   "id": "U01:conflict:0",
+   "packet_id": "U01",
+   "kind": "conflict",
+   "kind_label": "Pages disagree",
+   "title": "Clopidogrel on discharge list but not in reconciliation",
+   "detail": "The discharge summary lists clopidogrel 75 mg daily. The pharmacy reconciliation lists only acetaminophen, docusate and pantoprazole. The hospital needs to confirm whether the antiplatelet continues.",
+   "rule_id": null,
+   "evidence": {
+    "page": 3,
+    "quote": "Clopidogrel | 75 mg PO daily",
+    "check": "on_page",
+    "image_check": "yes",
+    "box": [
+     0.0863,
+     0.2715,
+     0.8745,
+     0.2909
+    ]
+   },
+   "owner": "Coordinator"
+  }
+ ],
+ "transcripts": {
+  "1": {
+   "transcript": "[identifier] 11:37 FAX [identifier] 1010 P.001/005\nRecuperative Care Referral \u2014 [identifier]\nReferral #1010 \u00b7 Sent [identifier] \u00b7 From: [identifier], RN CM, [identifier], Santa Ana, CA \u00b7 Phone [identifier]\nField | Value\nPatient | [identifier]\nDOB | [identifier]\nMRN | [identifier]\nAdmit date | [identifier]\nAnticipated discharge | [identifier]\nPrimary diagnosis | Stroke (small left MCA), mild right-sided weakness\nPayer | Medi-Cal FFS\nHousing status | Unsheltered \u2014 lives in vehicle\nReason for referral | Medically stable for discharge; no safe place to recover; needs short-term recuperative care with follow-up appointments.\nRequested start: on discharge. Please call to confirm bed availability.\nSYNTHETIC TEST DATA \u2014 NOT A REAL PATIENT \u2014 Claude Impact Lab [identifier]\nPage 1",
+   "kind": "ihh_referral_form",
+   "rotated": false,
+   "legibility": "clear",
+   "possible_unredacted_identifier": true
+  },
+  "2": {
+   "transcript": "[identifier] 13:25 FAX [identifier] 1010 P.002/005\nFace Sheet\nName | [identifier] | Sex | M\nDOB | [identifier] | Language | Vietnamese\nEmergency contact | Friend \u2014 no number | Phone | None\nInsurance | Medi-Cal FFS | Member ID | On file\nPCP | None | Attending | Dr. [identifier] (fictional)\nSYNTHETIC TEST DATA \u2014 NOT A REAL PATIENT \u2014 Claude Impact Lab [identifier]\nPage 2",
+   "kind": "face_sheet",
+   "rotated": false,
+   "legibility": "clear",
+   "possible_unredacted_identifier": true
+  },
+  "3": {
+   "transcript": "[identifier] 14:43 FAX [identifier] 1010 P.003/005\nDischarge Summary (draft)\nHospital course. 68-year-old admitted [identifier] with stroke (small left MCA), mild right-sided weakness. Improving; afebrile x 48h.\nFunctional status. Modified independent; uses rolling walker.\nDischarge medications\nMedication | Dose / route / frequency\nAcetaminophen | 650 mg PO q6h PRN pain\nDocusate | 100 mg PO BID\nPantoprazole | 40 mg PO daily\nClopidogrel | 75 mg PO daily\nFollow-up. PCP within 7 days (to be arranged). Specialty follow-up per team.\nSYNTHETIC TEST DATA \u2014 NOT A REAL PATIENT \u2014 Claude Impact Lab [identifier]\nPage 3",
+   "kind": "discharge_summary",
+   "rotated": false,
+   "legibility": "clear",
+   "possible_unredacted_identifier": true
+  },
+  "4": {
+   "transcript": "[identifier] 16:45 FAX [identifier] 1010 P.004/005\nMedication Reconciliation\nMedication | Sig | Continue?\nAcetaminophen | 650 mg PO q6h PRN pain | Yes\nDocusate | 100 mg PO BID | Yes\nPantoprazole | 40 mg PO daily | Yes\nReconciled by pharmacy [identifier].\nInfection Control / TB Screening\nCXR clear [identifier]\nPT / OT Evaluation\nAssessment: Modified independent; uses rolling walker. Recommendation: discharge to community setting with outpatient follow-up.\nSYNTHETIC TEST DATA \u2014 NOT A REAL PATIENT \u2014 Claude Impact Lab [identifier]\nPage 4",
+   "kind": "medication_record",
+   "rotated": false,
+   "legibility": "clear",
+   "possible_unredacted_identifier": true
+  },
+  "5": {
+   "transcript": "[identifier] 11:51 FAX [identifier] 1010 P.005/005\nHealth Plan Authorization\nRecuperative care authorized: 30 days from [identifier]. Auth # [identifier].\nConsent / Release of Information\nSigned by patient [identifier]. Authorizes release to recuperative care provider and health plan.\nSYNTHETIC TEST DATA \u2014 NOT A REAL PATIENT \u2014 Claude Impact Lab [identifier]\nPage 5",
+   "kind": "health_plan_authorization",
+   "rotated": false,
+   "legibility": "clear",
+   "possible_unredacted_identifier": true
+  }
+ },
+ "images": [
+  {
+   "page": 1,
+   "src": "/demo/pages/p-01.jpg"
+  },
+  {
+   "page": 2,
+   "src": "/demo/pages/p-02.jpg"
+  },
+  {
+   "page": 3,
+   "src": "/demo/pages/p-03.jpg"
+  },
+  {
+   "page": 4,
+   "src": "/demo/pages/p-04.jpg"
+  },
+  {
+   "page": 5,
+   "src": "/demo/pages/p-05.jpg"
+  }
+ ]
+}

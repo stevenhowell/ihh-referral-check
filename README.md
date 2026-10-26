@@ -24,7 +24,7 @@ A coordinator's desk in the browser:
 - **Export PDF.** A record of the decision, who made it and when, Fetch's suggestion (labeled as a suggestion), every flagged item with page and quote, every rule checked, a log of every change, and the fax's SHA-256.
 - **Tasks.** Every flagged risk becomes a task with a suggested reviewer (coordinator, LVN, clinical lead, program manager) that anyone can reassign and mark done.
 
-**Live:** [fetch.stevenluishowell.com](https://fetch.stevenluishowell.com), the landing page (also at [stevenhowell.github.io/ihh-referral-check](https://stevenhowell.github.io/ihh-referral-check)). The app itself runs on a laptop, below. The page is served by the small Worker in `site/`.
+**Live:** [fetch.stevenluishowell.com](https://fetch.stevenluishowell.com), the landing page (also at [stevenhowell.github.io/ihh-referral-check](https://stevenhowell.github.io/ihh-referral-check)), and [fetch.stevenluishowell.com/demo](https://fetch.stevenluishowell.com/demo), a replay of one scan of a made-up referral that anyone can read without installing anything. The app itself runs on a laptop, below. Both pages are served by the small Worker in `site/`.
 
 **Demo video:** to be added
 
@@ -60,6 +60,14 @@ python3 app/server.py
 
 Then open http://localhost:8811. Put IHH's packets in `challenges/1-referral-intake/packets/` (see that folder's README), or drop any referral PDF or photo onto the queue. A fresh scan averaged 6 min 42 s per referral across IHH's 11 (3 to 15 minutes, measured three at a time on venue Wi-Fi), at roughly $1 to $2 of API use each.
 
+## The hosted demo
+
+[fetch.stevenluishowell.com/demo](https://fetch.stevenluishowell.com/demo) is the referral view above, frozen. On October 26, 2026 the app scanned one made-up referral once (`referral-1010-linh-pham-scan-medium.pdf` from the hackathon's synthetic test set: five pages, invented names and dates, "synthetic test data, not a real patient" printed on every page) in 1 min 57 s. `app/freeze_demo.py` then copied what the app saved (the queue row, the review, the client profile, the page transcripts, the page images and the highlight boxes) into `site/public/demo/` as one JSON file and five JPEGs. The page reads those files and nothing else: no API calls, nothing saved.
+
+What differs from the app, each with a line on the page saying so: Approve and Deny are shown disabled, the Tasks screen, PDF export, beds and the waiting clock are left out, and the checklist has no checkboxes. Because the packet's names and dates are not blacked out, Fetch wrote `[identifier]` in place of each one and flagged every page as a possible missed redaction; the demo keeps that warning and explains it.
+
+IHH's real packets are never frozen: the script refuses to write an `R` packet anywhere inside the repo.
+
 ## What is real and what is mocked
 
 | Part | Status |
@@ -73,6 +81,7 @@ Then open http://localhost:8811. Put IHH's packets in `challenges/1-referral-int
 | Who reviews a task | Our suggested defaults by kind of rule; IHH has not confirmed them |
 | Connection to IHH's systems or EMR | None, by design. The PDF is a record a person can file |
 | Login | None. Initials are typed at decision time |
+| Hosted demo at `/demo` | A replay of one recorded scan of a synthetic referral: static files, no API |
 
 ## How well it works
 

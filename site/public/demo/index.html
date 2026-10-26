@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fetch · Demo referral</title>
+<meta name="description" content="A replay of one Fetch scan: a made-up hospital referral checked against IHH's admission rules, every finding traced to the page and the words it came from.">
+<style>
+:root {
+  --bg: #f5f5f7; --panel: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
+  --accent: #0a66d8; --accent-press: #0852ad; --accent-soft: #e8f1fc;
+  --red: #c4291c; --red-soft: #fdeceb; --amber: #a35a00; --amber-soft: #fdf3e3;
+  --green: #1f7a3a; --green-soft: #e9f6ed; --purple: #6b3fb5; --purple-soft: #f1ecfa;
+  --row: #fafafc; --mark: #ffe58a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161618; --panel: #1f1f22; --text: #f2f2f5; --muted: #a1a1a8; --line: #333338;
+    --accent: #4a9bff; --accent-press: #2f86f0; --accent-soft: #1c2b40;
+    --red: #ff6b5e; --red-soft: #3a1f1d; --amber: #f0a542; --amber-soft: #382a17;
+    --green: #5fd27f; --green-soft: #18301f; --purple: #b69cff; --purple-soft: #2a2238;
+    --row: #242428; --mark: #6b5a12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161618; --panel: #1f1f22; --text: #f2f2f5; --muted: #a1a1a8; --line: #333338;
+  --accent: #4a9bff; --accent-press: #2f86f0; --accent-soft: #1c2b40;
+  --red: #ff6b5e; --red-soft: #3a1f1d; --amber: #f0a542; --amber-soft: #382a17;
+  --green: #5fd27f; --green-soft: #18301f; --purple: #b69cff; --purple-soft: #2a2238;
+  --row: #242428; --mark: #6b5a12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
+button { font: inherit; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px; position: sticky; top: 0; z-index: 5; color: #fff;
+  background: radial-gradient(600px 200px at 85% 0%, rgba(127,182,255,.3), transparent 70%), linear-gradient(120deg, #071d3d, #0a5cc4); box-shadow: 0 4px 20px rgba(7,29,61,.25); }
+header h1 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin: 0; }
+header .sub { color: rgba(255,255,255,.75); font-size: 13px; }
+.homelink { color: inherit; text-decoration: none; }
+header .code { color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,.45); border-radius: 10px; min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; font-weight: 600; white-space: nowrap; }
+header .code:active { background: rgba(255,255,255,.14); }
+.replay { background: var(--amber-soft); color: var(--amber); border-bottom: 1px solid var(--line); padding: 10px 20px; font-size: 14px; line-height: 1.4; }
+.replay b { font-weight: 700; }
+.replay a { color: inherit; }
+main { padding: 24px 28px 60px; max-width: 1120px; width: 100%; margin: 0 auto; }
+.qhead { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; } .qhead h2 { margin: 0 0 10px; font-size: 20px; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 12px; overflow: hidden; }
+th, td { text-align: left; padding: 10px 12px; font-size: 14px; vertical-align: top; }
+th { font-size: 12.5px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(even) { background: var(--row); }
+.qrow { cursor: pointer; } .qrow:hover { background: var(--accent-soft) !important; } .qrow:focus { outline: 2px solid var(--accent); }
+.qrow td { padding-top: 14px; padding-bottom: 14px; }
+.qline { max-width: 380px; }
+.chip2 { font-size: 13px; font-weight: 700; border-radius: 999px; padding: 3px 10px; display: inline-block; white-space: nowrap; }
+.chip2.approve { color: var(--green); background: var(--green-soft); } .chip2.deny { color: var(--red); background: var(--red-soft); }
+.chip2.info { color: var(--amber); background: var(--amber-soft); } .chip2.wait { color: var(--muted); background: var(--bg); }
+.riskn { background: var(--purple); color: #fff; font-weight: 700; border-radius: 999px; padding: 2px 10px; }
+.open-btn { border: 1px solid var(--accent); background: var(--panel); color: var(--accent); border-radius: 10px; min-height: 44px; padding: 0 14px; font-weight: 600; cursor: pointer; }
+.open-btn:active { background: var(--accent-soft); }
+.backlink { border: 0; background: none; color: var(--accent); font-size: 16px; min-height: 44px; padding: 0; cursor: pointer; }
+.meta { color: var(--muted); font-size: 13px; }
+.tiny { font-size: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; }
+.verdict { display: flex; gap: 18px; align-items: flex-start; }
+.verdict .label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.client { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+.call { font-size: 26px; font-weight: 700; margin: 2px 0 6px; }
+.call.approve, .call.approve_once_arranged { color: var(--green); } .call.deny { color: var(--red); } .call.need_more_info { color: var(--amber); }
+.trust { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+.badge { font-size: 12.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; display: inline-block; }
+.badge.ok { color: var(--green); background: var(--green-soft); }
+.badge.bad { color: var(--red); background: var(--red-soft); }
+.badge-why { font-size: 12px; color: var(--red); }
+.flagbadge { color: #fff; background: var(--purple); }
+.chip { font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.banner { border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; background: var(--red-soft); color: var(--red); font-weight: 600; }
+.banner .why { display: block; margin-top: 6px; font-weight: 400; color: var(--text); font-size: 14px; }
+h3 { font-size: 15px; margin: 26px 0 10px; display: flex; align-items: center; gap: 8px; }
+h3 .count { color: var(--muted); font-weight: 400; }
+details.profile { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 4px 18px; margin: 0 0 18px; }
+details.profile > summary { list-style: none; cursor: pointer; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--text); }
+details.profile > summary::-webkit-details-marker { display: none; }
+details.profile[open] { padding-bottom: 16px; }
+details.profile .showwhy { color: var(--accent); font-weight: 600; white-space: nowrap; }
+details.profile[open] .showwhy::after { content: "Hide"; } details.profile:not([open]) .showwhy::after { content: "Show"; }
+.psections { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.psec h4 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.fact { display: grid; grid-template-columns: 110px 1fr auto; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); align-items: start; font-size: 14.5px; }
+.fl { color: var(--muted); } .fv.missing { color: var(--muted); font-style: italic; }
+.formonly { font-size: 12.5px; color: var(--amber); margin-top: 6px; font-weight: 600; }
+.flagged { background: var(--purple-soft); border: 2px solid var(--purple); border-radius: 16px; padding: 16px; margin: 0 0 18px; }
+.flagged-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+.flagged-head h2 { margin: 0; font-size: 19px; }
+.flag-count { background: var(--purple); color: #fff; font-weight: 700; font-size: 20px; min-width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; }
+.finding { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+.finding.problem { border-left-color: var(--red); } .finding.cant_tell, .finding.missing { border-left-color: var(--amber); }
+.finding.ok { border-left-color: var(--green); } .finding.conflict, .finding.coordinator_call { border-left-color: var(--purple); }
+.finding .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.finding .head strong { font-weight: 600; }
+.finding .rule { font-size: 12.5px; color: var(--muted); }
+.finding .expl { margin: 4px 0 0; }
+.finding .ruletext { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.unsupported { font-size: 12.5px; color: var(--red); margin-top: 6px; font-weight: 600; }
+.reviewer { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+.tag { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+.tag.problem, .tag.unchecked { color: var(--red); background: var(--red-soft); }
+.tag.coordinator_call, .tag.conflict { color: var(--purple); background: var(--purple-soft); }
+.tag.arrange { color: var(--accent); background: var(--accent-soft); }
+.quote { display: flex; gap: 10px; align-items: flex-start; margin-top: 8px; padding: 8px 10px; background: var(--row); border-radius: 8px; }
+.quote q { flex: 1; font-style: italic; }
+.quote .side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; max-width: 200px; text-align: right; }
+.pagebtn { border: 1px solid var(--line); background: var(--panel); color: var(--accent); border-radius: 8px; min-height: 44px; min-width: 52px; padding: 0 8px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+.pagebtn:active { background: var(--accent-soft); }
+.groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.group { border: 1px solid var(--line); border-radius: 10px; background: var(--row); }
+.group > summary { list-style: none; cursor: pointer; padding: 10px 12px; min-height: 44px; border-radius: 10px; color: var(--text); }
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary:hover { background: var(--bg); }
+.group[open] { grid-column: 1 / -1; background: var(--panel); }
+.group-body { padding: 0 12px 10px; }
+.group .g { font-size: 13px; color: var(--muted); } .group .r { font-weight: 700; }
+.r.pass { color: var(--green); } .r.fail { color: var(--red); } .r.cant { color: var(--amber); } .r.judge { color: var(--purple); } .r.arrange { color: var(--accent); }
+.group[open] .showwhy::after { content: "Hide"; } .group:not([open]) .showwhy::after { content: "Show why"; }
+.rulerow { border-top: 1px solid var(--line); }
+.rulerow > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; padding: 10px 2px; min-height: 44px; color: var(--text); }
+.rulerow > summary::-webkit-details-marker { display: none; }
+.rulerow > summary:hover { background: var(--row); }
+.rulerow .rr-text strong::after { content: " ›"; color: var(--muted); font-weight: 400; } .rulerow[open] .rr-text strong::after { content: " ⌄"; }
+.rr-text { flex: 1; } .rr-why { display: block; color: var(--muted); font-size: 13.5px; }
+.rr-body { padding: 0 2px 10px 72px; }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; min-width: 62px; text-align: center; }
+.pill.pass { color: var(--green); background: var(--green-soft); } .pill.fail { color: var(--red); background: var(--red-soft); }
+.pill.cant { color: var(--amber); background: var(--amber-soft); } .pill.arrange { color: var(--accent); background: var(--accent-soft); }
+.pill.judge { color: var(--purple); background: var(--purple-soft); }
+.todo { padding: 4px 16px; }
+.todo-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
+.todo-item:first-child { border-top: 0; }
+.todo-item .txt { flex: 1; } .todo-item .tt { font-weight: 600; }
+.ring { width: 22px; height: 22px; flex: none; border-radius: 50%; border: 2px solid var(--line); margin-top: 1px; }
+.decbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-top: 18px; }
+.decbar .why { flex: 1; min-width: 260px; }
+.decbtns { display: flex; gap: 8px; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 0 16px; min-height: 44px; border-radius: 10px; cursor: pointer; }
+.btn:active { background: var(--bg); }
+.btn.approve { color: var(--green); border-color: var(--green); font-weight: 700; } .btn.deny { color: var(--red); border-color: var(--red); font-weight: 700; }
+.btn:disabled { opacity: .45; cursor: default; }
+.viewer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 48vw); background: var(--panel); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0,0,0,.08); display: flex; flex-direction: column; z-index: 10; }
+.viewer[hidden] { display: none; }
+.viewer .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.viewer .bar .t { flex: 1; font-weight: 600; }
+.viewer .body { overflow: auto; padding: 14px; }
+.viewer img { width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff; display: block; }
+.pagewrap { position: relative; }
+.hl { position: absolute; border: 3px solid var(--accent); background: rgba(10, 102, 216, .14); border-radius: 4px; pointer-events: none; }
+.hl[hidden] { display: none; }
+.viewer pre { white-space: pre-wrap; font: 13px/1.5 ui-monospace, Menlo, monospace; background: var(--row); padding: 12px; border-radius: 8px; }
+.viewer details > summary { cursor: pointer; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
+mark { background: var(--mark); color: inherit; }
+footer { text-align: center; color: var(--muted); font-size: 13px; padding: 10px 20px 40px; line-height: 1.6; }
+footer a { color: inherit; }
+.loading { text-align: center; padding: 70px 20px; color: var(--muted); }
+@media (max-width: 760px) {
+  main { padding: 16px; }
+  .verdict > div { min-width: 0; }
+  .badge, .chip, .pill { white-space: normal; }
+  .rr-body { padding-left: 2px; }
+  .fact { grid-template-columns: 90px 1fr auto; }
+  .viewer { width: 100vw; }
+  header .sub { display: none; }
+  .qrow td:nth-child(2) { display: none; } th:nth-child(2) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .hl { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1><a href="/" class="homelink" title="About Fetch">Fetch</a></h1>
+    <div class="sub">Demo: one recorded scan of a made-up referral</div>
+  </div>
+  <a class="code" href="https://github.com/stevenhowell/ihh-referral-check">See the code</a>
+</header>
+<div class="replay" id="replay">This page replays one scan Fetch made of a made-up referral. No AI runs here and nothing you do is saved.</div>
+<main id="main"><div class="loading">Loading the recorded scan…</div></main>
+<aside class="viewer" id="viewer" hidden aria-label="Page viewer">
+  <div class="bar">
+    <button class="btn" id="v-prev" aria-label="Previous page">‹</button>
+    <span class="t" id="v-title"></span>
+    <button class="btn" id="v-next" aria-label="Next page">›</button>
+    <button class="btn" id="v-close">Close</button>
+  </div>
+  <div class="body">
+    <div id="v-note" class="meta"></div>
+    <div class="pagewrap"><img id="v-img" alt=""><div class="hl" id="v-hl" hidden></div></div>
+    <details id="v-tr-wrap"><summary>Show what Claude read on this page</summary><pre id="v-tr"></pre></details>
+  </div>
+</aside>
+<footer>Built in one day at the Orange County Claude Impact Lab, October 17, 2026, with Illumination Health + Home · A prototype, not connected to any IHH system<br>
+  <span id="foot-scan"></span> No identifiable patient information: the referral on this page is invented. <a href="/">About Fetch</a></footer>
+<script>
+const state = { demo: null, viewer: null };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const CALL = { approve: "Approve", approve_once_arranged: "Approve once arranged", deny: "Deny", need_more_info: "Needs more information" };
+const TAG = { problem: "Rules them out", arrange: "Arrange first", coordinator_call: "Your call", conflict: "Pages disagree", unchecked: "Check by hand" };
+
+function suggestionText(decision, lean) { return decision === "need_more_info" ? `${CALL[decision]}, leaning ${lean}` : CALL[decision]; }
+function leanOf(decision, lean) { return ["approve", "approve_once_arranged"].includes(decision) ? "approve" : decision === "deny" ? "deny" : lean; }
+function mmss(s) { return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${s % 60} s`; }
+const MODEL_NAMES = { "claude-opus-5-5": "Claude Opus 5.5" };
+function modelName(id) { return MODEL_NAMES[id] || id; }
+function longDate(stamp) {  // "2026-10-26 15:12" as the app writes it
+  const [d] = String(stamp || "").split(" ");
+  const [y, m, day] = d.split("-").map(Number);
+  if (!y) return stamp || "";
+  return new Date(y, m - 1, day).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+// ---------- queue (one row)
+function suggestionChip(q) {
+  const cls = q.decision === "need_more_info" ? "info" : leanOf(q.decision, q.lean);
+  return `<span class="chip2 ${cls}">${esc(suggestionText(q.decision, q.lean))}</span>`;
+}
+function renderQueue() {
+  const D = state.demo, q = D.queue, r = D.review, total = r.seconds + (D.profile.seconds || 0);
+  $("main").innerHTML = `
+    <div class="qhead"><h2>Queue <span class="meta" style="font-weight:400">1 referral</span></h2></div>
+    <table class="queue"><thead><tr><th>Referral</th><th>Pages</th><th title="From opening the fax to the finished client profile, as Fetch measured it">Scan took</th><th>Fetch suggests</th><th>Open risks</th><th>Decision</th><th></th></tr></thead><tbody>
+      <tr class="qrow" data-open tabindex="0" aria-label="Open the demo referral">
+        <td><b>Demo referral</b><div class="meta qline">${esc(q.profile_line || "")}</div></td>
+        <td>${r.page_count}</td>
+        <td>${mmss(total)}<div class="meta tiny">on ${esc(longDate(D.frozen.scanned_at))}</div></td>
+        <td>${suggestionChip(q)}</td>
+        <td>${q.open_tasks ? `<span class="riskn">${q.open_tasks}</span>` : `<span class="meta">None</span>`}</td>
+        <td><span class="meta">Not decided</span></td>
+        <td style="text-align:right"><button class="open-btn" data-open>Open</button></td></tr>
+    </tbody></table>
+    <p class="meta">In Fetch, this table lists every referral oldest first, with how long each has waited against IHH's 2-hour target and who decided it. This demo has one referral and no clock: a replay can't keep counting. The coordinator decides in the app; no one can decide here.</p>`;
+  document.querySelectorAll("[data-open]").forEach((el) => {
+    el.onclick = () => { location.hash = "referral"; };
+    el.onkeydown = (e) => { if (e.key === "Enter") location.hash = "referral"; };
+  });
+}
+
+// ---------- the referral
+function trust(e) {
+  const textOk = e.check === "on_page" || e.check === "close";
+  const imageOk = e.image_check === undefined ? null : e.image_check === "yes";
+  if (textOk && imageOk) return "";
+  if (textOk && imageOk === null) return `<span class="badge ok" title="Found in the page text; not checked on the image">✓ In the page text</span>`;
+  let why = "Not found on this page";
+  if (e.check === "other_page") why = `It's on page ${e.found_on}, not ${e.page}`;
+  else if (textOk && e.image_check === "unclear") why = "Hard to read on the page image";
+  else if (textOk) why = "Not seen on the page image";
+  const says = e.image_says ? `<div class="badge-why">Page shows: ${esc(e.image_says)}</div>` : "";
+  return `<span class="badge bad">Check by hand</span><div class="badge-why">${why}</div>${says}`;
+}
+function pageBtn(e, label) {
+  return `<button class="pagebtn" data-page="${e.page}" data-quote="${esc(e.quote)}" data-box="${e.box ? esc(JSON.stringify(e.box)) : ""}" aria-label="Open page ${e.page}">${label || `p. ${e.page}`}</button>`;
+}
+function quoteHTML(e) {
+  return `<div class="quote">${pageBtn(e)}<q>${esc(e.quote)}</q><span class="side">${trust(e)}</span></div>`;
+}
+function taskFor(f) {
+  const rv = state.demo.review.review;
+  let key;
+  if (!f.status) key = `conflict:${rv.conflicts.indexOf(f)}`;
+  else if (["problem", "coordinator_call", "arrange"].includes(f.status)) key = `${f.status}:${f.rule_id}`;
+  else key = `unchecked:${f.rule_id}`;
+  return state.demo.tasks.find((t) => t.id === `${state.demo.review.packet_id}:${key}`) || null;
+}
+function findingHTML(f) {
+  const kind = f.status || "conflict";
+  const task = taskFor(f);
+  const tag = TAG[kind] ? `<span class="tag ${kind}">${TAG[kind]}</span>` : "";
+  const rule = f.rule_id ? `<span class="rule">${esc(f.rule_id)}${f.known_rule ? "" : " (not an IHH rule ID)"}</span>` : "";
+  return `<div class="finding ${kind}">
+    <div class="head">${tag}<strong>${esc(f.headline || f.topic)}</strong>${rule}</div>
+    <p class="expl">${esc(f.explanation)}</p>
+    ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
+    ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
+    ${f.guard ? `<div class="formonly">Changed from ${f.guard.was === "ok" ? "pass" : "fail"} to can't tell by Fetch's timing check. ${esc(f.guard.reason)}</div>` : ""}
+    ${f.supported === false ? `<div class="unsupported">None of its quotes checked out. Treat this finding as unchecked.</div>` : ""}
+    ${f.evidence.map(quoteHTML).join("")}
+    ${task ? `<div class="reviewer">In the app this becomes a task. Fetch's suggested reviewer: <b>${esc(task.owner)}</b> (a default by kind of rule; anyone can reassign it).</div>` : ""}
+  </div>`;
+}
+
+const GROUPS = [["GEN", "General"], ["ADL", "Daily living"], ["MOB", "Mobility"], ["MH", "Mental health"],
+  ["COG", "Cognition"], ["OTH", "Other factors"], ["INF", "Infection control"], ["EOL", "End of life"], ["DOC", "Documents"], ["FORM", "Referral form"]];
+function groupOf(id) { const pre = id.split("-")[0]; const g = GROUPS.find(([k]) => k === pre); return g ? g[1] : "Conditions"; }
+const RESULT = { ok: ["pass", "Pass"], problem: ["fail", "Fail"], arrange: ["arrange", "Arrange first"], coordinator_call: ["judge", "Your call"],
+  cant_tell: ["cant", "Can't tell"], missing: ["cant", "Missing"] };
+function ruleResult(f) {
+  if (f.status === "ok" && (f.form_only || f.supported === false)) return ["cant", "Unconfirmed"];
+  return RESULT[f.status];
+}
+function ruleRow(f) {
+  const [cls, word] = ruleResult(f);
+  return `<details class="rulerow">
+    <summary><span class="pill ${cls}">${word}</span><span class="rr-text"><strong>${esc(f.headline)}</strong>
+      <span class="rr-why">${esc(f.explanation)}</span></span><span class="rule">${esc(f.rule_id)}</span></summary>
+    <div class="rr-body">
+      ${f.rule_text ? `<div class="ruletext">IHH rule: ${esc(f.rule_text)}</div>` : ""}
+      ${f.form_only ? `<div class="formonly">Only the referral form says this. The chart doesn't confirm it.</div>` : ""}
+      ${f.guard ? `<div class="formonly">Changed from ${f.guard.was === "ok" ? "pass" : "fail"} to can't tell: ${esc(f.guard.reason)}</div>` : ""}
+      ${f.evidence.length ? f.evidence.map(quoteHTML).join("") : `<div class="meta">No quote: the packet doesn't say.</div>`}
+    </div></details>`;
+}
+function groupsHTML(findings) {
+  const order = [...GROUPS.map(([, n]) => n), "Conditions"];
+  const groups = {};
+  for (const f of findings) (groups[groupOf(f.rule_id)] ||= []).push(f);
+  const rank = { fail: 0, judge: 1, arrange: 2, cant: 3, pass: 4 };
+  const cells = order.filter((n) => groups[n]).map((n) => {
+    const fs = groups[n].slice().sort((a, b) => rank[ruleResult(a)[0]] - rank[ruleResult(b)[0]]);
+    const results = fs.map((f) => ruleResult(f)[0]);
+    const [cls, word] = results.includes("fail") ? ["fail", "Fail"] : results.includes("judge") ? ["judge", "Your call"]
+      : results.includes("arrange") ? ["arrange", "Arrange first"] : results.includes("cant") ? ["cant", "Can't tell"] : ["pass", "Pass"];
+    const passed = results.filter((r) => r === "pass").length;
+    return `<details class="group ${cls}"><summary><div class="g">${n}</div><div class="r ${cls}">${word}</div>
+      <div class="meta">${passed} of ${fs.length} rule${fs.length > 1 ? "s" : ""} pass · <span class="showwhy"></span></div></summary>
+      <div class="group-body">${fs.map(ruleRow).join("")}</div></details>`;
+  }).join("");
+  return `<h3>Rule by rule <span class="count">${findings.length} rules Fetch reported on, of IHH's 155</span></h3><div class="groups">${cells}</div>`;
+}
+
+function factHTML(f) {
+  const ev = f.evidence[0];
+  return `<div class="fact"><div class="fl">${esc(f.label)}</div><div class="fv ${f.value === "Not in the fax" ? "missing" : ""}">${esc(f.value)}
+    ${f.checked === false ? `<span class="badge bad">Check by hand</span>` : ""}${f.form_only ? `<div class="formonly">Only the referral form says this.</div>` : ""}</div>
+    <div class="fp">${ev ? pageBtn(ev) : ""}</div></div>`;
+}
+function profileHTML(pr) {
+  const P = pr.profile;
+  const facts = P.sections.reduce((n, sec) => n + sec.facts.length, 0);
+  return `<details class="profile" open><summary><span><b>Client profile</b><span class="meta"> · ${facts} facts, each with its page · Fetch never copies a name, date or record number</span></span><span class="showwhy"></span></summary>
+    <div class="psections">${P.sections.map((sec) => `<div class="psec"><h4>${esc(sec.title)}</h4>${sec.facts.map(factHTML).join("")}</div>`).join("")}</div>
+  </details>`;
+}
+
+function todoHTML(r) {
+  const rv = r.review;
+  const items = [
+    ...rv.findings.filter((f) => f.status === "arrange").map((f) => ({ text: f.headline, why: f.explanation, ev: f.evidence[0] })),
+    ...rv.ask_hospital.map((a) => ({ text: a, why: "Ask the hospital: not in the fax." })),
+  ];
+  if (!items.length) return "";
+  return `<h3>Before you say yes <span class="count">${items.length} item${items.length > 1 ? "s" : ""} · in the app each one is a checkbox</span></h3><div class="card todo">
+    ${items.map((it) => `<div class="todo-item"><span class="ring" aria-hidden="true"></span>
+      <div class="txt"><div class="tt">${esc(it.text)}</div><div class="meta">${esc(it.why)}</div></div>
+      ${it.ev ? pageBtn(it.ev, `Page ${it.ev.page}`) : ""}</div>`).join("")}</div>`;
+}
+
+function renderPacket() {
+  const D = state.demo, r = D.review, rv = r.review, s = rv.suggestion, profile = D.profile;
+  const by = (st) => rv.findings.filter((f) => f.status === st);
+  const flaggedPages = r.pages.filter((p) => p.possible_unredacted_identifier).map((p) => p.page);
+  const quotes = [...rv.findings, ...rv.conflicts].flatMap((f) => f.evidence);
+  const handCheck = quotes.filter((e) => !(e.check === "on_page" || e.check === "close") || (e.image_check && e.image_check !== "yes")).length;
+  const unchecked = rv.findings.filter((f) => !["problem", "arrange", "coordinator_call"].includes(f.status) && f.supported === false);
+  const flaggedItems = [...by("problem"), ...by("coordinator_call"), ...by("arrange"), ...rv.conflicts, ...unchecked];
+  const trustLine = handCheck
+    ? `<span class="badge bad">${handCheck} of ${quotes.length} quotes to check by hand</span>`
+    : `<span class="badge ok">✓ All ${quotes.length} quotes found in the page text and on the page image</span>`;
+  const sha = r.sha256 || "";
+  $("main").innerHTML = `<button class="backlink" id="back">‹ Queue</button>
+  ${flaggedPages.length ? `<div class="banner">Page ${flaggedPages.join(", ")} may show an identifier the redaction missed. Stop and tell an organizer before going further.
+    <span class="why">That is what Fetch shows a coordinator. Here it is expected: this referral is invented, so nothing on it was blacked out, and Fetch wrote [identifier] in place of every name, date and number it read. Every page carries the line “synthetic test data, not a real patient”.</span></div>` : ""}
+  <div class="card verdict"><div style="flex:1">
+    <div class="client">${esc(profile.profile.one_line)}</div>
+    <div class="label">Demo referral · Fetch suggests</div>
+    <div class="call ${s.decision}">${esc(suggestionText(s.decision, s.lean_if_forced))}</div>
+    <div>${esc(s.why)}</div>
+    <div class="trust"><span class="badge flagbadge">${flaggedItems.length} flagged for you</span>${trustLine}<span class="chip" title="SHA-256 of the scanned file: ${esc(sha)}">File fingerprint …${esc(sha.slice(-8))}</span></div>
+    <p class="meta" style="margin:10px 0 0">Read ${r.page_count} page${r.page_count === 1 ? "" : "s"}, checked the rules and every quote in ${mmss(r.seconds)}, then built the profile in ${mmss(profile.seconds || 0)}, on ${esc(longDate(D.frozen.scanned_at))} with ${esc(modelName(D.frozen.model))}. Fetch suggests; the coordinator decides.</p>
+  </div></div>
+  ${profileHTML(profile)}
+  <section class="flagged">
+    <div class="flagged-head"><span class="flag-count">${flaggedItems.length}</span><div><h2>Flagged for the coordinator</h2>
+      <div class="meta">${flaggedItems.length ? "What rules the patient out, what needs your judgment, what must be arranged first, where the pages disagree, and anything Fetch couldn't confirm." : "Nothing rules the patient out, needs your judgment or failed a check."}</div></div></div>
+    ${flaggedItems.map(findingHTML).join("")}
+  </section>
+  ${groupsHTML(rv.findings)}
+  ${todoHTML(r)}
+  <p class="meta" style="margin-top:14px">${esc(rv.summary)}</p>
+  <div class="decbar"><span class="why"><b>Approve and Deny are off in this replay.</b> <span class="meta">In the app the coordinator decides here with their initials, each flag becomes a task with a reviewer, and the record exports as a PDF. This page is a recording of one scan and saves nothing.</span></span>
+    <span class="decbtns"><button class="btn approve" disabled>Approve</button><button class="btn deny" disabled>Deny</button></span></div>`;
+  $("back").onclick = () => { location.hash = "queue"; };
+  document.querySelectorAll(".pagebtn").forEach((b) => b.onclick = () => openViewer(+b.dataset.page, b.dataset.quote, b.dataset.box ? JSON.parse(b.dataset.box) : null));
+}
+
+// ---------- page viewer: the page image with the quote boxed, and what Claude read
+function openViewer(page, quote, box) {
+  const D = state.demo, r = D.review;
+  state.viewer = { page, quote };
+  const hl = $("v-hl");
+  hl.hidden = true;
+  if (box) {
+    const pad = 0.006;
+    Object.assign(hl.style, { left: `${(box[0] - pad) * 100}%`, top: `${(box[1] - pad) * 100}%`,
+      width: `${(box[2] - box[0] + 2 * pad) * 100}%`, height: `${(box[3] - box[1] + 2 * pad) * 100}%` });
+    hl.hidden = false;
+    $("v-img").onload = () => hl.scrollIntoView({ block: "center", behavior: "smooth" });
+  } else { $("v-img").onload = null; }
+  const info = r.pages.find((p) => p.page === page) || {};
+  $("viewer").hidden = false;
+  $("v-title").textContent = `Page ${page} of ${r.page_count}`;
+  const notes = [info.kind ? info.kind.replace(/_/g, " ") : "", info.rotated ? "scanned sideways or upside down" : "", info.legibility && info.legibility !== "clear" ? info.legibility.replace(/_/g, " ") : ""].filter(Boolean);
+  $("v-note").textContent = notes.join(" · ");
+  if (quote && !box) $("v-note").textContent += (notes.length ? " · " : "") + "Fetch found the words in the page text but could not place a box on the image.";
+  const image = D.images.find((i) => i.page === page);
+  $("v-img").src = image ? image.src : "";
+  $("v-img").alt = `Page ${page} of the demo referral`;
+  $("v-prev").disabled = page <= 1;
+  $("v-next").disabled = page >= r.page_count;
+  const t = D.transcripts[String(page)];
+  if (!t) { $("v-tr").textContent = "No transcript for this page."; return; }
+  let html = esc(t.transcript);
+  if (quote) {
+    const i = t.transcript.toLowerCase().indexOf(quote.toLowerCase());
+    if (i >= 0) {
+      html = esc(t.transcript.slice(0, i)) + "<mark>" + esc(t.transcript.slice(i, i + quote.length)) + "</mark>" + esc(t.transcript.slice(i + quote.length));
+      $("v-tr-wrap").open = true;
+    }
+  }
+  $("v-tr").innerHTML = html;
+}
+function closeViewer() { $("viewer").hidden = true; state.viewer = null; }
+$("v-close").onclick = closeViewer;
+$("v-prev").onclick = () => openViewer(state.viewer.page - 1);
+$("v-next").onclick = () => openViewer(state.viewer.page + 1);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && state.viewer) closeViewer(); });
+
+function route() {
+  if (!state.demo) return;
+  closeViewer();
+  if (location.hash === "#referral") renderPacket(); else renderQueue();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+
+(async () => {
+  try {
+    const res = await fetch("/demo/demo.json", { cache: "no-cache" });
+    if (!res.ok) throw new Error(`${res.status}`);
+    state.demo = await res.json();
+  } catch (e) {
+    $("main").innerHTML = `<div class="loading">The recorded scan could not be loaded (${esc(e.message)}). Reload the page, or <a href="/">read about Fetch</a>.</div>`;
+    return;
+  }
+  const F = state.demo.frozen, pages = state.demo.review.page_count;
+  $("replay").innerHTML = `<b>Replay of one scan.</b> ${esc(F.note)} Fetch read its ${pages} pages once, on ${esc(longDate(F.scanned_at))}; everything below is what it produced that day. No AI runs on this page and nothing you do here is saved. <a href="/">About Fetch</a>`;
+  $("foot-scan").textContent = `This referral: ${F.source_file || "a synthetic packet"}, scanned once on ${longDate(F.scanned_at)}.`;
+  route();
+})();
+</script>
+</body>
+</html>
