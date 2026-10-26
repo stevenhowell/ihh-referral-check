@@ -24,6 +24,8 @@ A coordinator's desk in the browser:
 - **Export PDF.** A record of the decision, who made it and when, Fetch's suggestion (labeled as a suggestion), every flagged item with page and quote, every rule checked, a log of every change, and the fax's SHA-256.
 - **Tasks.** Every flagged risk becomes a task with a suggested reviewer (coordinator, LVN, clinical lead, program manager) that anyone can reassign and mark done.
 
+**Live:** [fetch.stevenluishowell.com](https://fetch.stevenluishowell.com), the landing page (also at [stevenhowell.github.io/ihh-referral-check](https://stevenhowell.github.io/ihh-referral-check)). The app itself runs on a laptop, below. The page is served by the small Worker in `site/`.
+
 **Demo video:** to be added
 
 ## How Claude is used

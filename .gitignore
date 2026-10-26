@@ -30,3 +30,7 @@ challenges/1-referral-intake/packets/*
 
 # referral check app: page images, transcripts, results and uploads come from the packets
 work/
+
+# wrangler state for site/
+.wrangler/
+site/.wrangler/

@@ -1,0 +1,11 @@
+{
+  // The public landing page for Fetch, served as static assets from a Cloudflare Worker.
+  // The app itself runs on a laptop (see ../README.md): it reads de-identified hospital referrals that can't be posted publicly.
+  // The same page is also published by GitHub Pages from the gh-pages branch; keep the two copies the same.
+  "name": "fetch",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "public" },
+  "workers_dev": true,
+  // The stevenluishowell.com zone is on this account; the first deploy creates the DNS record and certificate.
+  "routes": [{ "pattern": "fetch.stevenluishowell.com", "custom_domain": true }]
+}
